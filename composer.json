@@ -1,6 +1,7 @@
 {
     "name": "61qt/laravel-graphql",
     "description": "Laravel Graphql",
+    "type": "library",
     "require": {
         "php": "^8.0.0",
         "webonyx/graphql-php": "^14.7.0",
@@ -13,8 +14,12 @@
     },
     "authors": [
         {
-            "name": "xurh",
+            "name": "rayson",
             "email": "xurhwork@gmail.com"
+        },
+        {
+            "name": "zyz",
+            "email": "348977791@qq.com"
         }
     ],
     "autoload": {
