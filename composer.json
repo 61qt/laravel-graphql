@@ -5,12 +5,11 @@
     "require": {
         "php": "^8.0.0",
         "webonyx/graphql-php": "^14.7.0",
-        "illuminate/http": "^6.0.0",
-        "illuminate/support": "^6.0.0",
-        "illuminate/database": "^6.0.0",
-        "illuminate/validation": "^6.0.0",
-        "illuminate/events": "^6.0.0",
-        "illuminate/pagination": "^6.0.0"
+        "illuminate/http": "^8.0.0",
+        "illuminate/support": "^8.0.0",
+        "illuminate/database": "^8.0.0",
+        "illuminate/validation": "^8.0.0",
+        "illuminate/pagination": "^8.0.0"
     },
     "authors": [
         {
