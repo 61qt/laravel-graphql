@@ -1,6 +1,6 @@
 <?php
 
-namespace QT\GraphQL\Mutation;
+namespace QT\GraphQL\Definition;
 
 use RuntimeException;
 use App\Exceptions\Error;
@@ -14,9 +14,9 @@ use GraphQL\Type\Definition\ResolveInfo;
 /**
  * Class Mutation
  *
- * @package QT\GraphQL\Mutation
+ * @package QT\GraphQL\Definition
  */
-abstract class Mutation
+abstract class ModelMutation
 {
     /**
      * object type
