@@ -5,12 +5,12 @@ namespace QT\GraphQL;
 use Closure;
 use RuntimeException;
 use GraphQL\Type\Definition\Type;
-use QT\GraphQL\Mutation\Mutation;
-use QT\GraphQL\Type\Scalar\JsonType;
-use QT\GraphQL\Type\Scalar\MixedType;
-use QT\GraphQL\Type\Scalar\BigIntType;
+use QT\GraphQL\Definition\JsonType;
+use QT\GraphQL\Definition\MixedType;
+use QT\GraphQL\Definition\BigIntType;
 use GraphQL\Type\Definition\ObjectType;
-use QT\GraphQL\Type\Scalar\TimestampType;
+use QT\GraphQL\Definition\ModelMutation;
+use QT\GraphQL\Definition\TimestampType;
 
 /**
  * @method JsonType      json()
@@ -90,28 +90,28 @@ class GraphQLManager
 
     /**
      * @param string $name
-     * @return ?Mutation
+     * @return ModelMutation
      */
-    public function getMutation(string $name): Mutation
+    public function getMutation(string $name): ModelMutation
     {
         return $this->find($name, static::MUTATION);
     }
 
     /**
-     * @param Mutation $mutation
-     * @return BaseMutation
+     * @param ModelMutation $mutation
+     * @return ModelMutation
      */
-    public function setMutation(Mutation $mutation)
+    public function setMutation(ModelMutation $mutation): ModelMutation
     {
-        $this->mutations[$mutation->name] = $mutation;
+        return $this->mutations[$mutation->name] = $mutation;
     }
 
     /**
      * @param string $name
      * @param string $space
-     * @return Type|Mutation
+     * @return Type|ModelMutation
      */
-    protected function find(string $name, string $space): Type | Mutation
+    protected function find(string $name, string $space): Type | ModelMutation
     {
         if ($space === static::TYPE) {
             $containers = &$this->types;
@@ -129,7 +129,7 @@ class GraphQLManager
 
         $type = call_user_func($this->getTypeFinder(), $name, $space);
 
-        if (empty($type) || (!$type instanceof Type && !$type instanceof Mutation)) {
+        if (empty($type) || (!$type instanceof Type && !$type instanceof ModelMutation)) {
             throw new RuntimeException("{$name} 类型不存在");
         }
 
