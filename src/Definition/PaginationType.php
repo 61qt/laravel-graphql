@@ -1,9 +1,10 @@
 <?php
+
+declare(strict_types=1);
+
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\GraphQLManager;
-use QT\GraphQL\Queries\ModelType;
-use QT\GraphQL\Queries\ObjectType;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\PageOption;

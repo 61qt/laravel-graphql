@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL\Contracts;
 
 use QT\GraphQL\GraphQLManager;

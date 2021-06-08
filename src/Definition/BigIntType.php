@@ -1,22 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL\Definition;
 
 use GraphQL\Utils\Utils;
 use GraphQL\Error\Error;
 use GraphQL\Language\AST\Node;
-use GraphQL\Error\InvariantViolation;
 use GraphQL\Language\AST\IntValueNode;
-use GraphQL\Type\Definition\IntType as IntType;
+use GraphQL\Type\Definition\ScalarType;
 
 /**
  * Class BigIntType
  * 
  * @package QT\GraphQL\Definition
  */
-class BigIntType extends IntType
+class BigIntType extends ScalarType
 {
-/**
+    const MAX_INT = 9223372036854775807;
+    const MIN_INT = -9223372036854775807;
+
+    /**
      * @var string
      */
     public $name = 'bigint';
@@ -24,61 +28,86 @@ class BigIntType extends IntType
     /**
      * @var string
      */
-    public $description = 'bigint类型,兼容溢出的整形类型';
+    public $description = 'bigint类型,兼容64位int';
 
     /**
      * @param mixed $value
-     * @return mixed
+     *
+     * @return int|null
+     *
+     * @throws Error
      */
     public function serialize($value)
     {
-        if ($value === '') {
-            return 0;
-        }
-        if (false === $value || true === $value) {
-            return (int) $value;
+        // Fast path for 90+% of cases:
+        if (is_int($value) && $value <= self::MAX_INT && $value >= self::MIN_INT) {
+            return $value;
         }
 
-        $num = (float) $value;
+        $float = is_numeric($value) || is_bool($value)
+            ? (float) $value
+            : null;
 
-        // The GraphQL specification does not allow serializing non-integer values
-        // as Int to avoid accidental data loss.
-        // Examples: 1.0 == 1; 1.1 != 1, etc
-        if ($num != (int) $value) {
-            // Additionally account for scientific notation (i.e. 1e3), because (float)'1e3' is 1000, but (int)'1e3' is 1
-            $trimmed = floor($num);
-            if ($trimmed !== $num) {
-                throw new InvariantViolation(sprintf(
-                    'Int cannot represent non-integer value: %s',
-                    Utils::printSafe($value)
-                ));
-            }
+        if ($float === null || floor($float) !== $float) {
+            throw new Error(
+                'Int cannot represent non-integer value: ' .
+                Utils::printSafe($value)
+            );
         }
+
+        if ($float > self::MAX_INT || $float < self::MIN_INT) {
+            throw new Error(
+                'Int cannot represent non 32-bit signed integer value: ' .
+                Utils::printSafe($value)
+            );
+        }
+
+        return (int) $float;
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @throws Error
+     */
+    public function parseValue($value) : int
+    {
+        $isInt = is_int($value) || (is_float($value) && floor($value) === $value);
+
+        if (! $isInt) {
+            throw new Error(
+                'Int cannot represent non-integer value: ' .
+                Utils::printSafe($value)
+            );
+        }
+
+        if ($value > self::MAX_INT || $value < self::MIN_INT) {
+            throw new Error(
+                'Int cannot represent non 32-bit signed integer value: ' .
+                Utils::printSafe($value)
+            );
+        }
+
         return (int) $value;
     }
 
     /**
-     * @param mixed $value
-     * @return mixed
+     * @param mixed[]|null $variables
+     *
+     * @return int
+     *
+     * @throws Exception
      */
-    public function parseValue($value): int
+    public function parseLiteral(Node $valueNode, ?array $variables = null)
     {
-        return is_int($value) ? $value : null;
-    }
-
-    /**
-     * @param \GraphQL\Language\AST\Node $ast
-     * @return string
-     * @throws Error
-     */
-    public function parseLiteral(Node $ast, ?array $variables = null)
-    {
-        if ($ast instanceof IntValueNode) {
-            $val = (int) $ast->value;
-            if ($ast->value === (string) $val) {
+        if ($valueNode instanceof IntValueNode) {
+            $val = (int) $valueNode->value;
+            if ($valueNode->value === (string) $val && self::MIN_INT <= $val && $val <= self::MAX_INT) {
                 return $val;
             }
         }
-        return null;
+
+        // Intentionally without message, as all information already in wrapped Exception
+        throw new Error();
     }
 }

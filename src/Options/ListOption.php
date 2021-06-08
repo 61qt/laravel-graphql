@@ -1,7 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL\Options;
 
+/**
+ * ListOption
+ * 
+ * @package QT\GraphQL\Options
+ */
 class ListOption
 {
    /**

@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL\Traits;
 
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Validation\ValidationException;
 
 trait Validate
 {
@@ -59,9 +62,7 @@ trait Validate
         );
 
         if ($validator->fails()) {
-            throw (new Error('VALIDATE_FAILED'))->setData(
-                $validator->errors()->toArray()
-            );
+            throw new ValidationException($validator);
         }
     }
 }

@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL\Definition;
 
-use RuntimeException;
 use App\Exceptions\Error;
 use App\GraphQL\AppContext;
 use Illuminate\Support\Arr;
@@ -10,6 +11,7 @@ use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Definition\ModelType;
 use GraphQL\Type\Definition\ResolveInfo;
+use QT\GraphQL\Exceptions\GraphQLException;
 
 /**
  * Class Mutation
@@ -55,13 +57,13 @@ abstract class ModelMutation
     public function __construct(GraphQLManager $manager)
     {
         if (empty($this->objectType)) {
-            throw new RuntimeException("Mutation绑定的Object Type不能为空");
+            throw new GraphQLException("Mutation绑定的Object Type不能为空");
         }
 
         $this->ofType = $manager->getType($this->objectType);
 
         if (!$this->ofType instanceof ModelType) {
-            throw new RuntimeException("Mutation必须绑定Model Type");
+            throw new GraphQLException("Mutation必须绑定Model Type");
         }
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL;
 
 use RuntimeException;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Graphql Result Resolver
@@ -303,10 +306,13 @@ class Resolver
      */
     public function find(array | Collection $input): Model
     {
-        $model = $this->getModelQuery(true)->find($this->getKey($input));
+        $id    = $this->getKey($input);
+        $model = $this->getModelQuery(true)->find($id);
 
         if ($model === null) {
-            throw new RuntimeException('数据不存在');
+            $exception = new ModelNotFoundException('数据不存在');
+
+            throw $exception->setModel($this->model, [$id]);
         }
 
         return $model;

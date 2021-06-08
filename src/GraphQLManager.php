@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL;
 
 use Closure;
-use RuntimeException;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Definition\JsonType;
 use QT\GraphQL\Definition\MixedType;
@@ -11,6 +12,7 @@ use QT\GraphQL\Definition\BigIntType;
 use GraphQL\Type\Definition\ObjectType;
 use QT\GraphQL\Definition\ModelMutation;
 use QT\GraphQL\Definition\TimestampType;
+use QT\GraphQL\Exceptions\GraphQLException;
 
 /**
  * @method JsonType      json()
@@ -19,6 +21,7 @@ use QT\GraphQL\Definition\TimestampType;
  * @method TimestampType timestamp()
  *
  * Class GraphQLManager
+ * 
  * @package App\GraphQL
  */
 class GraphQLManager
@@ -70,7 +73,7 @@ class GraphQLManager
     /**
      * @param string $name
      * @param string|Type $type
-     * @throws RuntimeException
+     * @throws GraphQLException
      */
     public function setType(string|Type $type): Type
     {
@@ -82,7 +85,7 @@ class GraphQLManager
         }
 
         if (!$type instanceof Type) {
-            throw new RuntimeException("类型错误");
+            throw new GraphQLException("类型错误");
         }
 
         return $this->types[$type->name] = $type;
@@ -110,6 +113,7 @@ class GraphQLManager
      * @param string $name
      * @param string $space
      * @return Type|ModelMutation
+     * @throws GraphQLException
      */
     protected function find(string $name, string $space): Type | ModelMutation
     {
@@ -130,7 +134,7 @@ class GraphQLManager
         $type = call_user_func($this->getTypeFinder(), $name, $space);
 
         if (empty($type) || (!$type instanceof Type && !$type instanceof ModelMutation)) {
-            throw new RuntimeException("{$name} 类型不存在");
+            throw new GraphQLException("{$name} 类型不存在");
         }
 
         return $containers[$name] = $type;
