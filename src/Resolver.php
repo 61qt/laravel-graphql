@@ -73,7 +73,8 @@ class Resolver
     /**
      * 获取单条记录
      *
-     * @param int|string $id
+     * @param Context $context
+     * @param array $input
      * @param array $selection
      * @return \Illuminate\Database\Eloquent\Model
      * @throws Error
@@ -160,6 +161,7 @@ class Resolver
     /**
      * 更新一条记录
      *
+     * @param Context $context
      * @param array $input
      * @return Model
      * @throws RuntimeException
@@ -197,6 +199,7 @@ class Resolver
     /**
      * 新建记录
      *
+     * @param Context $context
      * @param array $input
      * @return Model
      * @throws Error
@@ -246,15 +249,16 @@ class Resolver
     }
 
     /**
-     * @param int|string $id
+     * @param Context $context
+     * @param array $input
      * @return Model
      * @throws \Exception
      */
-    public function destroy(array $input = []): Model
+    public function destroy(Context $context, array $input = []): Model
     {
         $id = $this->getKey($input);
 
-        $this->beforeDestroy($id);
+        $this->beforeDestroy($context, $id);
 
         return DB::transaction(function () use ($id) {
             $model = $this->getModelQuery()->findOrFail($id);
@@ -272,7 +276,7 @@ class Resolver
      * @return int
      * @throws \Exception
      */
-    public function batchDestroy(array $input = []): int
+    public function batchDestroy(Context $context, array $input = []): int
     {
         $filters = [];
         if (!empty($input['filters'])) {
