@@ -1,5 +1,5 @@
 <?php
-namespace QT\GraphQL\Type\Scalar;
+namespace QT\GraphQL\Definition;
 
 use Carbon\Carbon;
 use GraphQL\Error\Error;
@@ -8,6 +8,11 @@ use GraphQL\Language\AST\IntValueNode;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Language\AST\StringValueNode;
 
+/**
+ * Class TimestampType
+ * 
+ * @package QT\GraphQL\Definition
+ */
 class TimestampType extends ScalarType
 {
     /**

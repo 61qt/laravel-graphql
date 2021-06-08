@@ -1,9 +1,9 @@
 <?php
-namespace QT\GraphQL\Type\Custom;
+namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\GraphQLManager;
-use QT\GraphQL\Type\ModelType;
-use QT\GraphQL\Type\ObjectType;
+use QT\GraphQL\Queries\ModelType;
+use QT\GraphQL\Queries\ObjectType;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\PageOption;
@@ -12,7 +12,8 @@ use GraphQL\Type\Definition\ResolveInfo;
 
 /**
  * Class PaginationType
- * @package QT\GraphQL\Type\Custom
+ * 
+ * @package QT\GraphQL\Definition
  */
 class PaginationType extends ObjectType implements Resolvable
 {
@@ -69,6 +70,12 @@ class PaginationType extends ObjectType implements Resolvable
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param GraphQLManager $manager
+     * @return array
+     */
     public function getArgs(GraphQLManager $manager): array
     {
         return [
@@ -93,6 +100,15 @@ class PaginationType extends ObjectType implements Resolvable
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param mixed $node
+     * @param array $args
+     * @param Context $context
+     * @param ResolveInfo $info
+     * @return mixed
+     */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
         $selection = $this->ofType->formatSelection(

@@ -1,8 +1,8 @@
 <?php
-namespace QT\GraphQL\Type\Custom;
+namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\GraphQLManager;
-use QT\GraphQL\Type\ModelType;
+use QT\GraphQL\Queries\ModelType;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\ListOption;
@@ -10,6 +10,11 @@ use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ResolveInfo;
 
+/**
+ * Class ListType
+ * 
+ * @package QT\GraphQL\Definition
+ */
 class ListType extends ListOfType implements Resolvable
 {
     /**
@@ -17,6 +22,11 @@ class ListType extends ListOfType implements Resolvable
      */
     public $ofType;
 
+    /**
+     * ListType Constructor
+     * 
+     * @param ModelType $type
+     */
     public function __construct(ModelType $type)
     {
         if (empty($this->name)) {
@@ -26,6 +36,12 @@ class ListType extends ListOfType implements Resolvable
         parent::__construct($type);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param GraphQLManager $manager
+     * @return array
+     */
     public function getArgs(GraphQLManager $manager): array
     {
         return [
@@ -56,6 +72,15 @@ class ListType extends ListOfType implements Resolvable
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param mixed $node
+     * @param array $args
+     * @param Context $context
+     * @param ResolveInfo $info
+     * @return mixed
+     */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
         $selection = $this->ofType->formatSelection(

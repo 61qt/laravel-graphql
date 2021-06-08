@@ -1,20 +1,20 @@
 <?php
 
-namespace QT\GraphQL\Type;
+namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Resolver;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Contracts\Resolvable;
-use QT\GraphQL\Type\Custom\ListType;
 use GraphQL\Type\Definition\ResolveInfo;
-use QT\GraphQL\Type\Custom\PaginationType;
+use QT\GraphQL\Definition\ListType;
 use GraphQL\Type\Definition\InputObjectType;
+use QT\GraphQL\Definition\PaginationType;
 
 /**
  * abstract ModelType
  * 
- * @package QT\GraphQL\Type
+ * @package QT\GraphQL\Definition
  */
 abstract class ModelType extends ObjectType implements Resolvable
 {
@@ -81,8 +81,9 @@ abstract class ModelType extends ObjectType implements Resolvable
     }
 
     /**
-     * 获取可查询条件
-     *
+     * {@inheritDoc}
+     * 
+     * @param GraphQLManager $manager
      * @return array
      */
     public function getArgs(GraphQLManager $manager): array
@@ -91,13 +92,14 @@ abstract class ModelType extends ObjectType implements Resolvable
     }
 
     /**
-     * @param $node
-     * @param $args
+     * {@inheritDoc}
+     *
+     * @param mixed $node
+     * @param array $args
      * @param Context $context
      * @param ResolveInfo $info
      * @return mixed
-     */
-    public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
+     */    public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
         return $this->getResolver()->show(
             $context,

@@ -1,6 +1,6 @@
 <?php
 
-namespace QT\GraphQL\Type\Scalar;
+namespace QT\GraphQL\Definition;
 
 use GraphQL\Utils\Utils;
 use GraphQL\Error\Error;
@@ -11,7 +11,8 @@ use GraphQL\Type\Definition\IntType as IntType;
 
 /**
  * Class BigIntType
- * @package QT\GraphQL\Type\Custom
+ * 
+ * @package QT\GraphQL\Definition
  */
 class BigIntType extends IntType
 {

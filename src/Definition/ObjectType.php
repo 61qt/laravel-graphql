@@ -1,13 +1,22 @@
 <?php
-namespace QT\GraphQL\Type;
+namespace QT\GraphQL\Definition;
 
 use Illuminate\Support\Str;
+use QT\GraphQL\Contracts\Context;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\ObjectType as BaseObjectType;
 
+/**
+ * ObjectType
+ * 
+ * @package QT\GraphQL\Definition
+ */
 class ObjectType extends BaseObjectType
 {
+    /**
+     * @param array $config
+     */
     public function __construct(array $config = [])
     {
         if (!isset($config['resolveField'])) {
@@ -18,9 +27,14 @@ class ObjectType extends BaseObjectType
         parent::__construct($config);
     }
 
-    public function getResolveFieldFn()
+    /**
+     * 获取字段处理回调
+     * 
+     * @return callable
+     */
+    public function getResolveFieldFn(): callable
     {
-        return function ($node, $args, $context, ResolveInfo $info) {
+        return function ($node, $args, Context $context, ResolveInfo $info) {
             $method = 'resolve' . ucfirst(Str::camel($info->fieldName));
 
             if (method_exists($this, $method)) {

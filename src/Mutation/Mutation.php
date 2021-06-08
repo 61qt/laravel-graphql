@@ -7,10 +7,9 @@ use App\Exceptions\Error;
 use App\GraphQL\AppContext;
 use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
-use QT\GraphQL\Type\ModelType;
 use QT\GraphQL\Contracts\Context;
+use QT\GraphQL\Definition\ModelType;
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\InputObjectType;
 
 /**
  * Class Mutation
@@ -48,10 +47,10 @@ abstract class Mutation
     abstract public function getMutationList(): array;
 
     /**
+     * TODO 添加触发器,用于检查权限
      * Constructor
      *
      * @param GraphQLManager $manager
-     * @param array $options
      */
     public function __construct(GraphQLManager $manager)
     {
@@ -77,15 +76,8 @@ abstract class Mutation
      */
     public function resolve($node, $input, Context $context, ResolveInfo $info)
     {
-        foreach ($input as $key => $value) {
-            if ($value === null) {
-                $input[$key] = '';
-            }
-        }
-
         $resolver = $this->ofType->getResolver();
 
-        dd($resolver, $info->fieldName);
         return $resolver->{$info->fieldName}($context, $input);
     }
 
@@ -99,17 +91,13 @@ abstract class Mutation
         $mutationArgs = $this->getMutationArgs();
 
         foreach ($this->getMutationList() as $mutation) {
-            $inputName   = "{$mutation}Input";
             $mutationArg = isset($mutationArgs[$mutation])
                 ? Arr::only($globalArgs, $mutationArgs[$mutation])
                 : $globalArgs;
 
-            $inputType = $manager->setType(new InputObjectType([
-                'name'   => $inputName,
-                'fields' => array_merge($this->getDefaultMutationArgs(), $mutationArg),
-            ]));
+            $mutationArg = array_merge($this->getDefaultMutationArgs(), $mutationArg);
 
-            yield $mutation => [$this->ofType, $inputType, [$this, 'resolve']];
+            yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve']];
         }
     }
 

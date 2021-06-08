@@ -1,5 +1,5 @@
 <?php
-namespace QT\GraphQL\Type\Scalar;
+namespace QT\GraphQL\Definition;
 
 use GraphQL\Error\Error;
 use GraphQL\Utils\Utils;
@@ -12,10 +12,9 @@ use GraphQL\Type\Definition\BooleanType;
 use GraphQL\Language\AST\StringValueNode;
 
 /**
- * 混合类型
- *
  * Class MixedType
- * @package QT\GraphQL\Type\Scalar
+ * 
+ * @package QT\GraphQL\Definition
  */
 class MixedType extends ScalarType
 {
