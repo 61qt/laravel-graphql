@@ -6,23 +6,14 @@ namespace QT\GraphQL;
 
 use Closure;
 use GraphQL\Type\Definition\Type;
-use QT\GraphQL\Definition\JsonType;
-use QT\GraphQL\Definition\MixedType;
-use QT\GraphQL\Definition\BigIntType;
 use GraphQL\Type\Definition\ObjectType;
 use QT\GraphQL\Definition\ModelMutation;
-use QT\GraphQL\Definition\TimestampType;
 use QT\GraphQL\Exceptions\GraphQLException;
 
 /**
- * @method JsonType      json()
- * @method MixedType     mixed()
- * @method BigIntType    bigint()
- * @method TimestampType timestamp()
- *
  * Class GraphQLManager
  * 
- * @package App\GraphQL
+ * @package QT\GraphQL
  */
 class GraphQLManager
 {
@@ -43,23 +34,6 @@ class GraphQLManager
      * @var Closure
      */
     protected $typeFinder;
-
-    /**
-     * @var array
-     */
-    protected $defaultTypes = [
-        JsonType::class,
-        MixedType::class,
-        BigIntType::class,
-        TimestampType::class,
-    ];
-
-    public function __construct()
-    {
-        foreach ($this->defaultTypes as $type) {
-            $this->setType($type);
-        }
-    }
 
     /**
      * @param string $name
