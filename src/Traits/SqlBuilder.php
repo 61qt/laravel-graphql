@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as BaseBuilder;
 
 trait SqlBuilder
 {
@@ -26,13 +27,6 @@ trait SqlBuilder
     protected $joinTable = [
         // 'table' => ['foreignKey', '=', 'ownerKey'],
     ];
-
-    /**
-     * 支持排序的字段
-     *
-     * @var array
-     */
-    protected $orderFields = [];
 
     /**
      * 筛选条件对应的操作符
@@ -281,27 +275,24 @@ trait SqlBuilder
      * @return \Illuminate\Database\Eloquent\Builder
      * @throws Error
      */
-    public function buildSort(
-        Builder $query,
-        string $column = null,
-        string $direction = 'desc'
-    ): Builder {
-        if (!in_array($column, $this->orderFields)) {
-            $column = $this->model->getKeyName();
+    public function buildSort(Builder $query, ?string $column = null, string $direction = 'desc'): Builder
+    {
+        if ($column === null) {
+            return $query;
         }
 
-        $table = $this->getTable();
+        $table = $this->table;
         if (strpos($column, '.') !== false) {
             list($table, $column) = explode('.', $column, 2);
         }
 
         $orderBy = "{$table}.{$column}";
         // 排序时支持链表
-        if ($table !== $this->getTable()) {
+        if ($table !== $this->table) {
             $query = $this->buildJoin($query, $orderBy);
         }
 
-        $columns = $this->getColumns($query);
+        $columns = $this->getColumns($query->toBase());
         // 筛选条件与排序字段不同时,默认放弃排序索引
         if (count($columns) > 1 || (count($columns) == 1 && empty($columns[$orderBy]))) {
             // order by limit 在部分情况下会覆盖where条件中索引
@@ -319,10 +310,10 @@ trait SqlBuilder
      * @param $query
      * @return array
      */
-    protected function getColumns(Builder $query): array
+    protected function getColumns(BaseBuilder $query): array
     {
         $columns = [];
-        foreach ($query->toBase()->wheres as $where) {
+        foreach ($query->wheres as $where) {
             if ($where['type'] === 'Nested') {
                 $columns = array_merge($columns, $this->getColumns($where['query']));
             } elseif (!empty($where['column'])) {

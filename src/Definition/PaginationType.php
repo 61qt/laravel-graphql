@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\GraphQLManager;
-use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\PageOption;
 use QT\GraphQL\Contracts\Resolvable;
@@ -95,7 +94,7 @@ class PaginationType extends ObjectType implements Resolvable
                 'defaultValue' => [],
             ],
             'orderBy' => [
-                'type'        => Type::string(),
+                'type'        => $this->ofType->getSortFields(),
                 'description' => '排序字段',
             ],
         ];

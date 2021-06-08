@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\GraphQLManager;
-use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\ListOption;
 use QT\GraphQL\Contracts\Resolvable;
@@ -68,7 +67,7 @@ class ListType extends ListOfType implements Resolvable
                 'defaultValue' => [],
             ],
             'orderBy' => [
-                'type'        => Type::string(),
+                'type'        => $this->ofType->getSortFields(),
                 'description' => '排序字段',
             ],
         ];

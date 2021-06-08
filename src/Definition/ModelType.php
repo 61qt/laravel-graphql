@@ -7,11 +7,11 @@ namespace QT\GraphQL\Definition;
 use QT\GraphQL\Resolver;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
+use QT\GraphQL\Definition\ListType;
 use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
-use QT\GraphQL\Definition\ListType;
-use GraphQL\Type\Definition\InputObjectType;
 use QT\GraphQL\Definition\PaginationType;
+use GraphQL\Type\Definition\InputObjectType;
 
 /**
  * abstract ModelType
@@ -49,11 +49,25 @@ abstract class ModelType extends ObjectType implements Resolvable
     public $detailedFields = [];
 
     /**
+     * 支持排序的字段
+     *
+     * @var array
+     */
+    protected $sortFields = [];
+
+    /**
      * 列表页通用筛选条件
      * 
      * @var InputObjectType
      */
     protected $filterInput;
+
+    /**
+     * 列表页通用筛选条件
+     * 
+     * @var InputObjectType
+     */
+    protected $sortInput;
 
     /**
      * 获取model数据结构
@@ -101,13 +115,24 @@ abstract class ModelType extends ObjectType implements Resolvable
      * @param Context $context
      * @param ResolveInfo $info
      * @return mixed
-     */    public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
+     */
+    public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
         return $this->getResolver()->show(
             $context,
             $args,
             $info->getFieldSelection($context->getValue('max_depth', 5))
         );
+    }
+
+    /**
+     * 获取筛选条件
+     *
+     * @return array
+     */
+    public function getFilters(): array
+    {
+        return [];
     }
 
     /**
@@ -132,9 +157,21 @@ abstract class ModelType extends ObjectType implements Resolvable
      *
      * @return array
      */
-    public function getFilters(): array
+    public function getSortFields(): ?InputObjectType
     {
-        return [];
+        if (!empty($this->sortInput)) {
+            return $this->sortInput;
+        }
+
+        $sortFields = [];
+        foreach ($this->sortFields as $field) {
+            $sortFields[$field] = ['type' => Type::direction()];
+        }
+
+        return $this->sortInput = new InputObjectType([
+            'name'   => "{$this->name}SortFields",
+            'fields' => $sortFields,
+        ]);
     }
 
     /**
