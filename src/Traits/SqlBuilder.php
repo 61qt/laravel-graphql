@@ -165,7 +165,6 @@ trait SqlBuilder
             return $baseQuery;
         }
 
-        // Register(operater, function () {})
         return $baseQuery->where(function (Builder $query) use ($baseQuery, $filters) {
             foreach ($filters as $column => $operators) {
                 foreach ($operators as $operator => $value) {
@@ -227,14 +226,18 @@ trait SqlBuilder
     }
 
     /**
-     * @param $field
-     * @param $operator
-     * @param $value
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
      * @return array
      */
-    protected function resolveCondition($field, $operator, $value)
+    protected function resolveCondition(string $column, string $operator, mixed $value): array
     {
-        return [$field, $operator, $value];
+        // TODO 改为注册回调的方式
+        // 部分特殊的条件构造,可以重写该方法来处理
+        // 比如要无限分级下查询子分类下的全部数据
+        // 就可以在此处先拿出全部的子分类id,在进行sql查询
+        return [$column, $operator, $value];
     }
 
     /**
@@ -244,9 +247,9 @@ trait SqlBuilder
      * @param $filters
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function buildJoin($query, $field)
+    public function buildJoin(Builder $query, $column): Builder
     {
-        list($table) = explode('.', $field, 2);
+        list($table) = explode('.', $column, 2);
 
         if (isset($this->joinTable[$table])) {
             $method   = 'join';
@@ -312,15 +315,12 @@ trait SqlBuilder
      * 获取sql使用的where字段
      *
      * @param $query
+     * @return array
      */
-    protected function getColumns($query)
+    protected function getColumns(Builder $query): array
     {
-        if ($query instanceof Builder) {
-            $query = $query->toBase();
-        }
-
         $columns = [];
-        foreach ($query->wheres as $where) {
+        foreach ($query->toBase()->wheres as $where) {
             if ($where['type'] === 'Nested') {
                 $columns = array_merge($columns, $this->getColumns($where['query']));
             } elseif (!empty($where['column'])) {
@@ -336,7 +336,7 @@ trait SqlBuilder
      * @param null|string $table
      * @return string
      */
-    protected function formatField(string $field, ?string $table = null)
+    protected function formatField(string $field, ?string $table = null): string
     {
         if (strpos($field, '.')) {
             return $field;
@@ -354,7 +354,7 @@ trait SqlBuilder
      * @param callable $handle
      * @return static
      */
-    public function registerOperatorHandle(string $operator, callable $handle)
+    public function registerOperatorHandle(string $operator, callable $handle): static
     {
         $this->operatorHandles[$operator] = $handle;
 
