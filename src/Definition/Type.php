@@ -23,18 +23,18 @@ abstract class Type extends BaseType
     /** 
      * @var array<ScalarType|DirectionType> 
      * */
-    protected static $standardTypes;
+    protected static $globalTypes = [];
 
     /**
      * @api
      */
     public static function json() : JsonType
     {
-        if (! isset(static::$standardTypes[self::JSON])) {
-            static::$standardTypes[self::JSON] = new JsonType;
+        if (! isset(static::$globalTypes[self::JSON])) {
+            static::$globalTypes[self::JSON] = new JsonType;
         }
 
-        return static::$standardTypes[self::JSON];
+        return static::$globalTypes[self::JSON];
     }
 
     /**
@@ -42,11 +42,11 @@ abstract class Type extends BaseType
      */
     public static function mixed() : MixedType
     {
-        if (! isset(static::$standardTypes[self::MIXED])) {
-            static::$standardTypes[self::MIXED] = new MixedType;
+        if (! isset(static::$globalTypes[self::MIXED])) {
+            static::$globalTypes[self::MIXED] = new MixedType;
         }
 
-        return static::$standardTypes[self::MIXED];
+        return static::$globalTypes[self::MIXED];
     }
 
     /**
@@ -54,11 +54,11 @@ abstract class Type extends BaseType
      */
     public static function timestamp() : TimestampType
     {
-        if (! isset(static::$standardTypes[self::TIMESTAMP])) {
-            static::$standardTypes[self::TIMESTAMP] = new TimestampType;
+        if (! isset(static::$globalTypes[self::TIMESTAMP])) {
+            static::$globalTypes[self::TIMESTAMP] = new TimestampType;
         }
 
-        return static::$standardTypes[self::TIMESTAMP];
+        return static::$globalTypes[self::TIMESTAMP];
     }
 
     /**
@@ -66,11 +66,11 @@ abstract class Type extends BaseType
      */
     public static function bigint() : BigIntType
     {
-        if (! isset(static::$standardTypes[self::BIGINT])) {
-            static::$standardTypes[self::BIGINT] = new BigIntType;
+        if (! isset(static::$globalTypes[self::BIGINT])) {
+            static::$globalTypes[self::BIGINT] = new BigIntType;
         }
 
-        return static::$standardTypes[self::BIGINT];
+        return static::$globalTypes[self::BIGINT];
     }
 
     /**
@@ -78,10 +78,10 @@ abstract class Type extends BaseType
      */
     public static function direction() : DirectionType
     {
-        if (! isset(static::$standardTypes[self::DIRECTION])) {
-            static::$standardTypes[self::DIRECTION] = new DirectionType;
+        if (! isset(static::$globalTypes[self::DIRECTION])) {
+            static::$globalTypes[self::DIRECTION] = new DirectionType;
         }
 
-        return static::$standardTypes[self::DIRECTION];
+        return static::$globalTypes[self::DIRECTION];
     }
 }
