@@ -5,15 +5,20 @@ namespace QT\GraphQL;
 use RuntimeException;
 use Illuminate\Support\Arr;
 use QT\GraphQL\Contracts\Context;
-use QT\GraphQL\Options\ListOption;
-use QT\GraphQL\Options\PageOption;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use QT\GraphQL\Options\ListOption;
+use QT\GraphQL\Options\PageOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * Graphql Result Resolver
+ *
+ * @package QT\GraphQL
+ */
 class Resolver
 {
     use Traits\Validate;
@@ -22,14 +27,14 @@ class Resolver
 
     /**
      * model 对应的query
-     * 
+     *
      * @var null|Builder
      */
     protected $query = null;
 
     /**
      * 查询的table
-     * 
+     *
      * @var string
      */
     protected $table;
@@ -43,7 +48,7 @@ class Resolver
 
     /**
      * Resolver constructor.
-     * 
+     *
      * @param Model $model
      */
     public function __construct(protected Model $model)
@@ -79,7 +84,7 @@ class Resolver
      * @return \Illuminate\Database\Eloquent\Model
      * @throws Error
      */
-    public function show(Context $context, array $input, array $selection = []): Model 
+    public function show(Context $context, array $input, array $selection = []): Model
     {
         $id = $this->getKey($input);
 
@@ -232,7 +237,7 @@ class Resolver
      * @param array $input
      * @return array|Collection
      */
-    protected function checkAndFormatInput(array $input = []): array|Collection
+    protected function checkAndFormatInput(array $input = []): array | Collection
     {
         return $input;
     }
@@ -296,7 +301,7 @@ class Resolver
      * @param array|Collection $input
      * @return Model
      */
-    public function find(array|Collection $input): Model
+    public function find(array | Collection $input): Model
     {
         $model = $this->getModelQuery(true)->find($this->getKey($input));
 
@@ -324,6 +329,7 @@ class Resolver
     }
 
     /**
+     * TODO 多态查询优化
      * 加载动态关系,morphTo关系
      *
      * @param $models
@@ -375,18 +381,19 @@ class Resolver
         }
     }
 
+    // TODO 多态查询优化
     protected function loadMorph($models, $relation, $relations)
     {
         $models->pluck($relation)
-               ->groupBy(function ($model) {
-                   return empty($model) ? null : get_class($model);
-               })
-               ->filter(function ($models, $className) use ($relations) {
-                   return Arr::has($relations, $className);
-               })
-               ->each(function ($models, $className) use ($relations) {
-                   $className::with($relations[$className])
-                       ->eagerLoadRelations($models->all());
-               });
+            ->groupBy(function ($model) {
+                return empty($model) ? null : get_class($model);
+            })
+            ->filter(function ($models, $className) use ($relations) {
+                return Arr::has($relations, $className);
+            })
+            ->each(function ($models, $className) use ($relations) {
+                $className::with($relations[$className])
+                    ->eagerLoadRelations($models->all());
+            });
     }
 }
