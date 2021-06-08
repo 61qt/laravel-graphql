@@ -51,6 +51,9 @@ class JsonType extends ScalarType
 
     /**
      * {@inheritDoc}
+     * 
+     * @param Node $valueNode
+     * @param array|null $variables
      */
     public function parseLiteral(Node $valueNode, ?array $variables = null)
     {
