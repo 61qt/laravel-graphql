@@ -14,6 +14,7 @@ use GraphQL\Type\Definition\Type as BaseType;
 
 abstract class Type extends BaseType
 {
+    public const NIL       = 'nil';
     public const JSON      = 'json';
     public const MIXED     = 'mixed';
     public const BIGINT    = 'bigint';
@@ -24,6 +25,18 @@ abstract class Type extends BaseType
      * @var array<ScalarType|DirectionType> 
      * */
     protected static $globalTypes = [];
+
+    /**
+     * @api
+     */
+    public static function nil() : NilType
+    {
+        if (! isset(static::$globalTypes[self::NIL])) {
+            static::$globalTypes[self::NIL] = new NilType;
+        }
+
+        return static::$globalTypes[self::NIL];
+    }
 
     /**
      * @api

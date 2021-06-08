@@ -157,10 +157,14 @@ abstract class ModelType extends ObjectType implements Resolvable
      *
      * @return array
      */
-    public function getSortFields(): ?InputObjectType
+    public function getSortFields(): InputObjectType|NilType
     {
         if (!empty($this->sortInput)) {
             return $this->sortInput;
+        }
+
+        if (empty($this->sortFields)) {
+            return $this->sortInput = Type::nil();
         }
 
         $sortFields = [];
