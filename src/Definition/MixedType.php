@@ -25,7 +25,7 @@ class MixedType extends ScalarType
     /**
      * @var string
      */
-    public $name = 'mixed';
+    public $name = Type::MIXED;
 
     /**
      * @var string

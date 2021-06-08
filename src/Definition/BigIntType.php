@@ -23,7 +23,7 @@ class BigIntType extends ScalarType
     /**
      * @var string
      */
-    public $name = 'bigint';
+    public $name = Type::BIGINT;
 
     /**
      * @var string

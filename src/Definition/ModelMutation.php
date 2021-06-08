@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use App\Exceptions\Error;
-use App\GraphQL\AppContext;
 use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;

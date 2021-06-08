@@ -21,7 +21,7 @@ class TimestampType extends ScalarType
     /**
      * @var string
      */
-    public $name = 'timestamp';
+    public $name = Type::TIMESTAMP;
 
     /**
      * @var string

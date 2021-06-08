@@ -14,7 +14,7 @@ class JsonType extends MixedType
     /**
      * @var string
      */
-    public $name = 'json';
+    public $name = Type::JSON;
 
     /**
      * @var string
