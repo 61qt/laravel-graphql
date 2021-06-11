@@ -13,7 +13,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Exceptions\GraphQLException;
 
 /**
- * Class Mutation
+ * Mutation
  *
  * @package QT\GraphQL\Definition
  */

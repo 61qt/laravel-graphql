@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 /**
- * Class JsonType
+ * JsonType
  *
  * @package QT\GraphQL\Definition
  */

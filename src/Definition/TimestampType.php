@@ -12,7 +12,7 @@ use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Language\AST\StringValueNode;
 
 /**
- * Class TimestampType
+ * TimestampType
  * 
  * @package QT\GraphQL\Definition
  */
@@ -28,6 +28,12 @@ class TimestampType extends ScalarType
      */
     public $description = '时间戳格式';
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param  mixed $value
+     * @return mixed
+     */
     public function serialize($value)
     {
         if ($value instanceof Carbon) {
@@ -41,6 +47,12 @@ class TimestampType extends ScalarType
         return $value;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param  mixed $value
+     * @return mixed|null
+     */
     public function parseValue($value)
     {
         if (is_int($value)) {
@@ -50,6 +62,12 @@ class TimestampType extends ScalarType
         return $value;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param Node $valueNode
+     * @param array|null $variables
+     */
     public function parseLiteral(Node $ast, ?array $variables = null)
     {
         if ($ast instanceof StringValueNode) {

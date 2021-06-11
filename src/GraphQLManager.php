@@ -11,7 +11,7 @@ use QT\GraphQL\Definition\ModelMutation;
 use QT\GraphQL\Exceptions\GraphQLException;
 
 /**
- * Class GraphQLManager
+ * GraphQLManager
  * 
  * @package QT\GraphQL
  */

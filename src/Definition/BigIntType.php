@@ -11,7 +11,7 @@ use GraphQL\Language\AST\IntValueNode;
 use GraphQL\Type\Definition\ScalarType;
 
 /**
- * Class BigIntType
+ * BigIntType
  * 
  * @package QT\GraphQL\Definition
  */

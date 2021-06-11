@@ -11,7 +11,7 @@ use GraphQL\Type\Definition\ScalarType;
 /**
  * 要求一定返回type,但是type又没有具体含义时使用
  * 
- * Class NilType
+ * NilType
  *
  * @package QT\GraphQL\Definition
  */

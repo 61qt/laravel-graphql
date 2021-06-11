@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace QT\GraphQL\Definition;
 
@@ -12,8 +12,8 @@ use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * Class ListType
- * 
+ * ListType
+ *
  * @package QT\GraphQL\Definition
  */
 class ListType extends ListOfType implements Resolvable
@@ -25,7 +25,7 @@ class ListType extends ListOfType implements Resolvable
 
     /**
      * ListType Constructor
-     * 
+     *
      * @param ModelType $type
      */
     public function __construct(ModelType $type)
@@ -39,7 +39,7 @@ class ListType extends ListOfType implements Resolvable
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param GraphQLManager $manager
      * @return array
      */
@@ -67,8 +67,9 @@ class ListType extends ListOfType implements Resolvable
                 'defaultValue' => [],
             ],
             'orderBy' => [
-                'type'        => $this->ofType->getSortFields(),
-                'description' => '排序字段',
+                'type'         => $this->ofType->getSortFields(),
+                'description'  => '排序字段',
+                'defaultValue' => [],
             ],
         ];
     }

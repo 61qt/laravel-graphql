@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace QT\GraphQL\Definition;
 
@@ -11,8 +11,8 @@ use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * Class PaginationType
- * 
+ * PaginationType
+ *
  * @package QT\GraphQL\Definition
  */
 class PaginationType extends ObjectType implements Resolvable
@@ -24,7 +24,7 @@ class PaginationType extends ObjectType implements Resolvable
 
     /**
      * PaginationType Constructor
-     * 
+     *
      * @param ModelType $type
      */
     public function __construct(ModelType $type)
@@ -72,7 +72,7 @@ class PaginationType extends ObjectType implements Resolvable
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param GraphQLManager $manager
      * @return array
      */
@@ -94,8 +94,9 @@ class PaginationType extends ObjectType implements Resolvable
                 'defaultValue' => [],
             ],
             'orderBy' => [
-                'type'        => $this->ofType->getSortFields(),
-                'description' => '排序字段',
+                'type'         => $this->ofType->getSortFields(),
+                'description'  => '排序字段',
+                'defaultValue' => [],
             ],
         ];
     }

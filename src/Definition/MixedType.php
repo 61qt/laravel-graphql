@@ -16,7 +16,7 @@ use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Language\AST\ObjectValueNode;
 
 /**
- * Class MixedType
+ * MixedType
  * 
  * @package QT\GraphQL\Definition
  */
