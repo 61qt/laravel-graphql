@@ -14,7 +14,7 @@ use QT\GraphQL\Definition\PaginationType;
 use GraphQL\Type\Definition\InputObjectType;
 
 /**
- * abstract ModelType
+ * ModelType
  * 
  * @package QT\GraphQL\Definition
  */
@@ -155,7 +155,7 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 获取筛选条件
      *
-     * @return array
+     * @return InputObjectType|NilType
      */
     public function getSortFields(): InputObjectType|NilType
     {
@@ -181,17 +181,17 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 获取可用的 Graphql Type
      *
-     * @param GraphQLManager $manager
+     * @return array<Resolvable>
      */
-    public function getQueryable(GraphQLManager $manager): array
+    public function getQueryable(): array
     {
-        $types = [$manager->setType($this)];
+        $types = [$this];
 
         if ($this->useList) {
-            $types[] = $manager->setType(new ListType($this));
+            $types[] = new ListType($this);
         }
         if ($this->usePagination) {
-            $types[] = $manager->setType(new PaginationType($this));
+            $types[] = new PaginationType($this);
         }
 
         return $types;
@@ -200,7 +200,8 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 格式化选中的字段
      *
-     * @param GraphQLManager $manager
+     * @param array $selection
+     * @return array
      */
     public function formatSelection(array $selection): array
     {
