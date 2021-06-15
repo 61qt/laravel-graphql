@@ -46,7 +46,7 @@ class PageOption
             $this->orderBy = $args['orderBy'];
         }
 
-        foreach (['skip', 'page'] as $arg) {
+        foreach (['take', 'page'] as $arg) {
             if (isset($args[$arg])) {
                 $this->{$arg} = $args[$arg];
             }
