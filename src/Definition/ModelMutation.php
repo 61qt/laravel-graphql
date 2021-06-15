@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace QT\GraphQL\Definition;
 
+use Generator;
 use App\Exceptions\Error;
 use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
@@ -53,7 +54,7 @@ abstract class ModelMutation
      *
      * @param GraphQLManager $manager
      */
-    public function __construct(GraphQLManager $manager)
+    public function __construct(protected GraphQLManager $manager)
     {
         if (empty($this->objectType)) {
             throw new GraphQLException("Mutation绑定的Object Type不能为空");
@@ -83,10 +84,12 @@ abstract class ModelMutation
     }
 
     /**
-     * @return \Iterable
+     * 获取Mutation的配置信息
+     * 
+     * @return Generator
      * @throws Error
      */
-    public function getMutationConfig(GraphQLManager $manager)
+    public function getMutationConfig()
     {
         $globalArgs   = $this->args();
         $mutationArgs = $this->getMutationArgs();
