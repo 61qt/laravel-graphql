@@ -179,14 +179,13 @@ abstract class ModelType extends ObjectType implements Resolvable
     }
 
     /**
-     * 获取可用的 Graphql Type
+     * 获取额外的 Graphql Type
      *
      * @return array<Resolvable>
      */
-    public function getQueryable(): array
+    public function getExtraTypes(): array
     {
-        $types = [$this];
-
+        $types = [];
         if ($this->useList) {
             $types[] = new ListType($this);
         }
