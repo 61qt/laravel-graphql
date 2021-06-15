@@ -105,7 +105,7 @@ class GraphQLManager
             return $containers[$name];
         }
 
-        $type = call_user_func($this->getTypeFinder(), $name, $space);
+        $type = call_user_func($this->getTypeFinder(), $name, $space, $this);
 
         if (empty($type) || (!$type instanceof Type && !$type instanceof ModelMutation)) {
             throw new GraphQLException("{$name} 类型不存在");
@@ -117,9 +117,9 @@ class GraphQLManager
     /**
      * 获取 Graphql type 查询回调 
      * 
-     * @return Closure
+     * @return callable
      */
-    public function getTypeFinder(): Closure
+    public function getTypeFinder(): callable
     {
         return $this->typeFinder ?: function () {
 
@@ -129,10 +129,10 @@ class GraphQLManager
     /**
      * 设置 Graphql type 查询回调
      * 
-     * @param Closure $typeFinder
+     * @param callable $typeFinder
      * @return self
      */
-    public function setTypeFinder(Closure $typeFinder)
+    public function setTypeFinder(callable $typeFinder)
     {
         $this->typeFinder = $typeFinder;
 
