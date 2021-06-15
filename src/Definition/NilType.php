@@ -35,7 +35,7 @@ class NilType extends ScalarType
      */
     public function serialize($value)
     {
-        throw new Error('Query error: Cannot serialize nil type');
+        return null;
     }
 
     /**
@@ -46,7 +46,7 @@ class NilType extends ScalarType
      */
     public function parseValue($value)
     {
-        throw new Error('Query error: Cannot parse nil type');
+        return null;
     }
 
     /**
