@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Resolver;
-use QT\GraphQL\FilterFactory;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Definition\ListType;
