@@ -58,14 +58,14 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 列表页通用筛选条件
      * 
-     * @var InputObjectType
+     * @var InputObjectType|NilType
      */
     protected $filterInput;
 
     /**
-     * 列表页通用筛选条件
+     * 列表页通用排序条件
      * 
-     * @var InputObjectType
+     * @var InputObjectType|NilType
      */
     protected $sortInput;
 
@@ -140,17 +140,22 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 生成列表页使用的 Filters
      *
-     * @return array
+     * @return InputObjectType|NilType
      */
-    public function getFiltersInput(): InputObjectType
+    public function getFiltersInput(): InputObjectType|NilType
     {
         if (!empty($this->filterInput)) {
             return $this->filterInput;
         }
 
+        $filters = $this->getFilters();
+        if (empty($filters)) {
+            return $this->filterInput = Type::nil();
+        }
+
         return $this->filterInput = new InputObjectType([
             'name'   => "{$this->name}Filters",
-            'fields' => $this->getFilters(),
+            'fields' => $filters,
         ]);
     }
 
