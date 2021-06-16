@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Resolver;
+use QT\GraphQL\FilterFactory;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Definition\ListType;
@@ -92,7 +93,9 @@ abstract class ModelType extends ObjectType implements Resolvable
     public function __construct(GraphQLManager $manager, array $options = [])
     {
         parent::__construct(array_merge($options, [
-            'fields' => $this->getDataStructure($manager),
+            'fields' => function () use ($manager) {
+                return $this->getDataStructure($manager);
+            },
         ]));
     }
 
@@ -181,7 +184,7 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 获取额外的 Graphql Type
      *
-     * @return array<Resolvable>
+     * @return array<Resolvable|Type>
      */
     public function getExtraTypes(): array
     {
