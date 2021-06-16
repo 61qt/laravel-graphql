@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace QT\GraphQL;
 
@@ -15,8 +15,28 @@ use GraphQL\Type\Definition\Type as BaseType;
 class FilterFactory
 {
     /**
+     * 筛选条件对应的操作符
+     *
+     * @var array
+     */
+    protected static $operatorsMaps = [
+        // equal
+        '='  => 'eq',
+        // not equal
+        '!=' => 'ne',
+        // greater than
+        '>'  => 'gt',
+        // greater than or equal
+        '>=' => 'ge',
+        // less than
+        '<'  => 'lt',
+        // less than or equal
+        '<=' => 'le',
+    ];
+
+    /**
      * 创建一组int类型的筛选条件
-     * 
+     *
      * @param string $name
      * @param array $operators
      * @return array
@@ -28,7 +48,7 @@ class FilterFactory
 
     /**
      * 创建一组string类型的筛选条件
-     * 
+     *
      * @param string $name
      * @param array $operators
      * @return array
@@ -40,7 +60,7 @@ class FilterFactory
 
     /**
      * 创建一组指定类型的筛选条件
-     * 
+     *
      * @param string $name
      * @param array $operators
      * @return array
@@ -50,6 +70,10 @@ class FilterFactory
         $args    = [];
         $factory = new self($name, $type);
         foreach ($operators as $operator) {
+            if (isset(static::$operatorsMaps[$operator])) {
+                $operator = static::$operatorsMaps[$operator];
+            }
+
             if (method_exists($factory, $operator)) {
                 $args[$operator] = $factory->{$operator}();
             }
@@ -72,8 +96,8 @@ class FilterFactory
     public function eq()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 等于",
+            'type'        => $this->type,
+            'description' => "{$this->name} 等于",
         ];
     }
 
@@ -83,8 +107,8 @@ class FilterFactory
     public function ne()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 不等于",
+            'type'        => $this->type,
+            'description' => "{$this->name} 不等于",
         ];
     }
 
@@ -94,8 +118,8 @@ class FilterFactory
     public function gt()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 大于",
+            'type'        => $this->type,
+            'description' => "{$this->name} 大于",
         ];
     }
 
@@ -105,8 +129,8 @@ class FilterFactory
     public function ge()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 大于等于",
+            'type'        => $this->type,
+            'description' => "{$this->name} 大于等于",
         ];
     }
 
@@ -116,8 +140,8 @@ class FilterFactory
     public function lt()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 小于",
+            'type'        => $this->type,
+            'description' => "{$this->name} 小于",
         ];
     }
 
@@ -127,8 +151,8 @@ class FilterFactory
     public function le()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 小于等于",
+            'type'        => $this->type,
+            'description' => "{$this->name} 小于等于",
         ];
     }
 
@@ -138,8 +162,8 @@ class FilterFactory
     public function in()
     {
         return [
-            'type'         => Type::listOf($this->type),
-            'description'  => "{$this->name} 交集",
+            'type'        => Type::listOf($this->type),
+            'description' => "{$this->name} 交集",
         ];
     }
 
@@ -149,8 +173,8 @@ class FilterFactory
     public function notIn()
     {
         return [
-            'type'         => Type::listOf($this->type),
-            'description'  => "{$this->name} 差集",
+            'type'        => Type::listOf($this->type),
+            'description' => "{$this->name} 差集",
         ];
     }
 
@@ -160,8 +184,8 @@ class FilterFactory
     public function between()
     {
         return [
-            'type'         => Type::listOf($this->type),
-            'description'  => "{$this->name} 差集",
+            'type'        => Type::listOf($this->type),
+            'description' => "{$this->name} 差集",
         ];
     }
 
@@ -171,8 +195,8 @@ class FilterFactory
     public function like()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 模糊查询",
+            'type'        => $this->type,
+            'description' => "{$this->name} 模糊查询",
         ];
     }
 
@@ -182,8 +206,8 @@ class FilterFactory
     public function leftLike()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 向左模糊查询",
+            'type'        => $this->type,
+            'description' => "{$this->name} 向左模糊查询",
         ];
     }
 
@@ -193,8 +217,8 @@ class FilterFactory
     public function rightLike()
     {
         return [
-            'type'         => $this->type,
-            'description'  => "{$this->name} 向右模糊查询",
+            'type'        => $this->type,
+            'description' => "{$this->name} 向右模糊查询",
         ];
     }
 
@@ -204,8 +228,8 @@ class FilterFactory
     public function isNull()
     {
         return [
-            'type'         => Type::boolean(),
-            'description'  => "{$this->name} 为空",
+            'type'        => Type::boolean(),
+            'description' => "{$this->name} 为空",
         ];
     }
 
@@ -215,8 +239,8 @@ class FilterFactory
     public function notNull()
     {
         return [
-            'type'         => Type::boolean(),
-            'description'  => "{$this->name} 不为空",
+            'type'        => Type::boolean(),
+            'description' => "{$this->name} 不为空",
         ];
     }
 }
