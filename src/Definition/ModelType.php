@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Resolver;
+use QT\GraphQL\FilterFactory;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Definition\ListType;
@@ -132,7 +133,7 @@ abstract class ModelType extends ObjectType implements Resolvable
      *
      * @return array
      */
-    public function getFilters(): array
+    public function getFilters(FilterFactory $factory): array
     {
         return [];
     }
@@ -148,7 +149,7 @@ abstract class ModelType extends ObjectType implements Resolvable
             return $this->filterInput;
         }
 
-        $filters = $this->getFilters();
+        $filters = $this->getFilters(new FilterFactory($this));
         if (empty($filters)) {
             return $this->filterInput = Type::nil();
         }
