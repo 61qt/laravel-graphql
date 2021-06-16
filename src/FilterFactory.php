@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace QT\GraphQL;
 
 use QT\GraphQL\Definition\Type;
+use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as BaseType;
 
 /**
@@ -39,9 +40,9 @@ class FilterFactory
      *
      * @param string $name
      * @param array $operators
-     * @return array
+     * @return InputObjectType
      */
-    public static function int(string $name, array $operators): array
+    public static function int(string $name, array $operators): InputObjectType
     {
         return self::create($name, Type::int(), $operators);
     }
@@ -51,9 +52,9 @@ class FilterFactory
      *
      * @param string $name
      * @param array $operators
-     * @return array
+     * @return InputObjectType
      */
-    public static function string(string $name, array $operators)
+    public static function string(string $name, array $operators): InputObjectType
     {
         return self::create($name, Type::string(), $operators);
     }
@@ -63,11 +64,11 @@ class FilterFactory
      *
      * @param string $name
      * @param array $operators
-     * @return array
+     * @return InputObjectType
      */
-    public static function create($name, $type, $operators)
+    public static function create($name, $type, $operators): InputObjectType
     {
-        $args    = [];
+        $fields  = [];
         $factory = new self($name, $type);
         foreach ($operators as $operator) {
             if (isset(static::$operatorsMaps[$operator])) {
@@ -75,11 +76,11 @@ class FilterFactory
             }
 
             if (method_exists($factory, $operator)) {
-                $args[$operator] = $factory->{$operator}();
+                $fields[$operator] = $factory->{$operator}();
             }
         }
 
-        return $args;
+        return new InputObjectType(['name' => "{$name}Filters", 'fields' => $fields]);
     }
 
     /**
