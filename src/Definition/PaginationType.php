@@ -80,8 +80,9 @@ class PaginationType extends ObjectType implements Resolvable
     {
         return [
             'take'    => [
-                'type'        => Type::int(),
-                'description' => '一次性获取的行数(默认为100)',
+                'type'         => Type::int(),
+                'description'  => '一次性获取的行数(默认为100)',
+                'defaultValue' => 100,
             ],
             'page'    => [
                 'type'         => Type::int(),
@@ -91,12 +92,10 @@ class PaginationType extends ObjectType implements Resolvable
             'filters' => [
                 'type'         => $this->ofType->getFiltersInput(),
                 'description'  => '查询条件',
-                'defaultValue' => [],
             ],
             'orderBy' => [
                 'type'         => $this->ofType->getSortFields(),
                 'description'  => '排序字段',
-                'defaultValue' => [],
             ],
         ];
     }
