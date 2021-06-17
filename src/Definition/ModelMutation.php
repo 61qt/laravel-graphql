@@ -12,6 +12,7 @@ use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Definition\ModelType;
 use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Exceptions\GraphQLException;
+use GraphQL\Type\Definition\InputObjectType;
 
 /**
  * Mutation
@@ -49,7 +50,6 @@ abstract class ModelMutation
     abstract public function getMutationList(): array;
 
     /**
-     * TODO 添加触发器,用于检查权限
      * Constructor
      *
      * @param GraphQLManager $manager
@@ -95,11 +95,18 @@ abstract class ModelMutation
         $mutationArgs = $this->getMutationArgs();
 
         foreach ($this->getMutationList() as $mutation) {
-            $mutationArg = isset($mutationArgs[$mutation])
+            $name   = "{$mutation}Input";
+            $fields = isset($mutationArgs[$mutation])
                 ? Arr::only($globalArgs, $mutationArgs[$mutation])
                 : $globalArgs;
 
-            $mutationArg = array_merge($this->getDefaultMutationArgs(), $mutationArg);
+            $inputObject = $this->manager->setType(
+                new InputObjectType(compact('name', 'fields'))
+            );
+
+            $mutationArg = array_merge(
+                $this->getDefaultMutationArgs(), ['input' => $inputObject]
+            );
 
             yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve']];
         }
