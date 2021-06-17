@@ -129,7 +129,7 @@ abstract class ModelType extends ObjectType implements Resolvable
     }
 
     /**
-     * 获取筛选条件
+     * 注册筛选条件
      *
      * @param Registrar $registrar
      */

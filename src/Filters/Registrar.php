@@ -119,10 +119,10 @@ class Registrar
             return ExtraType::nil();
         }
 
-        return $this->manager->setType(new InputObjectType([
+        return new InputObjectType([
             'name'   => "{$this->modelType->name}Filters",
             'fields' => $this->filters,
-        ]));
+        ]);
     }
 
     /**
