@@ -40,14 +40,14 @@ abstract class ModelType extends ObjectType implements Resolvable
      *
      * @var array
      */
-    public $mustSelection = [];
+    protected $mustSelection = [];
 
     /**
      * 详细页面进行展示的字段(填充超长字段)
      *
      * @var array
      */
-    public $detailedFields = [];
+    protected $detailedFields = [];
 
     /**
      * 支持排序的字段
