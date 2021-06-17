@@ -6,20 +6,20 @@ namespace QT\GraphQL\Options;
 
 /**
  * ListOption
- * 
+ *
  * @package QT\GraphQL\Options
  */
 class ListOption
 {
-   /**
-    * @var array
-    */
-   public $filters = [];
+    /**
+     * @var array
+     */
+    public $filters = [];
 
-   /**
-    * @var array
-    */
-   public $orderBy = [];
+    /**
+     * @var array
+     */
+    public $orderBy = [];
 
     /**
      * @var int
@@ -41,19 +41,11 @@ class ListOption
      */
     public function __construct(array $args = [])
     {
-        if (isset($args['filters'])) {
-            // TODO 添加Filters格式判断
-            $this->filters = $args['filters'];
-        }
-
-        if (isset($args['orderBy'])) {
-            // TODO 添加OrderBy格式判断
-            $this->orderBy = $args['orderBy'];
-        }
-
-        foreach (['skip', 'take', 'all'] as $arg) {
-            if (isset($args[$arg])) {
-                $this->{$arg} = $args[$arg];
+        // format的逻辑放在option中处理,resolver只需要依赖option即可
+        // 给未来restful使用resolver留出自定义空间
+        foreach (['filters', 'orderBy', 'skip', 'take', 'all'] as $key) {
+            if (isset($args[$key])) {
+                $this->{$key} = $args[$key];
             }
         }
     }

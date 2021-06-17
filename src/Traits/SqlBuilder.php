@@ -14,7 +14,7 @@ trait SqlBuilder
 {
     /**
      * 最大查询深度
-     * 
+     *
      * @var int
      */
     protected $maxDepth = 5;
@@ -65,8 +65,11 @@ trait SqlBuilder
     /**
      * 生成sql
      *
-     * @param Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Builder $query
+     * @param array $selection
+     * @param array $filters
+     * @param array $orderBy
+     * @return Builder
      * @throws Error
      */
     public function buildSql(
@@ -90,7 +93,7 @@ trait SqlBuilder
      *
      * @param Builder $query
      * @param array   $selection
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      * @throws Error
      */
     public function buildSelect(Builder $query, array $selection = [])
@@ -108,10 +111,10 @@ trait SqlBuilder
      * @param array            $selection
      * @param bool             $detail
      * @param int              $depth
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      * @throws Error
      */
-    protected function selectFieldAndWithTable(Builder|Relation $query, array $selection, int $depth): Builder|Relation
+    protected function selectFieldAndWithTable(Builder | Relation $query, array $selection, int $depth): Builder | Relation
     {
         // 深度达到极限,不在进行关联
         if ($depth === 0) {
@@ -123,7 +126,7 @@ trait SqlBuilder
 
         // 去除隐藏字段
         $selection = array_diff_key(
-            array_merge($selection, [$model->getKeyName() => true]), 
+            array_merge($selection, [$model->getKeyName() => true]),
             array_flip($model->getHidden())
         );
 
@@ -153,7 +156,7 @@ trait SqlBuilder
      *
      * @param Builder $baseQuery
      * @param array   $filters
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function buildFilter(Builder $baseQuery, $filters)
     {
@@ -193,9 +196,9 @@ trait SqlBuilder
      * @param mixed $value
      */
     protected function buildCondition(
-        Builder $query, 
-        string $column, 
-        string $operator, 
+        Builder $query,
+        string $column,
+        string $operator,
         mixed $value
     ) {
         [$column, $operator, $value] = $this->resolveCondition(
@@ -207,7 +210,7 @@ trait SqlBuilder
             if (is_numeric($value)) {
                 $value = date('Y-m-d H:i:s', $value);
             }
-        
+
             if (is_array($value) && count($value) >= 2) {
                 $value[0] = date('Y-m-d H:i:s', $value[0]);
                 $value[1] = date('Y-m-d H:i:s', $value[1]);
@@ -241,7 +244,7 @@ trait SqlBuilder
      *
      * @param $query
      * @param $filters
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function buildJoin(Builder $query, $column): Builder
     {
@@ -272,7 +275,7 @@ trait SqlBuilder
      * @param null       $orderBy
      * @param string     $direction
      * @param Collection $filters
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      * @throws Error
      */
     public function buildSort(Builder $query, ?string $column = null, string $direction = 'desc'): Builder
