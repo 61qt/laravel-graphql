@@ -13,6 +13,7 @@ use QT\GraphQL\Options\ListOption;
 use QT\GraphQL\Options\PageOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -53,19 +54,22 @@ class Resolver
      * Resolver constructor.
      *
      * @param Model $model
+     * @param Factory $factory
      */
-    public function __construct(protected Model $model)
+    public function __construct(protected Model $model, Factory $factory)
     {
         $this->table = $this->getModelQuery()->getModel()->getTable();
 
         $this->registorDefaultOperatorHandle();
+
+        $this->setValidationFactory($factory);
     }
 
     /**
      * @param bool $fresh
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getModelQuery(bool $fresh = false): Builder
+    public function getModelQuery(bool $fresh = false) : Builder
     {
         if ($fresh) {
             return $this->model->query();

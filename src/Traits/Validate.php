@@ -47,8 +47,8 @@ trait Validate
      * @throws Error
      */
     public function validate(
-        array|Collection $input, 
-        array $rules = [], 
+        array | Collection $input,
+        array $rules = [],
         array $message = []
     ) {
         if ($input instanceof Collection) {
@@ -57,12 +57,28 @@ trait Validate
 
         $rules     = $rules ?: $this->rules;
         $message   = $message ?: $this->messages;
-        $validator = $this->factory->make(
+        $validator = $this->getValidationFactory()->make(
             $input, $rules, $message, $this->customAttributes
         );
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
+    }
+
+    /**
+     * @return Factory
+     */
+    protected function getValidationFactory(): Factory
+    {
+        return $this->factory;
+    }
+
+    /**
+     * @param Factory $factory
+     */
+    public function setValidationFactory(Factory $factory)
+    {
+        $this->factory = $factory;
     }
 }
