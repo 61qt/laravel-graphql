@@ -36,6 +36,13 @@ abstract class ModelMutation
     protected $ofType;
 
     /**
+     * input在args中的key
+     *
+     * @var string
+     */
+    protected $inputKey = 'input';
+
+    /**
      * 可输入参数
      *
      * @return array
@@ -80,7 +87,7 @@ abstract class ModelMutation
     {
         $resolver = $this->ofType->getResolver();
 
-        return $resolver->{$info->fieldName}($context, $input);
+        return $resolver->{$info->fieldName}($context, $input[$this->inputKey] ?? []);
     }
 
     /**
@@ -105,7 +112,7 @@ abstract class ModelMutation
             );
 
             $mutationArg = array_merge(
-                $this->getDefaultMutationArgs(), ['input' => $inputObject]
+                $this->getDefaultMutationArgs(), [$this->inputKey => $inputObject]
             );
 
             yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve']];
