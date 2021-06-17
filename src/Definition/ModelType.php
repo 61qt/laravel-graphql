@@ -5,9 +5,9 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Resolver;
-use QT\GraphQL\FilterFactory;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
+use QT\GraphQL\Filters\Registrar;
 use QT\GraphQL\Definition\ListType;
 use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -131,11 +131,11 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 获取筛选条件
      *
-     * @return array
+     * @param Registrar $registrar
      */
-    public function getFilters(FilterFactory $factory): array
+    public function registrationFilters(Registrar $registrar)
     {
-        return [];
+
     }
 
     /**
@@ -149,15 +149,11 @@ abstract class ModelType extends ObjectType implements Resolvable
             return $this->filterInput;
         }
 
-        $filters = $this->getFilters(new FilterFactory($this, $this->manager));
-        if (empty($filters)) {
-            return $this->filterInput = Type::nil();
-        }
+        $registrar = new Registrar($this, $this->manager);
 
-        $this->filterInput = new InputObjectType([
-            'name'   => "{$this->name}Filters",
-            'fields' => $filters,
-        ]);
+        $this->registrationFilters($registrar);
+
+        $this->filterInput = $registrar->getFilterInput();
 
         return $this->manager->setType($this->filterInput);
     }
