@@ -38,8 +38,9 @@ class FilterFactory
 
     /**
      * @param ModelType $type
+     * @param GraphQLManager $manager
      */
-    public function __construct(protected ModelType $type)
+    public function __construct(protected ModelType $type, protected GraphQLManager $manager)
     {
     }
 
@@ -88,7 +89,7 @@ class FilterFactory
             }
         }
 
-        return new InputObjectType(compact('name', 'fields'));
+        return $this->manager->setType(new InputObjectType(compact('name', 'fields')));
     }
 
     /**

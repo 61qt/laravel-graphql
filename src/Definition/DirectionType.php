@@ -30,11 +30,11 @@ class DirectionType extends EnumType
     {
         parent::__construct([
             'values'      => [
-                'ASC'  => [
+                'asc'  => [
                     'value'       => 'asc',
                     'description' => '正序',
                 ],
-                'DESC' => [
+                'desc' => [
                     'value'       => 'desc',
                     'description' => '倒序',
                 ],

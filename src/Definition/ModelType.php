@@ -16,7 +16,7 @@ use GraphQL\Type\Definition\InputObjectType;
 
 /**
  * ModelType
- * 
+ *
  * @package QT\GraphQL\Definition
  */
 abstract class ModelType extends ObjectType implements Resolvable
@@ -58,14 +58,14 @@ abstract class ModelType extends ObjectType implements Resolvable
 
     /**
      * 列表页通用筛选条件
-     * 
+     *
      * @var InputObjectType|NilType
      */
     protected $filterInput;
 
     /**
      * 列表页通用排序条件
-     * 
+     *
      * @var InputObjectType|NilType
      */
     protected $sortInput;
@@ -90,18 +90,18 @@ abstract class ModelType extends ObjectType implements Resolvable
      * @param GraphQLManager $manager
      * @param array $options
      */
-    public function __construct(GraphQLManager $manager, array $options = [])
+    public function __construct(protected GraphQLManager $manager, array $options = [])
     {
         parent::__construct(array_merge($options, [
-            'fields' => function () use ($manager) {
-                return $this->getDataStructure($manager);
+            'fields' => function () {
+                return $this->getDataStructure($this->manager);
             },
         ]));
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param GraphQLManager $manager
      * @return array
      */
@@ -143,21 +143,23 @@ abstract class ModelType extends ObjectType implements Resolvable
      *
      * @return InputObjectType|NilType
      */
-    public function getFiltersInput(): InputObjectType|NilType
+    public function getFiltersInput(): InputObjectType | NilType
     {
         if (!empty($this->filterInput)) {
             return $this->filterInput;
         }
 
-        $filters = $this->getFilters(new FilterFactory($this));
+        $filters = $this->getFilters(new FilterFactory($this, $this->manager));
         if (empty($filters)) {
             return $this->filterInput = Type::nil();
         }
 
-        return $this->filterInput = new InputObjectType([
+        $this->filterInput = new InputObjectType([
             'name'   => "{$this->name}Filters",
             'fields' => $filters,
         ]);
+
+        return $this->manager->setType($this->filterInput);
     }
 
     /**
@@ -165,7 +167,7 @@ abstract class ModelType extends ObjectType implements Resolvable
      *
      * @return InputObjectType|NilType
      */
-    public function getSortFields(): InputObjectType|NilType
+    public function getSortFields(): InputObjectType | NilType
     {
         if (!empty($this->sortInput)) {
             return $this->sortInput;
@@ -180,10 +182,12 @@ abstract class ModelType extends ObjectType implements Resolvable
             $sortFields[$field] = ['type' => Type::direction()];
         }
 
-        return $this->sortInput = new InputObjectType([
+        $this->sortInput = new InputObjectType([
             'name'   => "{$this->name}SortFields",
             'fields' => $sortFields,
         ]);
+
+        return $this->manager->setType($this->sortInput);
     }
 
     /**
