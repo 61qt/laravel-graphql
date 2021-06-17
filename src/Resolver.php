@@ -184,18 +184,11 @@ class Resolver
 
         $this->beforeUpdate($context, $id);
 
-        $input = $this->checkAndFormatInput($input);
-
-        if ($input instanceof Collection) {
-            // 保证输入类型一定为数组
-            $input = $input->toArray();
-        }
-
         $this->validate($input, $this->rules, $this->messages);
 
         $model = $this->getModelQuery()
             ->findOrFail($id)
-            ->fill($input);
+            ->fill($this->checkAndFormatInput($input));
 
         return DB::transaction(function () use ($model) {
             $model->save();
@@ -220,14 +213,9 @@ class Resolver
     {
         $this->beforeStore($context);
 
-        $input = $this->checkAndFormatInput($input);
-
-        if ($input instanceof Collection) {
-            // 保证输入类型一定为数组
-            $input = $input->toArray();
-        }
-
         $this->validate($input, $this->rules, $this->messages);
+
+        $input = $this->checkAndFormatInput($input);
 
         return DB::transaction(function () use ($input) {
             $model = $this->model->create($input);
@@ -242,9 +230,9 @@ class Resolver
 
     /**
      * @param array $input
-     * @return array|Collection
+     * @return array
      */
-    protected function checkAndFormatInput(array $input = []): array | Collection
+    protected function checkAndFormatInput(array $input = []): array
     {
         return $input;
     }
