@@ -81,8 +81,8 @@ trait SqlBuilder
         $this->buildSelect($query, $selection);
         $this->buildFilter($query, $filters);
 
-        foreach ($orderBy as $colunm => $direction) {
-            $this->buildSort($query, $colunm, $direction);
+        foreach ($orderBy as $column => $direction) {
+            $this->buildSort($query, $column, $direction);
         }
 
         return $query;
@@ -103,18 +103,18 @@ trait SqlBuilder
             $selection = [$query->getModel()->getKeyName() => true];
         }
 
-        return $this->selectFieldAndWithTable($query, $selection, $this->maxDepth);
+        $this->selectFieldAndWithTable($query, $selection, $this->maxDepth);
+
+        return $query;
     }
 
     /**
      * @param Builder|Relation $query
      * @param array            $selection
-     * @param bool             $detail
      * @param int              $depth
-     * @return Builder
      * @throws Error
      */
-    protected function selectFieldAndWithTable(Builder | Relation $query, array $selection, int $depth): Builder | Relation
+    protected function selectFieldAndWithTable(Builder | Relation $query, array $selection, int $depth)
     {
         // 深度达到极限,不在进行关联
         if ($depth === 0) {
@@ -148,7 +148,7 @@ trait SqlBuilder
             }]);
         }
 
-        return $query->select($fields);
+        $query->select($fields);
     }
 
     /**
@@ -219,9 +219,7 @@ trait SqlBuilder
 
         $column = $this->formatField($column, $query->getModel()->getTable());
 
-        call_user_func(
-            $this->operatorHandles[$operator], $query, $column, $value
-        );
+        call_user_func($this->operatorHandles[$operator], $query, $column, $value);
     }
 
     /**

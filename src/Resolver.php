@@ -69,7 +69,7 @@ class Resolver
      * @param bool $fresh
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getModelQuery(bool $fresh = false) : Builder
+    public function getModelQuery(bool $fresh = false): Builder
     {
         if ($fresh) {
             return $this->model->query();
@@ -97,11 +97,8 @@ class Resolver
 
         $this->beforeShow($context, $id);
 
-        $query = $this->buildSelect(
-            $this->getModelQuery(), $selection, true
-        );
-
-        $model = $query->findOrFail($id);
+        $model = $this->buildSelect($this->getModelQuery(), $selection)
+            ->findOrFail($id);
 
         $this->afterShow($model);
 
@@ -165,9 +162,7 @@ class Resolver
      */
     public function generateSql(array $selection, array $filters, array $orderBy): Builder
     {
-        return $this->buildSql(
-            $this->getModelQuery(), $selection, $filters, $orderBy
-        );
+        return $this->buildSql($this->getModelQuery(), $selection, $filters, $orderBy);
     }
 
     /**

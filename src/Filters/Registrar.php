@@ -94,7 +94,7 @@ class Registrar
             if (isset(static::$operatorsMaps[$operator])) {
                 $operator = static::$operatorsMaps[$operator];
             }
-    
+
             $fields[$operator] = Factory::{$operator}($name, $type);
         }
 
