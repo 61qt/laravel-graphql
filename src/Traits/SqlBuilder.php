@@ -360,7 +360,7 @@ trait SqlBuilder
     /**
      * 初始化默认的filter operator
      */
-    protected function registorDefaultOperatorHandle()
+    protected function registerDefaultOperatorHandle()
     {
         foreach ($this->operatorsMaps as $name => $operator) {
             $callback = function ($query, $column, $value) use ($operator) {

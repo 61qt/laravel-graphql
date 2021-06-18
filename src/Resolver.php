@@ -60,7 +60,7 @@ class Resolver
     {
         $this->table = $this->getModelQuery()->getModel()->getTable();
 
-        $this->registorDefaultOperatorHandle();
+        $this->registerDefaultOperatorHandle();
 
         $this->setValidationFactory($factory);
     }
