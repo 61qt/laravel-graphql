@@ -100,7 +100,7 @@ abstract class ModelMutation
     {
         $globalArgs = $this->args();
 
-        foreach ($$this->getMutationArgs() as $mutation => $args) {
+        foreach ($this->getMutationArgs() as $mutation => $args) {
             $name   = "{$mutation}Input";
             $fields = !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
 
