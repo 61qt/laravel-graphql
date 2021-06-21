@@ -54,7 +54,7 @@ abstract class ModelMutation
      *
      * @return array
      */
-    abstract public function getMutationList(): array;
+    abstract public function getMutationArgs(): array;
 
     /**
      * Constructor
@@ -98,14 +98,11 @@ abstract class ModelMutation
      */
     public function getMutationConfig()
     {
-        $globalArgs   = $this->args();
-        $mutationArgs = $this->getMutationArgs();
+        $globalArgs = $this->args();
 
-        foreach ($this->getMutationList() as $mutation) {
+        foreach ($$this->getMutationArgs() as $mutation => $args) {
             $name   = "{$mutation}Input";
-            $fields = isset($mutationArgs[$mutation])
-                ? Arr::only($globalArgs, $mutationArgs[$mutation])
-                : $globalArgs;
+            $fields = !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
 
             $inputObject = $this->manager->setType(
                 new InputObjectType(compact('name', 'fields'))
@@ -117,16 +114,6 @@ abstract class ModelMutation
 
             yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve']];
         }
-    }
-
-    /**
-     * 方法对应可输入参数
-     *
-     * @return array
-     */
-    public function getMutationArgs()
-    {
-        return [];
     }
 
     /**
