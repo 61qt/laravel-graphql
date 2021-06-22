@@ -13,6 +13,7 @@ use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Definition\PaginationType;
 use GraphQL\Type\Definition\InputObjectType;
+use Illuminate\Support\Arr;
 
 /**
  * ModelType
@@ -212,11 +213,17 @@ abstract class ModelType extends ObjectType implements Resolvable
      */
     public function formatSelection(array $selection): array
     {
-        $selection = array_merge($selection, $this->mustSelection);
+        foreach ($this->mustSelection as $field => $val) {
+            if (is_int($field) && is_string($val)) {
+                $field = $val;
+                $val   = true;
+            }
 
-        // TODO 生成Schema时,就从列表页的fields中剥离
+            Arr::set($selection, $field, $val);
+        }
+
         foreach ($this->detailedFields as $field) {
-            unset($selection[$field]);
+            Arr::forget($selection, $field);
         }
 
         return $selection;
