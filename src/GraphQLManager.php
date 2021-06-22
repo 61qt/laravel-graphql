@@ -42,6 +42,10 @@ class GraphQLManager
      */
     public function getType(string $name): Type
     {
+        if (method_exists(GlobalType::class, $name)) {
+            return GlobalType::{$name}();
+        }
+
         return $this->find($name, static::TYPE);
     }
 
@@ -161,10 +165,6 @@ class GraphQLManager
      */
     public function __call($name, $arguments)
     {
-        if (method_exists(GlobalType::class, $name)) {
-            return GlobalType::{$name}(...$arguments);
-        }
-
         return $this->getType($name);
     }
 }
