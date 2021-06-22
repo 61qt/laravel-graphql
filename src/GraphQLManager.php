@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 use QT\GraphQL\Definition\ModelMutation;
 use QT\GraphQL\Exceptions\GraphQLException;
+use QT\GraphQL\Definition\Type as GlobalType;
 
 /**
  * GraphQLManager
@@ -160,8 +161,8 @@ class GraphQLManager
      */
     public function __call($name, $arguments)
     {
-        if (method_exists(Type::class, $name)) {
-            return Type::{$name}(...$arguments);
+        if (method_exists(GlobalType::class, $name)) {
+            return GlobalType::{$name}(...$arguments);
         }
 
         return $this->getType($name);
