@@ -79,11 +79,66 @@ trait SqlBuilder
         array $orderBy = []
     ): Builder {
         $this->buildSelect($query, $selection);
-        $this->buildFilter($query, $filters);
+        $this->buildFilter($query, $this->prepareJoin($query, $filters));
 
         foreach ($orderBy as $column => $direction) {
             $this->buildSort($query, $column, $direction);
         }
+
+        return $query;
+    }
+
+    /**
+     * 预处理联表查询的条件
+     *
+     * @param Builder $query
+     * @param array $input
+     * @return array
+     */
+    protected function prepareJoin(Builder $query, array $input)
+    {
+        $tables = array_intersect_key($input, $this->joinTable);
+
+        foreach ($tables as $table => $columns) {
+            // users: {id: {eq: 1}}  => users.id: {eq: q}
+            // users: {id: desc}  => users.id: desc
+            unset($input[$table]);
+
+            foreach ($columns as $column => $val) {
+                $input["{$table}.{$column}"] = $val;
+            }
+
+            $this->buildJoin($query, $table);
+        }
+
+        return $input;
+    }
+
+    /**
+     * 生成联表查询
+     *
+     * @param Builder $query
+     * @param string $table
+     * @return Builder
+     */
+    public function buildJoin(Builder $query, string $table): Builder
+    {
+        if (empty($this->joinTable[$table])) {
+            return $query;
+        }
+
+        $method   = 'join';
+        $relation = array_values($this->joinTable[$table]);
+
+        if (count($relation) > 3) {
+            [$first, $operator, $second, $method] = $relation;
+        } else {
+            [$first, $operator, $second] = $relation;
+        }
+
+        $query->{$method}($table, "{$query->getQuery()->from}.{$first}", $operator, "{$table}.{$second}");
+        // 只关联一次
+        unset($this->joinTable[$table]);
 
         return $query;
     }
@@ -164,7 +219,7 @@ trait SqlBuilder
             return $baseQuery;
         }
 
-        return $baseQuery->where(function (Builder $query) use ($baseQuery, $filters) {
+        return $baseQuery->where(function (Builder $query) use ($filters) {
             foreach ($filters as $column => $operators) {
                 foreach ($operators as $operator => $value) {
                     if (
@@ -172,13 +227,6 @@ trait SqlBuilder
                         empty($this->operatorHandles[$operator])
                     ) {
                         continue;
-                    }
-
-                    // 检查是否需要进行join查询
-                    if (false !== strpos($column, '.')) {
-                        // where回调传入的query对象为新建的Builder对象
-                        // 在其上进行join表无法生效,故使用原Builder对象进行join表
-                        $this->buildJoin($baseQuery, $column);
                     }
 
                     $this->buildCondition($query, $column, $operator, $value);
@@ -238,35 +286,6 @@ trait SqlBuilder
     }
 
     /**
-     * 根据filter进行join
-     *
-     * @param $query
-     * @param $filters
-     * @return Builder
-     */
-    public function buildJoin(Builder $query, $column): Builder
-    {
-        list($table) = explode('.', $column, 2);
-
-        if (isset($this->joinTable[$table])) {
-            $method   = 'join';
-            $relation = array_values($this->joinTable[$table]);
-
-            if (count($relation) > 3) {
-                [$first, $operator, $second, $method] = $relation;
-            } else {
-                [$first, $operator, $second] = $relation;
-            }
-
-            $query->{$method}($table, "{$query->getQuery()->from}.{$first}", $operator, "{$table}.{$second}");
-            // 只关联一次
-            unset($this->joinTable[$table]);
-        }
-
-        return $query;
-    }
-
-    /**
      * 构造排序方式
      *
      * @param Builder    $query
@@ -290,7 +309,7 @@ trait SqlBuilder
         $orderBy = "{$table}.{$column}";
         // 排序时支持链表
         if ($table !== $this->table) {
-            $query = $this->buildJoin($query, $orderBy);
+            $query = $this->buildJoin($query, $table);
         }
 
         $columns = $this->getColumns($query->toBase());

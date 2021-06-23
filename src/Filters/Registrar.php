@@ -4,12 +4,14 @@ declare (strict_types = 1);
 
 namespace QT\GraphQL\Filters;
 
+use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Definition\NilType;
 use QT\GraphQL\Definition\ModelType;
-use QT\GraphQL\Definition\Type as ExtraType;
 use GraphQL\Type\Definition\InputObjectType;
+use QT\GraphQL\Definition\Type as GlobalType;
 
 /**
  * 筛选类型注册器
@@ -39,11 +41,18 @@ class Registrar
     ];
 
     /**
-     * 允许筛选的字段
+     * 冗余可用的筛选条件,在实例化时生成
      *
      * @var array
      */
     protected $filters = [];
+
+    /**
+     * 允许筛选的字段
+     *
+     * @var array
+     */
+    protected $fields = [];
 
     /**
      * @param ModelType $type
@@ -56,7 +65,7 @@ class Registrar
     }
 
     /**
-     * 创建一组int类型的筛选条件
+     * 设置一组int类型的筛选条件
      *
      * @param string $name
      * @param array $operators
@@ -64,11 +73,11 @@ class Registrar
      */
     public function int(string $name, array $operators): self
     {
-        return $this->create($name, Type::int(), $operators);
+        return $this->set($name, Type::int(), $operators);
     }
 
     /**
-     * 创建一组string类型的筛选条件
+     * 设置一组string类型的筛选条件
      *
      * @param string $name
      * @param array $operators
@@ -76,7 +85,49 @@ class Registrar
      */
     public function string(string $name, array $operators): self
     {
-        return $this->create($name, Type::string(), $operators);
+        return $this->set($name, Type::string(), $operators);
+    }
+
+    /**
+     * 设置筛选条件
+     *
+     * @param string $name
+     * @param Type $type
+     * @param array $operators
+     * @return self
+     */
+    public function set(string $name, Type $type, array $operators)
+    {
+        $this->filters[$name] = [$type, $operators];
+
+        Arr::set($this->fields, $name, true);
+
+        return $this;
+    }
+
+    /**
+     * @param $fields
+     * @throws \App\Exceptions\Error
+     */
+    public function buildFields(array $fields, $table = null)
+    {
+        $results = [];
+        foreach ($fields as $field => $child) {
+            if (is_array($child)) {
+                $results[$field] = $this->createJoin($field, $child);
+                continue;
+            }
+
+            if ($table === null) {
+                [$type, $operators] = $this->filters[$field];
+            } else {
+                [$type, $operators] = $this->filters["{$table}.{$field}"];
+            }
+
+            $results[$field] = $this->create("{$table}_{$field}", $type, $operators);
+        }
+
+        return $results;
     }
 
     /**
@@ -87,7 +138,23 @@ class Registrar
      * @param array $operators
      * @return self
      */
-    public function create(string $name, Type $type, array $operators): self
+    protected function createJoin($table, $fields)
+    {
+        return $this->manager->setType(new InputObjectType([
+            'fields' => $this->buildFields($fields, $table),
+            'name'   => $this->formatFilterName($table),
+        ]));
+    }
+
+    /**
+     * 创建一组指定类型的筛选条件
+     *
+     * @param string $name
+     * @param Type $type
+     * @param array $operators
+     * @return self
+     */
+    protected function create(string $name, Type $type, array $operators)
     {
         $fields = [];
         foreach ($operators as $operator) {
@@ -98,14 +165,10 @@ class Registrar
             $fields[$operator] = Factory::{$operator}($name, $type);
         }
 
-        $filter = new InputObjectType([
+        return $this->manager->setType(new InputObjectType([
             'fields' => $fields,
-            'name'   => $this->formatFilterName($name, $type),
-        ]);
-
-        $this->filters[$name] = $this->manager->setType($filter);
-
-        return $this;
+            'name'   => $this->formatFilterName($name, $type->name),
+        ]));
     }
 
     /**
@@ -116,12 +179,14 @@ class Registrar
     public function getFilterInput(): InputObjectType | NilType
     {
         if (empty($this->filters)) {
-            return ExtraType::nil();
+            return GlobalType::nil();
         }
 
         return new InputObjectType([
             'name'   => "{$this->modelType->name}Filters",
-            'fields' => $this->filters,
+            'fields' => function () {
+                return $this->buildFields($this->fields);
+            },
         ]);
     }
 
@@ -132,8 +197,8 @@ class Registrar
      * @param array $operators
      * @return string
      */
-    protected function formatFilterName(string $name, Type $type): string
+    protected function formatFilterName(string $name, ?string $type = null): string
     {
-        return "{$this->modelType->name}_{$name}_{$type->name}_filter";
+        return Str::camel("{$this->modelType->name}_{$name}_{$type}_filter");
     }
 }
