@@ -128,7 +128,7 @@ class Resolver
      * @return \Illuminate\Database\Eloquent\Collection
      * @throws Error
      */
-    public function take(Context $context, ListOption $option, array $selection = []): Collection
+    public function list(Context $context, ListOption $option, array $selection = []): Collection
     {
         $this->beforeList($context);
 

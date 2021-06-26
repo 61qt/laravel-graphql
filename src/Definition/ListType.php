@@ -87,7 +87,7 @@ class ListType extends ListOfType implements Resolvable
             $info->getFieldSelection($context->getValue('max_depth', 5))
         );
 
-        return $this->ofType->getResolver()->take(
+        return $this->ofType->getResolver()->list(
             $context, new ListOption($args), $selection
         );
     }
