@@ -58,7 +58,7 @@ class Resolver
      */
     public function __construct(protected Model $model, Factory $factory)
     {
-        $this->table = $this->getModelQuery()->getModel()->getTable();
+        $this->table = $model->getTable();
 
         $this->registerDefaultOperatorHandle();
 
@@ -72,14 +72,14 @@ class Resolver
     public function getModelQuery(bool $fresh = false): Builder
     {
         if ($fresh) {
-            return $this->model->query();
+            return $this->model->newQuery();
         }
 
         if (!empty($this->query)) {
             return $this->query;
         }
 
-        return $this->query = $this->model->query();
+        return $this->query = $this->model->newQuery();
     }
 
     /**
