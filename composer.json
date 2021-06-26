@@ -11,6 +11,10 @@
         "illuminate/validation": "^8.0.0",
         "illuminate/pagination": "^8.0.0"
     },
+    "require-dev": {
+        "mockery/mockery": "^1.4.2",
+        "phpunit/phpunit": "^8.5.8|^9.3.3"
+    },
     "authors": [
         {
             "name": "rayson",
@@ -22,12 +26,13 @@
         }
     ],
     "autoload": {
-        "classmap": [
-        ],
         "psr-4": {
             "QT\\GraphQL\\": "src/"
-        },
-        "files": [
-        ]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "QT\\Tests\\GraphQL\\": "tests/GraphQL"
+        }
     }
 }
