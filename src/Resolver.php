@@ -83,6 +83,21 @@ class Resolver
     }
 
     /**
+     * 释放当前使用的builder并返回
+     * 
+     * @param bool $fresh
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function getFreedModelQuery(): Builder
+    {
+        $query = $this->getModelQuery();
+
+        $this->query = null;
+
+        return $query;
+    }
+
+    /**
      * 获取单条记录
      *
      * @param Context $context
@@ -97,8 +112,7 @@ class Resolver
 
         $this->beforeShow($context, $id);
 
-        $model = $this->buildSelect($this->getModelQuery(), $selection)
-            ->findOrFail($id);
+        $model = $this->generateSql($selection)->findOrFail($id);
 
         $this->afterShow($model);
 
@@ -160,9 +174,10 @@ class Resolver
      * @param array $orderBy
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function generateSql(array $selection, array $filters, array $orderBy): Builder
+    public function generateSql(array $selection, array $filters = [], array $orderBy = []): Builder
     {
-        return $this->buildSql($this->getModelQuery(), $selection, $filters, $orderBy);
+        // 使用释放之后的builder,保证CURD直接不会相互影响
+        return $this->buildSql($this->getFreedModelQuery(), $selection, $filters, $orderBy);
     }
 
     /**
@@ -181,7 +196,7 @@ class Resolver
 
         $this->validate($input, $this->rules, $this->messages);
 
-        $model = $this->getModelQuery()
+        $model = $this->getFreedModelQuery()
             ->findOrFail($id)
             ->fill($this->checkAndFormatInput($input));
 
@@ -213,7 +228,7 @@ class Resolver
         $input = $this->checkAndFormatInput($input);
 
         return DB::transaction(function () use ($input) {
-            $model = $this->model->create($input);
+            $model = $this->model->newQuery()->create($input);
 
             $this->buildRelation($model);
 
@@ -256,7 +271,7 @@ class Resolver
         $this->beforeDestroy($context, $id);
 
         return DB::transaction(function () use ($id) {
-            $model = $this->getModelQuery()->findOrFail($id);
+            $model = $this->getFreedModelQuery()->findOrFail($id);
 
             if (!$model->delete()) {
                 throw new RuntimeException('删除失败');
@@ -278,7 +293,7 @@ class Resolver
             $filters = $input['filters'];
         }
 
-        $query = $this->buildFilter($this->getModelQuery(true), $filters);
+        $query = $this->buildFilter($this->getFreedModelQuery(), $filters);
 
         return DB::transaction(function () use ($query) {
             $this->beforeBatchDestroy($query->get());
