@@ -21,6 +21,12 @@ interface Context
 
     /**
      * @param string|int $key
+     * @param mixed $value
+     */
+    public function setVale(string $key, mixed $value);
+
+    /**
+     * @param string|int $key
      * @param mixed $default
      * @return mixed
      */
