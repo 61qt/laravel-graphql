@@ -12,7 +12,7 @@ use GraphQL\Type\Definition\ObjectType as BaseObjectType;
 
 /**
  * ObjectType
- * 
+ *
  * @package QT\GraphQL\Definition
  */
 class ObjectType extends BaseObjectType
@@ -32,7 +32,7 @@ class ObjectType extends BaseObjectType
 
     /**
      * 获取字段处理回调
-     * 
+     *
      * @return callable
      */
     public function getResolveFieldFn(): callable
@@ -45,7 +45,12 @@ class ObjectType extends BaseObjectType
             }
 
             if ($node instanceof Model) {
-                $node = $node->toArray();
+                // 检查model是否加载了该字段
+                if ($node->relationLoaded($info->fieldName)) {
+                    return $node->getRelation($info->fieldName);
+                }
+
+                return $node->getAttributeValue($info->fieldName);
             }
 
             if (is_array($node)) {
@@ -55,7 +60,7 @@ class ObjectType extends BaseObjectType
             if (is_object($node)) {
                 $value = $node->{$info->fieldName} ?? null;
 
-                if (!is_null($value)) {
+                if ($value !== null) {
                     return $value;
                 }
 
