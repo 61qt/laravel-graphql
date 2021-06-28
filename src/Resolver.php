@@ -181,6 +181,34 @@ class Resolver
     }
 
     /**
+     * 新建记录
+     *
+     * @param Context $context
+     * @param array $input
+     * @return Model
+     * @throws Error
+     */
+    public function store(Context $context, array $input = []): Model
+    {
+        $this->beforeStore($context);
+
+        $this->validate($input, $this->rules, $this->messages);
+
+        $model = $this->model->newInstance()
+            ->fill($this->checkAndFormatInput($input));
+
+        return DB::transaction(function () use ($model) {
+            $model->save();
+
+            $this->buildRelation($model);
+
+            $this->afterStore($model);
+
+            return $model;
+        });
+    }
+
+    /**
      * 更新一条记录
      *
      * @param Context $context
@@ -206,33 +234,6 @@ class Resolver
             $this->buildRelation($model);
 
             $this->afterUpdate($model);
-
-            return $model;
-        });
-    }
-
-    /**
-     * 新建记录
-     *
-     * @param Context $context
-     * @param array $input
-     * @return Model
-     * @throws Error
-     */
-    public function store(Context $context, array $input = []): Model
-    {
-        $this->beforeStore($context);
-
-        $this->validate($input, $this->rules, $this->messages);
-
-        $input = $this->checkAndFormatInput($input);
-
-        return DB::transaction(function () use ($input) {
-            $model = $this->model->newQuery()->create($input);
-
-            $this->buildRelation($model);
-
-            $this->afterStore($model);
 
             return $model;
         });
