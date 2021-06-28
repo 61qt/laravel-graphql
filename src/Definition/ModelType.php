@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Resolver;
+use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Filters\Registrar;
@@ -13,7 +14,6 @@ use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Definition\PaginationType;
 use GraphQL\Type\Definition\InputObjectType;
-use Illuminate\Support\Arr;
 
 /**
  * ModelType
