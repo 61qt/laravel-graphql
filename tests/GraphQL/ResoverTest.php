@@ -223,6 +223,20 @@ class ResolverTest extends TestCase
         $this->createResolver($model)->update(new GraphQLContext, ['id' => 1, 'name' => 'bar']);
     }
 
+    public function testDestroy()
+    {
+        $model = new EloquentModelStub;
+        $this->addMockConnection($model);
+        $connection = $model->getConnection();
+        $connection->shouldReceive('delete')->andReturn(1);
+        $connection->shouldReceive('select')->andReturn(['id' => 1, 'name' => 'foo']);
+
+        $model = $this->createResolver($model)->destroy(new GraphQLContext, ['id' => 1]);
+
+        $this->assertSame(null, $model->id);
+        $this->assertFalse($model->exists);
+    }
+
     public function testGetKeyReturnsKeyValue()
     {
         $model    = new EloquentModelStub;
