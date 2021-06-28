@@ -74,14 +74,14 @@ abstract class ModelType extends ObjectType implements Resolvable
     /**
      * 获取model数据结构
      *
-     * @return string
+     * @return array
      */
     abstract public function getDataStructure(GraphQLManager $manager): array;
 
     /**
      * 获取逻辑层
      *
-     * @return string
+     * @return Resolver
      */
     abstract public function getResolver(): Resolver;
 
