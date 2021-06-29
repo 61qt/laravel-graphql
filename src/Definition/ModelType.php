@@ -13,6 +13,7 @@ use QT\GraphQL\Definition\ListType;
 use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Definition\PaginationType;
+use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputObjectType;
 
 /**
@@ -89,15 +90,25 @@ abstract class ModelType extends ObjectType implements Resolvable
      * Constructor
      *
      * @param GraphQLManager $manager
-     * @param array $options
+     * @param array $config
      */
-    public function __construct(protected GraphQLManager $manager, array $options = [])
+    public function __construct(protected GraphQLManager $manager, array $config = [])
     {
-        parent::__construct(array_merge($options, [
+        parent::__construct(array_merge($config, [
             'fields' => function () {
-                return $this->getDataStructure($this->manager);
-            },
+                return $this->getModelFields();
+            }
         ]));
+    }
+
+    /**
+     * 获取model可用字段,允许继承细分可用字段
+     *
+     * @return array
+     */
+    protected function getModelFields(): array
+    {
+        return $this->getDataStructure($this->manager);
     }
 
     /**
