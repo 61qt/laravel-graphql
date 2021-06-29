@@ -24,12 +24,12 @@ class DirectionType extends EnumType
     public $description = 'Sql排序关键字';
 
     /**
-     * @param array $config
+     * 初始化排序可以枚举值
      */
     public function __construct()
     {
         parent::__construct([
-            'values'      => [
+            'values' => [
                 'asc'  => [
                     'value'       => 'asc',
                     'description' => '正序',
