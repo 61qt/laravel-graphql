@@ -254,7 +254,7 @@ class Resolver
      * @param $model
      * @return mixed
      */
-    protected function buildRelation(Model $model): Model
+    protected function buildRelation(Model $model, array $input = []): Model
     {
         return $model;
     }
