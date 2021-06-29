@@ -13,7 +13,6 @@ use QT\GraphQL\Definition\ListType;
 use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Definition\PaginationType;
-use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\InputObjectType;
 
 /**
