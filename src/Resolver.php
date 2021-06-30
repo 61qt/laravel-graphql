@@ -84,7 +84,7 @@ class Resolver
 
     /**
      * 释放当前使用的builder并返回
-     * 
+     *
      * @param bool $fresh
      * @return \Illuminate\Database\Eloquent\Builder
      */
@@ -128,7 +128,7 @@ class Resolver
      * @return \Illuminate\Database\Eloquent\Collection
      * @throws Error
      */
-    public function list(Context $context, ListOption $option, array $selection = []): Collection
+    public function cursor(Context $context, ListOption $option, array $selection = []): Collection
     {
         $this->beforeList($context);
 
@@ -197,10 +197,10 @@ class Resolver
         $model = $this->model->newInstance()
             ->fill($this->checkAndFormatInput($input));
 
-        return DB::transaction(function () use ($model) {
+        return DB::transaction(function () use ($model, $input) {
             $model->save();
 
-            $this->buildRelation($model);
+            $this->buildRelation($model, $input);
 
             $this->afterStore($model);
 
@@ -228,10 +228,10 @@ class Resolver
             ->findOrFail($id)
             ->fill($this->checkAndFormatInput($input));
 
-        return DB::transaction(function () use ($model) {
+        return DB::transaction(function () use ($model, $input) {
             $model->save();
 
-            $this->buildRelation($model);
+            $this->buildRelation($model, $input);
 
             $this->afterUpdate($model);
 
