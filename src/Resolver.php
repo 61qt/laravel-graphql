@@ -194,8 +194,8 @@ class Resolver
 
         $this->validate($input, $this->rules, $this->messages);
 
-        $model = $this->model->newInstance()
-            ->fill($this->checkAndFormatInput($input));
+        $input = $this->checkAndFormatInput($input);
+        $model = $this->model->newInstance()->fill($input);
 
         return DB::transaction(function () use ($model, $input) {
             $model->save();
@@ -224,9 +224,8 @@ class Resolver
 
         $this->validate($input, $this->rules, $this->messages);
 
-        $model = $this->getFreedModelQuery()
-            ->findOrFail($id)
-            ->fill($this->checkAndFormatInput($input));
+        $input = $this->checkAndFormatInput($input);
+        $model = $this->getFreedModelQuery()->findOrFail($id)->fill($input);
 
         return DB::transaction(function () use ($model, $input) {
             $model->save();
