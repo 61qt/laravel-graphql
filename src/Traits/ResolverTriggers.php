@@ -55,4 +55,9 @@ trait ResolverTriggers
     {
 
     }
+
+    protected function beforeExport(Context $context)
+    {
+        $this->beforeList($context);
+    }
 }

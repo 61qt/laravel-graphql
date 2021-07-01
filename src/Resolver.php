@@ -4,6 +4,7 @@ declare (strict_types = 1);
 
 namespace QT\GraphQL;
 
+use Generator;
 use RuntimeException;
 use Illuminate\Support\Arr;
 use QT\GraphQL\Contracts\Context;
@@ -11,6 +12,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use QT\GraphQL\Options\PageOption;
 use QT\GraphQL\Options\ChunkOption;
+use QT\GraphQL\Options\ExportOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Validation\Factory;
@@ -164,6 +166,31 @@ class Resolver
         $this->afterList($results);
 
         return $results;
+    }
+
+    /**
+     * 导出列表数据
+     *
+     * @param Context $context
+     * @param ExportOption $option
+     * @param array $selection
+     * @return Generator
+     * @throws Error
+     */
+    public function export(Context $context, ExportOption $option, array $selection = []): Generator
+    {
+        $this->beforeExport($context);
+
+        $offset = $option->offset;
+        $query  = $this->generateSql($selection, $option->filters);
+
+        do {
+            $models = (clone $query)->forPage(++$offset, $option->limit)->get();
+
+            foreach ($models as $model) {
+                yield $model;
+            }
+        } while ($models->count() === $option->limit);
     }
 
     /**
