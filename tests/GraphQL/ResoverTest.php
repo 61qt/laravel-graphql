@@ -12,8 +12,8 @@ use PHPUnit\Framework\TestCase;
 use QT\GraphQL\Contracts\Context;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Factory;
-use QT\GraphQL\Options\ListOption;
 use QT\GraphQL\Options\PageOption;
+use QT\GraphQL\Options\ChunkOption;
 use Illuminate\Database\Connection;
 use Illuminate\Translation\Translator;
 use Illuminate\Database\Eloquent\Model;
@@ -112,7 +112,7 @@ class ResolverTest extends TestCase
         $this->createResolver($model)->show(new GraphQLContext, [$model->getKeyName() => 1], ['id' => true]);
     }
 
-    public function testList()
+    public function testChunk()
     {
         $model = new EloquentModelStub;
         $this->addMockConnection($model);
@@ -122,13 +122,13 @@ class ResolverTest extends TestCase
             return [['id' => 999, 'name' => 'foo']];
         });
 
-        $option = new ListOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'take' => 100, 'skip' => 100]);
-        $result = $this->createResolver($model)->list(new GraphQLContext, $option, ['id' => true, 'name' => true]);
+        $option = new ChunkOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'take' => 100, 'skip' => 100]);
+        $result = $this->createResolver($model)->chunk(new GraphQLContext, $option, ['id' => true, 'name' => true]);
 
         $this->assertSame([['id' => 999, 'name' => 'foo']], $result->toArray());
     }
 
-    public function testListAll()
+    public function testGetAllChunk()
     {
         $model = new EloquentModelStub;
         $this->addMockConnection($model);
@@ -138,8 +138,8 @@ class ResolverTest extends TestCase
             return [['id' => 999, 'name' => 'foo']];
         });
 
-        $option = new ListOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'all' => true]);
-        $result = $this->createResolver($model)->list(new GraphQLContext, $option, ['id' => true, 'name' => true]);
+        $option = new ChunkOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'all' => true]);
+        $result = $this->createResolver($model)->chunk(new GraphQLContext, $option, ['id' => true, 'name' => true]);
 
         $this->assertSame([['id' => 999, 'name' => 'foo']], $result->toArray());
     }
