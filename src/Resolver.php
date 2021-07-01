@@ -9,8 +9,8 @@ use Illuminate\Support\Arr;
 use QT\GraphQL\Contracts\Context;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use QT\GraphQL\Options\ListOption;
 use QT\GraphQL\Options\PageOption;
+use QT\GraphQL\Options\ChunkOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Validation\Factory;
@@ -123,12 +123,12 @@ class Resolver
      * 获取指定范围的数据
      *
      * @param Context $context
-     * @param ListOption $option
+     * @param ChunkOption $option
      * @param array $selection
      * @return \Illuminate\Database\Eloquent\Collection
      * @throws Error
      */
-    public function cursor(Context $context, ListOption $option, array $selection = []): Collection
+    public function chunk(Context $context, ChunkOption $option, array $selection = []): Collection
     {
         $this->beforeList($context);
 

@@ -6,7 +6,7 @@ namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
-use QT\GraphQL\Options\ListOption;
+use QT\GraphQL\Options\ChunkOption;
 use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -87,8 +87,8 @@ class ListType extends ListOfType implements Resolvable
             $info->getFieldSelection($context->getValue('max_depth', 5))
         );
 
-        return $this->ofType->getResolver()->cursor(
-            $context, new ListOption($args), $selection
+        return $this->ofType->getResolver()->chunk(
+            $context, new ChunkOption($args), $selection
         );
     }
 }
