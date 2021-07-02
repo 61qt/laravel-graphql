@@ -9,18 +9,8 @@ namespace QT\GraphQL\Options;
  *
  * @package QT\GraphQL\Options
  */
-class PageOption
+class PageOption extends JsonOption
 {
-    /**
-     * @var array
-     */
-    public $filters = [];
-
-    /**
-     * @var array
-     */
-    public $orderBy = [];
-
     /**
      * @var int
      */
@@ -36,12 +26,12 @@ class PageOption
      */
     public function __construct(array $args = [])
     {
-        // format的逻辑放在option中处理,resolver只需要依赖option即可
-        // 给未来restful使用resolver留出自定义空间
-        foreach (['filters', 'orderBy', 'take', 'page'] as $key) {
+        foreach (['take', 'page'] as $key) {
             if (isset($args[$key])) {
                 $this->{$key} = $args[$key];
             }
         }
+
+        parent::__construct($args);
     }
 }

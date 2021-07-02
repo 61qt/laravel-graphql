@@ -5,26 +5,27 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Options;
 
 /**
- * ExportOption
+ * JsonOption
  *
  * @package QT\GraphQL\Options
  */
-class ExportOption extends JsonOption
+class JsonOption
 {
     /**
-     * @var int
+     * @var array
      */
-    public $offset;
+    public $filters = [];
 
     /**
-     * @var int
+     * @var array
      */
-    public $limit;
+    public $orderBy = [];
 
     /**
      * @var array
      */
     protected $jsonKeys = [
+        'orderBy',
         'filters',
     ];
 
@@ -33,12 +34,12 @@ class ExportOption extends JsonOption
      */
     public function __construct(array $args = [])
     {
-        foreach (['offset', 'limit'] as $key) {
+        foreach ($this->jsonKeys as $key) {
             if (isset($args[$key])) {
-                $this->{$key} = $args[$key];
+                $this->{$key} = is_string($args[$key])
+                    ? json_decode($args[$key], true)
+                    : $args[$key];
             }
         }
-
-        parent::__construct($args);
     }
 }
