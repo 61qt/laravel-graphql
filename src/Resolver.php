@@ -177,10 +177,23 @@ class Resolver
      * @return Iterator
      * @throws Error
      */
-    public function cursor(Context $context, CursorOption $option, array $selection = []): Iterator
+    public function export(Context $context, CursorOption $option, array $selection): Iterator
     {
         $this->beforeExport($context);
 
+        return $this->cursor($option, $selection);
+    }
+
+    /**
+     * 游标式查询数据集
+     *
+     * @param CursorOption $option
+     * @param array $selection
+     * @return Iterator
+     * @throws Error
+     */
+    public function cursor(CursorOption $option, array $selection = []): Iterator
+    {
         $offset = $option->offset;
         $query  = $this->generateSql($selection, $option->filters);
 
