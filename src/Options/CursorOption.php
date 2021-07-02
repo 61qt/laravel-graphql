@@ -5,11 +5,11 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Options;
 
 /**
- * ExportOption
+ * CursorOption
  *
  * @package QT\GraphQL\Options
  */
-class ExportOption extends JsonOption
+class CursorOption extends JsonOption
 {
     /**
      * @var int
