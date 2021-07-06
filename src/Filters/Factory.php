@@ -17,13 +17,6 @@ class Factory
     use Macroable;
 
     /**
-     * 自定义的筛选数据结构
-     *
-     * @var array
-     */
-    protected static $operatorCallback = [];
-
-    /**
      * @return array
      */
     public static function eq(string $name, Type $type)
