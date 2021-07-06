@@ -4,11 +4,16 @@ declare (strict_types = 1);
 
 namespace QT\GraphQL\Traits;
 
+use RuntimeException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as BaseBuilder;
+use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 trait SqlBuilder
 {
@@ -70,7 +75,7 @@ trait SqlBuilder
      * @param array $filters
      * @param array $orderBy
      * @return Builder
-     * @throws Error
+     * @throws RuntimeException
      */
     public function buildSql(
         Builder $query,
@@ -153,7 +158,7 @@ trait SqlBuilder
      * @param Builder $query
      * @param array   $selection
      * @return Builder
-     * @throws Error
+     * @throws RuntimeException
      */
     public function buildSelect(Builder $query, array $selection = [])
     {
@@ -168,10 +173,12 @@ trait SqlBuilder
     }
 
     /**
+     * 选中要查询的字段以及关联表
+     *
      * @param Builder|Relation $query
      * @param array            $selection
      * @param int              $depth
-     * @throws Error
+     * @throws RuntimeException
      */
     protected function selectFieldAndWithTable(Builder | Relation $query, array $selection, int $depth)
     {
@@ -181,19 +188,20 @@ trait SqlBuilder
         }
 
         $model = $query->getModel();
-        $table = $model->getTable();
         $loads = $query->getEagerLoads();
-
         // 去除隐藏字段
-        $selection = array_diff_key(
-            array_merge($selection, [$model->getKeyName() => true]),
-            array_flip($model->getHidden())
-        );
+        foreach ($model->getHidden() as $hidden) {
+            unset($selection[$hidden]);
+        }
+        // 允许在model层设置关联字段
+        if (method_exists($model, 'getWithFields')) {
+            $selection = array_merge($selection, $model->getWithFields());
+        }
 
         $fields = [];
         foreach ($selection as $field => $val) {
             if (!method_exists($model, $field)) {
-                $fields[] = $this->formatField($field, $table);
+                $fields[$model->qualifyColumn($field)] = true;
                 continue;
             }
 
@@ -203,17 +211,48 @@ trait SqlBuilder
             }
 
             if (!is_array($val)) {
-                $query->with($field);
-                continue;
+                $val = ['*' => true];
+            }
+
+            [$localKey, $foreignKey] = $this->getWithKeyName(
+                $model->{$field}()
+            );
+
+            $fields[$model->qualifyColumn($localKey)] = true;
+            // 多态关联时无法指定外键,所以不做字段自动选中
+            if ($foreignKey !== null) {
+                $selection[$foreignKey] = true;
             }
 
             // 只取出选中字段
-            $query->with([$field => function ($query) use ($val, $depth) {
+            $query->with($field, function ($query) use ($val, $depth) {
                 $this->selectFieldAndWithTable($query, $val, $depth - 1);
-            }]);
+            });
         }
 
-        $query->select($fields);
+        $query->select(array_keys($fields));
+    }
+
+    /**
+     * 获取关联字段
+     *
+     * @param Relation $relation
+     * @return array<string|null>
+     * @throws RuntimeException
+     */
+    protected function getWithKeyName(Relation $relation): array
+    {
+        if ($relation instanceof BelongsTo) {
+            return [$relation->getForeignKeyName(), $relation->getOwnerKeyName()];
+        } elseif ($relation instanceof HasOneOrMany) {
+            return [$relation->getLocalKeyName(), $relation->getForeignKeyName()];
+        } elseif ($relation instanceof BelongsToMany) {
+            return [$relation->getParentKeyName(), $relation->getRelatedKeyName()];
+        } elseif ($relation instanceof HasManyThrough) {
+            return [$relation->getLocalKeyName(), $relation->getSecondLocalKeyName()];
+        }
+
+        throw new RuntimeException("无法从Relation上获取关联字段");
     }
 
     /**
@@ -275,7 +314,7 @@ trait SqlBuilder
             }
         }
 
-        $column = $this->formatField($column, $query->getModel()->getTable());
+        $column = $query->getModel()->qualifyColumn($column);
 
         call_user_func($this->operatorHandles[$operator], $query, $column, $value);
     }
@@ -303,7 +342,6 @@ trait SqlBuilder
      * @param string     $direction
      * @param Collection $filters
      * @return Builder
-     * @throws Error
      */
     public function buildSort(Builder $query, ?string $column = null, string $direction = 'desc'): Builder
     {
@@ -352,22 +390,6 @@ trait SqlBuilder
         }
 
         return $columns;
-    }
-
-    /**
-     * @param string      $field
-     * @param null|string $table
-     * @return string
-     */
-    protected function formatField(string $field, ?string $table = null): string
-    {
-        if (strpos($field, '.')) {
-            return $field;
-        }
-
-        $table = $table ?: $this->table;
-
-        return "{$table}.{$field}";
     }
 
     /**
