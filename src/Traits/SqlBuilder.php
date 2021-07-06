@@ -18,27 +18,11 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 trait SqlBuilder
 {
     /**
-     * 最大查询深度
-     *
-     * @var int
-     */
-    protected $maxDepth = 5;
-
-    /**
-     * 关联字段
-     *
-     * @var array
-     */
-    protected $joinTable = [
-        // 'table' => ['foreignKey', '=', 'ownerKey'],
-    ];
-
-    /**
      * 筛选条件对应的操作符
      *
      * @var array
      */
-    protected $operatorsMaps = [
+    protected static $defaultOperators = [
         // equal
         'eq' => '=',
         // not equal
@@ -54,11 +38,34 @@ trait SqlBuilder
     ];
 
     /**
-     * 查询条件对应的回调函数
+     * 筛选表达式对应的回调(全局通用)
+     *
+     * @var array<string, callable>
+     */
+    protected static $globalOperators = [];
+
+    /**
+     * 筛选表达式对应的回调(局部使用)
+     *
+     * @var array<string, callable>
+     */
+    protected $operators = [];
+
+    /**
+     * 最大查询深度
+     *
+     * @var int
+     */
+    protected $maxDepth = 5;
+
+    /**
+     * 关联字段
      *
      * @var array
      */
-    protected $operatorHandles = [];
+    protected $joinTable = [
+        // 'table' => ['foreignKey', '=', 'ownerKey'],
+    ];
 
     /**
      * 筛选时需要进行时间戳转换的字段
@@ -271,14 +278,23 @@ trait SqlBuilder
         return $baseQuery->where(function (Builder $query) use ($filters) {
             foreach ($filters as $column => $operators) {
                 foreach ($operators as $operator => $value) {
-                    if (
-                        in_array($value, ['', null], true) ||
-                        empty($this->operatorHandles[$operator])
-                    ) {
+                    [$column, $operator, $value] = $this->resolveCondition(
+                        $column, $operator, $value
+                    );
+            
+                    if (in_array($value, ['', null], true)) {
                         continue;
                     }
 
-                    $this->buildCondition($query, $column, $operator, $value);
+                    if (!empty($this->operators[$operator])) {
+                        $handler = $this->operators[$operator];
+                    } elseif (!empty(static::$globalOperators[$operator])) {
+                        $handler = static::$globalOperators[$operator];
+                    } else {
+                        continue;
+                    }
+
+                    $this->buildCondition($query, $handler, $column, $value);
                 }
             }
         });
@@ -292,16 +308,8 @@ trait SqlBuilder
      * @param string $operator
      * @param mixed $value
      */
-    protected function buildCondition(
-        Builder $query,
-        string $column,
-        string $operator,
-        mixed $value
-    ) {
-        [$column, $operator, $value] = $this->resolveCondition(
-            $column, $operator, $value
-        );
-
+    protected function buildCondition(Builder $query, callable $handler, string $column, mixed $value)
+    {
         // 如果搜索由数据库维护的时间信息，则自动转成数据库TIMESTAMP查找格式
         if (in_array($column, $this->timestampFields)) {
             if (is_numeric($value)) {
@@ -316,7 +324,7 @@ trait SqlBuilder
 
         $column = $query->getModel()->qualifyColumn($column);
 
-        call_user_func($this->operatorHandles[$operator], $query, $column, $value);
+        call_user_func($handler, $query, $column, $value);
     }
 
     /**
@@ -397,53 +405,67 @@ trait SqlBuilder
      *
      * @param string $operator
      * @param callable $handle
-     * @return static
+     * @return void
      */
-    public function registerOperatorHandle(string $operator, callable $handle): static
+    public function registerOperator(string $operator, callable $handle)
     {
-        $this->operatorHandles[$operator] = $handle;
+        $this->operators[$operator] = $handle;
+    }
 
-        return $this;
+    /**
+     * 注册全局filter operator
+     *
+     * @param string $operator
+     * @param callable $handle
+     * @return void
+     */
+    public static function registerGlobalOperator(string $operator, callable $handle)
+    {
+        static::$globalOperators[$operator] = $handle;
     }
 
     /**
      * 初始化默认的filter operator
      */
-    protected function registerDefaultOperatorHandle()
+    protected static function registerDefaultOperatorHandle()
     {
-        foreach ($this->operatorsMaps as $name => $operator) {
+        if (!empty(static::$globalOperators)) {
+            return;
+        }
+
+        foreach (static::$defaultOperators as $name => $operator) {
             $callback = function ($query, $column, $value) use ($operator) {
                 $query->where($column, $operator, $value);
             };
 
-            $this->registerOperatorHandle($name, $callback);
+            static::registerGlobalOperator($name, $callback);
         }
 
-        $this->registerOperatorHandle('in', function ($query, $column, $value) {
+        static::registerGlobalOperator('in', function ($query, $column, $value) {
             $query->whereIn($column, $value);
         });
 
-        $this->registerOperatorHandle('notIn', function ($query, $column, $value) {
+        static::registerGlobalOperator('notIn', function ($query, $column, $value) {
             $query->whereNotIn($column, $value);
         });
 
-        $this->registerOperatorHandle('between', function ($query, $column, $value) {
+        static::registerGlobalOperator('between', function ($query, $column, $value) {
             $query->whereBetween($column, $value);
         });
 
-        $this->registerOperatorHandle('like', function ($query, $column, $value) {
+        static::registerGlobalOperator('like', function ($query, $column, $value) {
             $query->where($column, 'like', "%{$value}%");
         });
 
-        $this->registerOperatorHandle('leftLike', function ($query, $column, $value) {
+        static::registerGlobalOperator('leftLike', function ($query, $column, $value) {
             $query->where($column, 'like', "%{$value}");
         });
 
-        $this->registerOperatorHandle('rightLike', function ($query, $column, $value) {
+        static::registerGlobalOperator('rightLike', function ($query, $column, $value) {
             $query->where($column, 'like', "{$value}%");
         });
 
-        $this->registerOperatorHandle('isNull', function ($query, $column, $value) {
+        static::registerGlobalOperator('isNull', function ($query, $column, $value) {
             if (is_bool($value)) {
                 $query->{$value ? 'whereNull' : 'whereNotNull'}($column);
             } else {
@@ -451,7 +473,7 @@ trait SqlBuilder
             }
         });
 
-        $this->registerOperatorHandle('notNull', function ($query, $column, $value) {
+        static::registerGlobalOperator('notNull', function ($query, $column, $value) {
             if (is_bool($value)) {
                 $query->{$value ? 'whereNotNull' : 'whereNull'}($column);
             } else {

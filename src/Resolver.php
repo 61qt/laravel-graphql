@@ -62,9 +62,9 @@ class Resolver
     {
         $this->table = $model->getTable();
 
-        $this->registerDefaultOperatorHandle();
-
         $this->setValidationFactory($factory);
+
+        static::registerDefaultOperatorHandle();
     }
 
     /**
