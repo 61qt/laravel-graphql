@@ -221,7 +221,7 @@ trait SqlBuilder
             $fields[$model->qualifyColumn($localKey)] = true;
             // 多态关联时无法指定外键,所以不做字段自动选中
             if ($foreignKey !== null) {
-                $selection[$foreignKey] = true;
+                $val[$foreignKey] = true;
             }
 
             // 只取出选中字段
