@@ -89,6 +89,18 @@ class Registrar
     }
 
     /**
+     * 设置一组bigint类型的筛选条件
+     *
+     * @param string $name
+     * @param array $operators
+     * @return self
+     */
+    public function bigint(string $name, array $operators): self
+    {
+        return $this->set($name, GlobalType::bigint(), $operators);
+    }
+
+    /**
      * 设置筛选条件
      *
      * @param string $name
