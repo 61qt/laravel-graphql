@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Filters;
 
 use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Traits\Macroable;
 
 /**
  * 筛选类型生成器
@@ -13,6 +14,8 @@ use GraphQL\Type\Definition\Type;
  */
 class Factory
 {
+    use Macroable;
+
     /**
      * 自定义的筛选数据结构
      *
@@ -172,34 +175,5 @@ class Factory
             'type'        => Type::boolean(),
             'description' => "{$name} 不为空",
         ];
-    }
-
-    /**
-     * 根据预设好的方法生成filter类型
-     * 
-     * @param string $operator
-     * @param callable $arguments
-     */
-    public static function setOperatorCallback(string $operator, callable $callback)
-    {
-        static::$operatorCallback[$operator] = $callback;
-    }
-
-    /**
-     * 根据预设好的方法生成filter类型
-     * 
-     * @param string $operator
-     * @param array $arguments
-     * @return array
-     */
-    public static function __callStatic($operator, $arguments)
-    {
-        if (isset(static::$operatorCallback[$operator])) {
-            return [];
-        }
-
-        return call_user_func_array(
-            static::$operatorCallback[$operator], $arguments
-        );
     }
 }
