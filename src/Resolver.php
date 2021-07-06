@@ -8,13 +8,13 @@ use Iterator;
 use RuntimeException;
 use Illuminate\Support\Arr;
 use QT\GraphQL\Contracts\Context;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use QT\GraphQL\Options\PageOption;
 use QT\GraphQL\Options\ChunkOption;
 use QT\GraphQL\Options\CursorOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -160,12 +160,12 @@ class Resolver
     {
         $this->beforeList($context);
 
-        $results = $this->generateSql($selection, $option->filters, $option->orderBy)
+        $paginator = $this->generateSql($selection, $option->filters, $option->orderBy)
             ->paginate(min($option->take, $this->perPageMax), ['*'], 'page', $option->page);
 
-        $this->afterList($results);
+        $this->afterList($paginator);
 
-        return $results;
+        return $paginator;
     }
 
     /**
@@ -343,10 +343,10 @@ class Resolver
     }
 
     /**
-     * @param array|Collection $input
+     * @param array $input
      * @return Model
      */
-    public function find(array | Collection $input): Model
+    public function find(array $input): Model
     {
         $id    = $this->getKey($input);
         $model = $this->getModelQuery(true)->find($id);
