@@ -91,7 +91,7 @@ class ResolverTest extends TestCase
         $model = new EloquentModelStub;
         $this->addMockConnection($model);
         $model->getConnection()->shouldReceive('select')->once()->andReturnUsing(function ($sql) {
-            $this->assertSame('select "table"."id", "table"."name" from "table" where "table"."id" = ? limit 1', $sql);
+            $this->assertSame('select "table"."id", "table"."name" from "table" where "table"."id" = ? order by "table"."id" desc limit 1', $sql);
 
             return [['id' => 999, 'name' => 'foo']];
         });
