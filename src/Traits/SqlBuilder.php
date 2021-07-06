@@ -182,6 +182,7 @@ trait SqlBuilder
 
         $model = $query->getModel();
         $table = $model->getTable();
+        $loads = $query->getEagerLoads();
 
         // 去除隐藏字段
         $selection = array_diff_key(
@@ -193,6 +194,11 @@ trait SqlBuilder
         foreach ($selection as $field => $val) {
             if (!method_exists($model, $field)) {
                 $fields[] = $this->formatField($field, $table);
+                continue;
+            }
+
+            // 已经设置过的with条件不做替换
+            if (isset($loads[$field])) {
                 continue;
             }
 
