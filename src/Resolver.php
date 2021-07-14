@@ -179,7 +179,7 @@ class Resolver
      */
     public function export(Context $context, CursorOption $option, array $selection): Iterator
     {
-        $this->beforeExport($context);
+        $this->beforeExport($context, $option);
 
         return $this->cursor($option, $selection);
     }

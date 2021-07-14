@@ -6,6 +6,7 @@ namespace QT\GraphQL\Traits;
 
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\JsonOption;
+use QT\GraphQL\Options\CursorOption;
 
 trait ResolverTriggers
 {
@@ -57,8 +58,8 @@ trait ResolverTriggers
 
     }
 
-    protected function beforeExport(Context $context)
+    protected function beforeExport(Context $context, CursorOption $option)
     {
-        $this->beforeList($context);
+        $this->beforeList($context, $option);
     }
 }
