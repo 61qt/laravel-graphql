@@ -132,7 +132,7 @@ class Resolver
      */
     public function chunk(Context $context, ChunkOption $option, array $selection = []): Collection
     {
-        $this->beforeList($context);
+        $this->beforeList($context, $option);
 
         $query = $this->generateSql($selection, $option->filters, $option->orderBy);
 
@@ -158,7 +158,7 @@ class Resolver
      */
     public function pagination(Context $context, PageOption $option, array $selection = []): Paginator
     {
-        $this->beforeList($context);
+        $this->beforeList($context, $option);
 
         $paginator = $this->generateSql($selection, $option->filters, $option->orderBy)
             ->paginate(min($option->take, $this->perPageMax), ['*'], 'page', $option->page);

@@ -5,10 +5,11 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Traits;
 
 use QT\GraphQL\Contracts\Context;
+use QT\GraphQL\Options\JsonOption;
 
 trait ResolverTriggers
 {
-    protected function beforeList(Context $context)
+    protected function beforeList(Context $context, JsonOption $option)
     {
     }
 
