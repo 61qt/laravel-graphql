@@ -116,19 +116,17 @@ trait SqlBuilder
         $tables = [];
         foreach ($input as $key => $value) {
             if (false === strpos($key, '.')) {
-                $table = $key;
-            } else {
-                [$table, $field] = explode('.', $key, 2);
-
-                $value = [$field => $value];
+                continue;
             }
+
+            [$table, $field] = explode('.', $key, 2);
 
             if (empty($tables[$table])) {
                 $tables[$table] = [];
             }
 
             if (!empty($this->joinTable[$table])) {
-                $tables[$table] = array_merge($tables[$table], $value);
+                $tables[$table] = array_merge($tables[$table], [$field => $value]);
             }
         }
 
