@@ -291,4 +291,9 @@ class GraphQLContext implements Context
     {
         return isset($this->data[$key]) ? $this->data[$key] : $default;
     }
+
+    public function input(string $key, mixed $default = null): mixed
+    {
+        return null;
+    }
 }

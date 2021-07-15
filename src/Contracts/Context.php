@@ -31,4 +31,11 @@ interface Context
      * @return mixed
      */
     public function getValue(string $key, mixed $default = null): mixed;
+
+    /**
+     * @param string|int $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function input(string $key, mixed $default = null): mixed;
 }
