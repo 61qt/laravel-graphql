@@ -113,22 +113,7 @@ trait SqlBuilder
      */
     protected function prepareJoin(Builder $query, array $input)
     {
-        $tables = [];
-        foreach ($input as $key => $value) {
-            if (false === strpos($key, '.')) {
-                continue;
-            }
-
-            [$table, $field] = explode('.', $key, 2);
-
-            if (empty($tables[$table])) {
-                $tables[$table] = [];
-            }
-
-            if (!empty($this->joinTable[$table])) {
-                $tables[$table] = array_merge($tables[$table], [$field => $value]);
-            }
-        }
+        $tables = array_intersect_key($input, $this->joinTable);
 
         foreach ($tables as $table => $columns) {
             // users: {id: desc}  => users.id: desc
