@@ -43,7 +43,7 @@ class Context implements ContextContract
      * @param mixed $default
      * @return mixed
      */
-    public function setVale(string $key, mixed $value)
+    public function setValue(string $key, mixed $value)
     {
         return Arr::set($this->config, $key, $value);
     }
