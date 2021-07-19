@@ -135,7 +135,7 @@ abstract class ModelType extends ObjectType implements Resolvable
         return $this->getResolver()->show(
             $context,
             $args,
-            $info->getFieldSelection($context->getValue('max_depth', 5))
+            $info->getFieldSelection($context->getValue('graphql.max_depth', 5))
         );
     }
 

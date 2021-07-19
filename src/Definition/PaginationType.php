@@ -111,7 +111,7 @@ class PaginationType extends ObjectType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        $fields = $info->getFieldSelection($context->getValue('max_depth', 5));
+        $fields = $info->getFieldSelection($context->getValue('graphql.max_depth', 5));
         // 获取选中的字段
         $selection = $this->ofType->formatSelection($fields['items'] ?? []);
 

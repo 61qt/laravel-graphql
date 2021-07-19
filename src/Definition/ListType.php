@@ -84,7 +84,7 @@ class ListType extends ListOfType implements Resolvable
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
         $selection = $this->ofType->formatSelection(
-            $info->getFieldSelection($context->getValue('max_depth', 5))
+            $info->getFieldSelection($context->getValue('graphql.max_depth', 5))
         );
 
         return $this->ofType->getResolver()->chunk(
