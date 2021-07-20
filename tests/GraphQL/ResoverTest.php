@@ -25,6 +25,7 @@ use Illuminate\Database\Query\Processors\Processor;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Throwable;
 
 class ResolverTest extends TestCase
 {
@@ -282,7 +283,7 @@ class GraphQLContext implements Context
         return new Response;
     }
 
-    public function setVale(string $key, mixed $value)
+    public function setValue(string $key, mixed $value)
     {
         $this->data[$key] = $value;
     }
