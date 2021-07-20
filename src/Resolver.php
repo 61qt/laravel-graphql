@@ -14,8 +14,8 @@ use QT\GraphQL\Options\ChunkOption;
 use QT\GraphQL\Options\CursorOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -258,17 +258,17 @@ class Resolver
      */
     public function update(Context $context, array $input = []): Model
     {
-        $id = $this->getKey($input);
+        $id    = $this->getKey($input);
+        $model = $this->getFreedModelQuery()->findOrFail($id);
 
-        $this->beforeUpdate($context, $id);
+        $this->beforeUpdate($context, $model);
 
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
-        $model = $this->getFreedModelQuery()->findOrFail($id)->fill($input);
 
         return DB::transaction(function () use ($model, $input) {
-            $model->save();
+            $model->fill($input)->save();
 
             $this->buildRelation($model, $input);
 
@@ -306,13 +306,12 @@ class Resolver
      */
     public function destroy(Context $context, array $input = []): Model
     {
-        $id = $this->getKey($input);
+        $id    = $this->getKey($input);
+        $model = $this->getFreedModelQuery()->findOrFail($id);
 
-        $this->beforeDestroy($context, $id);
+        $this->beforeDestroy($context, $model);
 
-        return DB::transaction(function () use ($id) {
-            $model = $this->getFreedModelQuery()->findOrFail($id);
-
+        return DB::transaction(function () use ($model) {
             if (!$model->delete()) {
                 throw new RuntimeException('删除失败');
             }

@@ -4,6 +4,7 @@ declare (strict_types = 1);
 
 namespace QT\GraphQL\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Options\JsonOption;
 use QT\GraphQL\Options\CursorOption;
@@ -28,7 +29,7 @@ trait ResolverTriggers
         return $model;
     }
 
-    protected function beforeUpdate(Context $context, int|string $id)
+    protected function beforeUpdate(Context $context, Model $model)
     {
     }
 
@@ -44,7 +45,7 @@ trait ResolverTriggers
     {
     }
 
-    protected function beforeDestroy(Context $context, int|string $id)
+    protected function beforeDestroy(Context $context, Model $model)
     {
     }
 
