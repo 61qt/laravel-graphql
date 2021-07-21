@@ -196,9 +196,7 @@ class Registrar
 
         return new InputObjectType([
             'name'   => "{$this->modelType->name}Filters",
-            'fields' => function () {
-                return $this->buildFields($this->fields);
-            },
+            'fields' => fn() => $this->buildFields($this->fields),
         ]);
     }
 

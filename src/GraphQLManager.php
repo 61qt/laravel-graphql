@@ -13,7 +13,7 @@ use QT\GraphQL\Definition\Type as GlobalType;
 
 /**
  * GraphQLManager
- * 
+ *
  * @package QT\GraphQL
  */
 class GraphQLManager
@@ -54,10 +54,10 @@ class GraphQLManager
      * @param string|Type $type
      * @throws GraphQLException
      */
-    public function setType(string|Type $type): Type
+    public function setType(string | Type $type): Type
     {
         if (
-            (is_string($type) && class_exists($type)) && 
+            (is_string($type) && class_exists($type)) &&
             is_subclass_of($type, Type::class)
         ) {
             $type = new $type;
@@ -120,8 +120,8 @@ class GraphQLManager
     }
 
     /**
-     * 获取 Graphql type 查询回调 
-     * 
+     * 获取 Graphql type 查询回调
+     *
      * @return callable
      */
     public function getTypeFinder(): callable
@@ -133,7 +133,7 @@ class GraphQLManager
 
     /**
      * 设置 Graphql type 查询回调
-     * 
+     *
      * @param callable $typeFinder
      * @return self
      */
@@ -145,17 +145,15 @@ class GraphQLManager
     }
 
     /**
-     * @param string            $name
-     * @param callable|array    $fields
-     * @param array             $args
+     * @param string         $name
+     * @param callable|array $fields
+     * @param array          $args
      * @return ObjectType
      * @throws Error
      */
-    public function create(string $name, callable | array $fields, array $args = []): ObjectType
+    public function create(string $name, callable  | array $fields, array $args = []): ObjectType
     {
-        return tap(new ObjectType(compact('name', 'fields', 'args')), function ($object) {
-            $this->setType($object);
-        });
+        return $this->setType(new ObjectType(compact('name', 'fields', 'args')));
     }
 
     /**
