@@ -230,12 +230,11 @@ class Resolver
      */
     public function store(Context $context, array $input = []): Model
     {
-        $this->beforeStore($context);
-
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
         $model = $this->model->newInstance()->fill($input);
+        $this->beforeStore($context, $model, $input);
 
         return DB::transaction(function () use ($model, $input) {
             $model->save();
@@ -258,14 +257,13 @@ class Resolver
      */
     public function update(Context $context, array $input = []): Model
     {
-        $id    = $this->getKey($input);
-        $model = $this->getFreedModelQuery()->findOrFail($id);
-
-        $this->beforeUpdate($context, $model);
-
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
+
+        $id    = $this->getKey($input);
+        $model = $this->getFreedModelQuery()->findOrFail($id);
+        $this->beforeUpdate($context, $model, $input);
 
         return DB::transaction(function () use ($model, $input) {
             $model->fill($input)->save();
