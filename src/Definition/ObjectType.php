@@ -4,6 +4,7 @@ declare (strict_types = 1);
 
 namespace QT\GraphQL\Definition;
 
+use Closure;
 use Illuminate\Support\Str;
 use QT\GraphQL\Contracts\Context;
 use Illuminate\Database\Eloquent\Model;
@@ -18,13 +19,18 @@ use GraphQL\Type\Definition\ObjectType as BaseObjectType;
 class ObjectType extends BaseObjectType
 {
     /**
+     * @var array
+     */
+    private $fieldResolvers = [];
+
+    /**
      * @param array $config
      */
     public function __construct(array $config = [])
     {
         if (!isset($config['resolveField'])) {
             // 对象内属性的解析回调
-            $config['resolveField'] = $this->getResolveFieldFn();
+            $config['resolveField'] = $this->getFieldResolver();
         }
 
         parent::__construct($config);
@@ -33,17 +39,50 @@ class ObjectType extends BaseObjectType
     /**
      * 获取字段处理回调
      *
-     * @return callable
+     * @return Closure
      */
-    public function getResolveFieldFn(): callable
+    public function getFieldResolver(): callable
     {
         return function ($node, $args, Context $context, ResolveInfo $info) {
-            $method = 'resolve' . ucfirst(Str::camel($info->fieldName));
-
-            if (method_exists($this, $method)) {
-                return $this->{$method}($node, $args, $context, $info);
+            if (empty($this->fieldResolvers)) {
+                $this->initializeFieldResolver();
             }
 
+            if (empty($this->fieldResolvers[$info->fieldName])) {
+                return null;
+            }
+
+            $resolver = $this->fieldResolvers[$info->fieldName];
+
+            return call_user_func($resolver, $node, $args, $context, $info);
+        };
+    }
+
+    /**
+     * 初始化字段回调函数
+     */
+    private function initializeFieldResolver()
+    {
+        $defaultFn = static::getDefaultFieldResolver();
+        foreach ($this->getFields() as $field) {
+            $method = 'resolve' . ucfirst(Str::camel($field->name));
+
+            if (method_exists($this, $method)) {
+                $this->fieldResolvers[$field->name] = [$this, $method];
+            } else {
+                $this->fieldResolvers[$field->name] = $defaultFn;
+            }
+        }
+    }
+
+    /**
+     * 获取字段默认处理回调
+     *
+     * @return Closure
+     */
+    public static function getDefaultFieldResolver(): Closure
+    {
+        return function ($node, $args, Context $context, ResolveInfo $info) {
             if ($node instanceof Model) {
                 // 检查model是否加载了该字段
                 if ($node->relationLoaded($info->fieldName)) {
