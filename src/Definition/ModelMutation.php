@@ -92,7 +92,7 @@ abstract class ModelMutation
 
     /**
      * 获取Mutation的配置信息
-     * 
+     *
      * @return Generator
      * @throws Error
      */
@@ -112,7 +112,11 @@ abstract class ModelMutation
                 $this->getDefaultMutationArgs(), [$this->inputKey => $inputObject]
             );
 
-            yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve']];
+            if (method_exists($this, 'get'.ucfirst($mutation).'Config')) {
+                yield $mutation => $this->{'get'.ucfirst($mutation).'Config'}($mutationArg);
+            } else {
+                yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve']];
+            }
         }
     }
 
