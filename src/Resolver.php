@@ -233,7 +233,7 @@ class Resolver
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
-        $model = $this->model->newInstance()->fill($input);
+        $model = $this->model->newInstance($input);
         $this->beforeStore($context, $model, $input);
 
         return DB::transaction(function () use ($model, $input) {
