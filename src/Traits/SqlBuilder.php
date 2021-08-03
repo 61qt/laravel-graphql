@@ -237,7 +237,7 @@ trait SqlBuilder
             });
         }
 
-        $query->select(array_keys($fields));
+        $query->addSelect(array_keys($fields));
     }
 
     /**
