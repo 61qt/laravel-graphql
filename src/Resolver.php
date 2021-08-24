@@ -114,7 +114,7 @@ class Resolver
 
         $this->beforeShow($context, $id);
 
-        $model = $this->generateSql($selection)->findOrFail($id);
+        $model = $this->getBuilder($selection)->findOrFail($id);
 
         $this->afterShow($model);
 
@@ -134,7 +134,7 @@ class Resolver
     {
         $this->beforeList($context, $option);
 
-        $query = $this->generateSql($selection, $option->filters, $option->orderBy);
+        $query = $this->getBuilder($selection, $option->filters, $option->orderBy);
 
         if (!$option->all) {
             $query->skip($option->skip)->take($option->take);
@@ -160,7 +160,7 @@ class Resolver
     {
         $this->beforeList($context, $option);
 
-        $paginator = $this->generateSql($selection, $option->filters, $option->orderBy)
+        $paginator = $this->getBuilder($selection, $option->filters, $option->orderBy)
             ->paginate(min($option->take, $this->perPageMax), ['*'], 'page', $option->page);
 
         $this->afterList($paginator);
@@ -195,7 +195,7 @@ class Resolver
     public function cursor(CursorOption $option, array $selection = []): Iterator
     {
         $offset = $option->offset;
-        $query  = $this->generateSql($selection, $option->filters);
+        $query  = $this->getBuilder($selection, $option->filters);
 
         do {
             $models = (clone $query)->forPage(++$offset, $option->limit)->get();
@@ -214,7 +214,7 @@ class Resolver
      * @param array $orderBy
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function generateSql(array $selection, array $filters = [], array $orderBy = []): Builder
+    public function getBuilder(array $selection, array $filters = [], array $orderBy = []): Builder
     {
         // 使用释放之后的builder,保证CURD直接不会相互影响
         return $this->buildSql($this->getFreedModelQuery(), $selection, $filters, $orderBy);
@@ -233,7 +233,7 @@ class Resolver
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
-        $model = $this->model->newInstance($input);
+        $model = $this->model->newInstance()->fill($input);
         $this->beforeStore($context, $model, $input);
 
         return DB::transaction(function () use ($model, $input) {
