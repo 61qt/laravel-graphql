@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Definition;
 
@@ -9,10 +9,8 @@ use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
 use QT\GraphQL\Contracts\Context;
 use QT\GraphQL\Filters\Registrar;
-use QT\GraphQL\Definition\ListType;
 use QT\GraphQL\Contracts\Resolvable;
 use GraphQL\Type\Definition\ResolveInfo;
-use QT\GraphQL\Definition\PaginationType;
 use GraphQL\Type\Definition\InputObjectType;
 
 /**
@@ -94,7 +92,8 @@ abstract class ModelType extends ObjectType implements Resolvable
     public function __construct(protected GraphQLManager $manager, array $config = [])
     {
         parent::__construct(array_merge($config, [
-            'fields' => fn() => $this->getModelFields(),
+            'fields'      => fn ()      => $this->getModelFields(),
+            'description' => $this->description,
         ]));
     }
 
@@ -144,7 +143,6 @@ abstract class ModelType extends ObjectType implements Resolvable
      */
     public function registrationFilters(Registrar $registrar)
     {
-
     }
 
     /**
