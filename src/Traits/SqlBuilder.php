@@ -94,11 +94,13 @@ trait SqlBuilder
         $this->buildFilter($query, $this->prepareJoin($query, $filters));
 
         if (empty($orderBy) && $this->model->incrementing) {
-            $orderBy[$this->model->getKeyName()] = 'desc';
+            $orderBy[] = [$this->model->getKeyName() => 'desc'];
         }
 
-        foreach ($orderBy as $column => $direction) {
-            $this->buildSort($query, $column, $direction);
+        foreach ($orderBy as $columns) {
+            foreach ($columns as $column => $direction) {
+                $this->buildSort($query, $column, $direction);
+            }
         }
 
         return $query;

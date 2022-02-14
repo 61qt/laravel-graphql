@@ -66,7 +66,7 @@ class ListType extends ListOfType implements Resolvable
                 'description'  => '查询条件',
             ],
             'orderBy' => [
-                'type'         => fn() => $this->ofType->getSortFields(),
+                'type'         => fn() => Type::listOf($this->ofType->getSortFields()),
                 'description'  => '排序字段',
             ],
         ];
