@@ -92,7 +92,7 @@ abstract class ModelType extends ObjectType implements Resolvable
     public function __construct(protected GraphQLManager $manager, array $config = [])
     {
         parent::__construct(array_merge($config, [
-            'fields'      => fn ()      => $this->getModelFields(),
+            'fields'      => fn() => $this->getModelFields(),
             'description' => $this->description,
         ]));
     }
