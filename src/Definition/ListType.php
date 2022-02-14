@@ -62,11 +62,11 @@ class ListType extends ListOfType implements Resolvable
                 'defaultValue' => false,
             ],
             'filters' => [
-                'type'         => $this->ofType->getFiltersInput(),
+                'type'         => fn() => $this->ofType->getFiltersInput(),
                 'description'  => '查询条件',
             ],
             'orderBy' => [
-                'type'         => $this->ofType->getSortFields(),
+                'type'         => fn() => $this->ofType->getSortFields(),
                 'description'  => '排序字段',
             ],
         ];
