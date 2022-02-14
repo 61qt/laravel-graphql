@@ -123,7 +123,7 @@ class ResolverTest extends TestCase
             return [['id' => 999, 'name' => 'foo']];
         });
 
-        $option = new ChunkOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'take' => 100, 'skip' => 100]);
+        $option = new ChunkOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => [['id' => 'desc']], 'take' => 100, 'skip' => 100]);
         $result = $this->createResolver($model)->chunk(new GraphQLContext, $option, ['id' => true, 'name' => true]);
 
         $this->assertSame([['id' => 999, 'name' => 'foo']], $result->toArray());
@@ -139,7 +139,7 @@ class ResolverTest extends TestCase
             return [['id' => 999, 'name' => 'foo']];
         });
 
-        $option = new ChunkOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'all' => true]);
+        $option = new ChunkOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => [['id' => 'desc']], 'all' => true]);
         $result = $this->createResolver($model)->chunk(new GraphQLContext, $option, ['id' => true, 'name' => true]);
 
         $this->assertSame([['id' => 999, 'name' => 'foo']], $result->toArray());
@@ -162,7 +162,7 @@ class ResolverTest extends TestCase
             }
         });
 
-        $option    = new PageOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => ['id' => 'desc'], 'take' => 100, 'page' => 2]);
+        $option    = new PageOption(['filters' => ['id' => ['in' => [1, 2]]], 'orderBy' => [['id' => 'desc']], 'take' => 100, 'page' => 2]);
         $paginator = $this->createResolver($model)->pagination(new GraphQLContext, $option, ['id' => true, 'name' => true]);
         $items     = array_map(function ($item) {return $item instanceof Arrayable ? $item->toArray() : $item;}, $paginator->items());
 
