@@ -47,7 +47,7 @@ abstract class ModelMutation
      *
      * @var string
      */
-    protected $inputKey = 'input';
+    protected $inputKey = null;
 
     /**
      * 可输入参数
@@ -90,11 +90,17 @@ abstract class ModelMutation
      * @param ResolveInfo $info
      * @return mixed
      */
-    public function resolve($node, $input, Context $context, ResolveInfo $info)
+    public function resolve($node, $args, Context $context, ResolveInfo $info)
     {
         $resolver = $this->ofType->getResolver();
 
-        return $resolver->{$info->fieldName}($context, $input[$this->inputKey] ?? []);
+        if ($this->inputKey === null) {
+            $input = $args;
+        } else {
+            $input = $args[$this->inputKey] ?? [];
+        }
+
+        return $resolver->{$info->fieldName}($context, $input);
     }
 
     /**
@@ -105,36 +111,54 @@ abstract class ModelMutation
      */
     public function getMutationConfig()
     {
-        $globalArgs = $this->args();
+        $globalArgs  = $this->args();
+        $defaultArgs = $this->getDefaultMutationArgs();
         if (empty($this->reflect)) {
             $this->reflect = new ReflectionClass($this->ofType->getResolver());
         }
 
         foreach ($this->getMutationArgs() as $mutation => $args) {
-            $name   = "{$mutation}Input";
-            $fields = !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
+            $inputArgs = !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
+            $inputArgs = array_merge($defaultArgs, $inputArgs);
 
-            $inputObject = $this->manager->setType(
-                new InputObjectType(compact('name', 'fields'))
-            );
-
-            $mutationArg = array_merge(
-                $this->getDefaultMutationArgs(),
-                [$this->inputKey => $inputObject]
-            );
-
-            // 获取方法备注信息
-            $description = '';
-            if (isDevelopEnv()) {
-                $description = $this->getMethodComment($mutation);
+            if ($this->inputKey !== null) {
+                $name      = "{$mutation}Input";
+                $inputType = new InputObjectType(['name' => $name, 'fields' => $inputArgs]);
+                $inputArgs = [$this->inputKey => $this->manager->setType($inputType)];
             }
 
-            if (method_exists($this, 'get' . ucfirst($mutation) . 'Config')) {
-                yield $mutation => $this->{'get' . ucfirst($mutation) . 'Config'}($mutationArg, $description);
-            } else {
-                yield $mutation => [$this->ofType, $mutationArg, [$this, 'resolve'], $description];
-            }
+            yield $mutation => $this->getMutationResolveInfo($mutation, $inputArgs);
         }
+    }
+
+    /**
+     * 获取mutation需要的形参,返回类型
+     *
+     * @param string $mutation
+     * @param array $inputArgs
+     * @return array
+     */
+    protected function getMutationResolveInfo(string $mutation, array $inputArgs): array
+    {
+        // 获取方法备注信息
+        $description = $this->getMutationDescription($mutation);
+
+        if (!method_exists($this, 'get' . ucfirst($mutation) . 'Config')) {
+            return [$this->ofType, $inputArgs, [$this, 'resolve'], $description];
+        }
+
+        return $this->{'get' . ucfirst($mutation) . 'Config'}($inputArgs, $description);
+    }
+
+    /**
+     * 获取mutation的介绍
+     *
+     * @param string $description
+     * @return string
+     */
+    protected function getMutationDescription(string $mutation): string
+    {
+        return '';
     }
 
     /**
@@ -145,48 +169,5 @@ abstract class ModelMutation
     protected function getDefaultMutationArgs()
     {
         return [];
-    }
-
-    /**
-     * 根据方法名称获取方法备注信息
-     *
-     * @param string $method
-     * @return null|string
-     */
-    protected function getMethodComment(string $method)
-    {
-        if (!$this->reflect->hasMethod($method)) {
-            return '';
-        }
-
-        $lines = $this->parseDocComment($this->reflect->getMethod($method)->getDocComment());
-        if ($lines === false) {
-            return '';
-        }
-
-        return trim(Arr::first($lines));
-    }
-
-    /**
-     * 解析文档内容为行
-     *
-     * @param $comment
-     */
-    protected function parseDocComment($comment)
-    {
-        if ($comment === false) {
-            return false;
-        }
-
-        if (preg_match('#^/\*\*(.*)\*/#s', $comment, $matches) === false) {
-            return false;
-        }
-
-        $comment = $matches[1];
-        if (preg_match_all('#^\s*\*(.*)#m', $comment, $lines) === false) {
-            return false;
-        }
-
-        return $lines[1];
     }
 }
