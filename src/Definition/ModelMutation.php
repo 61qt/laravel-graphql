@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use Generator;
-use ReflectionClass;
 use App\Exceptions\Error;
 use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
@@ -34,13 +33,6 @@ abstract class ModelMutation
      * @var ModelType
      */
     protected $ofType;
-
-    /**
-     * 对应反射信息
-     *
-     * @var ReflectionClass
-     */
-    protected $reflect;
 
     /**
      * input在args中的key
@@ -113,17 +105,14 @@ abstract class ModelMutation
     {
         $globalArgs  = $this->args();
         $defaultArgs = $this->getDefaultMutationArgs();
-        if (empty($this->reflect)) {
-            $this->reflect = new ReflectionClass($this->ofType->getResolver());
-        }
 
         foreach ($this->getMutationArgs() as $mutation => $args) {
             $inputArgs = !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
             $inputArgs = array_merge($defaultArgs, $inputArgs);
 
             if ($this->inputKey !== null) {
-                $name      = "{$mutation}Input";
-                $inputType = new InputObjectType(['name' => $name, 'fields' => $inputArgs]);
+                $inputName = "{$mutation}Input";
+                $inputType = new InputObjectType(['name' => $inputName, 'fields' => $inputArgs]);
                 $inputArgs = [$this->inputKey => $this->manager->setType($inputType)];
             }
 
@@ -158,7 +147,7 @@ abstract class ModelMutation
      */
     protected function getMutationDescription(string $mutation): string
     {
-        return '';
+        return $mutation;
     }
 
     /**
