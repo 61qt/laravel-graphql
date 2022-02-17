@@ -75,6 +75,13 @@ trait SqlBuilder
     protected $timestampFields = ['created_at', 'updated_at'];
 
     /**
+     * 需要特殊构造的条件
+     * 
+     * @var array
+     */
+    protected $conditionResolvers = [];
+
+    /**
      * 生成sql
      *
      * @param Builder $query
@@ -280,9 +287,13 @@ trait SqlBuilder
         return $baseQuery->where(function (Builder $query) use ($filters) {
             foreach ($filters as $column => $operators) {
                 foreach ($operators as $operator => $value) {
-                    [$column, $operator, $value] = $this->resolveCondition(
-                        $column, $operator, $value
-                    );
+                    $condition = $this->resolveCondition($column, $operator, $value);
+
+                    if (count($condition) !== 3) {
+                        continue;
+                    }
+
+                    [$column, $operator, $value] = array_values($condition);
             
                     if (in_array($value, ['', null], true)) {
                         continue;
@@ -337,11 +348,14 @@ trait SqlBuilder
      */
     protected function resolveCondition(string $column, string $operator, mixed $value): array
     {
-        // TODO 改为注册回调的方式
+        if (!isset($this->conditionResolvers[$column])) {
+            return [$column, $operator, $value];
+        }
+
         // 部分特殊的条件构造,可以重写该方法来处理
         // 比如要无限分级下查询子分类下的全部数据
         // 就可以在此处先拿出全部的子分类id,在进行sql查询
-        return [$column, $operator, $value];
+        return call_user_func($this->conditionResolvers[$column], $value, $operator);
     }
 
     /**
@@ -407,11 +421,27 @@ trait SqlBuilder
      *
      * @param string $operator
      * @param callable $handle
-     * @return void
+     * @return self
      */
     public function registerOperator(string $operator, callable $handle)
     {
         $this->operators[$operator] = $handle;
+
+        return $this;
+    }
+
+    /**
+     * 注册column condition resolver
+     *
+     * @param string $column
+     * @param callable $resolver
+     * @return self
+     */
+    public function registerCondition(string $column, callable $resolver)
+    {
+        $this->conditionResolvers[$column] = $resolver;
+
+        return $this;
     }
 
     /**

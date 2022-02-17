@@ -62,8 +62,18 @@ class Resolver
     {
         $this->table = $model->getTable();
 
-        $this->setValidationFactory($factory);
+        $this->boot();
 
+        $this->setValidationFactory($factory);
+    }
+
+    /**
+     * Bootstrap the resolver
+     * 
+     * @return void
+     */
+    protected function boot()
+    {
         static::registerDefaultOperatorHandle();
     }
 
