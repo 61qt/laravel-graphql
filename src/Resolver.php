@@ -179,6 +179,22 @@ class Resolver
     }
 
     /**
+     * 获取导出数据总量
+     *
+     * @param Context $context
+     * @param CursorOption $option
+     * @param array $selection
+     * @return int
+     * @throws Error
+     */
+    public function getExportCount(Context $context, CursorOption $option): int
+    {
+        $this->beforeExport($context, $option, []);
+
+        return $this->getBuilder([], $option->filters)->count();
+    }
+
+    /**
      * 导出列表数据
      *
      * @param Context $context
@@ -189,7 +205,7 @@ class Resolver
      */
     public function export(Context $context, CursorOption $option, array $selection): Iterator
     {
-        $this->beforeExport($context, $option);
+        $this->beforeExport($context, $option, $selection);
 
         return $this->cursor($option, $selection);
     }

@@ -144,8 +144,9 @@ trait ResolverTriggers
      * 
      * @param Context $context
      * @param CursorOption $option
+     * @param array $selection
      */
-    protected function beforeExport(Context $context, CursorOption $option)
+    protected function beforeExport(Context $context, CursorOption $option, array $selection)
     {
         $this->beforeList($context, $option);
     }
