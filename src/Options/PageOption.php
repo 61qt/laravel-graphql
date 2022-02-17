@@ -9,7 +9,7 @@ namespace QT\GraphQL\Options;
  *
  * @package QT\GraphQL\Options
  */
-class PageOption extends JsonOption
+class PageOption extends QueryOption
 {
     /**
      * @var int

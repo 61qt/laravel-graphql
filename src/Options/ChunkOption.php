@@ -9,7 +9,7 @@ namespace QT\GraphQL\Options;
  *
  * @package QT\GraphQL\Options
  */
-class ChunkOption extends JsonOption
+class ChunkOption extends QueryOption
 {
     /**
      * @var int

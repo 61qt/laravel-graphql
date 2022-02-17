@@ -9,7 +9,7 @@ namespace QT\GraphQL\Options;
  *
  * @package QT\GraphQL\Options
  */
-class CursorOption extends JsonOption
+class CursorOption extends QueryOption
 {
     /**
      * @var int

@@ -5,11 +5,11 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Options;
 
 /**
- * JsonOption
+ * QueryOption
  *
  * @package QT\GraphQL\Options
  */
-class JsonOption
+class QueryOption
 {
     /**
      * @var array

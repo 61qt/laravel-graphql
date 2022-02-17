@@ -5,7 +5,7 @@ declare (strict_types = 1);
 namespace QT\GraphQL\Traits;
 
 use QT\GraphQL\Contracts\Context;
-use QT\GraphQL\Options\JsonOption;
+use QT\GraphQL\Options\QueryOption;
 use QT\GraphQL\Options\CursorOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,9 +26,9 @@ trait ResolverTriggers
      * 在查询列表前触发
      * 
      * @param Context $context
-     * @param JsonOption $option
+     * @param QueryOption $option
      */
-    protected function beforeList(Context $context, JsonOption $option)
+    protected function beforeList(Context $context, QueryOption $option)
     {
         $this->beforeQuery($context);
     }
