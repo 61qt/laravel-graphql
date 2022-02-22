@@ -162,6 +162,10 @@ abstract class ModelType extends ObjectType implements Resolvable
 
         $this->filterInput = $registrar->getFilterInput();
 
+        if ($this->filterInput instanceof NilType) {
+            return $this->filterInput;
+        }
+
         return $this->manager->setType($this->filterInput);
     }
 
