@@ -90,7 +90,7 @@ class PaginationType extends ObjectType implements Resolvable
                 'defaultValue' => 0,
             ],
             'filters' => [
-                'type'         => fn() => $this->ofType->getFiltersInput(),
+                'type'         => $this->ofType->getFiltersInput(),
                 'description'  => '查询条件',
             ],
             'orderBy' => [
