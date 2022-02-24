@@ -184,14 +184,16 @@ abstract class ModelType extends ObjectType implements Resolvable
             return $this->sortInput = Type::nil();
         }
 
-        $sortFields = [];
-        foreach ($this->sortFields as $field) {
-            $sortFields[$field] = ['type' => Type::direction()];
-        }
-
         $this->sortInput = new InputObjectType([
             'name'   => "{$this->name}SortFields",
-            'fields' => $sortFields,
+            'fields' => function () {
+                $sortFields = [];
+                foreach ($this->sortFields as $field) {
+                    $sortFields[$field] = ['type' => Type::direction()];
+                }
+
+                return $sortFields;
+            },
         ]);
 
         return $this->manager->setType($this->sortInput);
