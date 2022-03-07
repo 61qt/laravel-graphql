@@ -10,7 +10,7 @@ use QT\GraphQL\GraphQLManager;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Definition\NilType;
 use QT\GraphQL\Definition\ModelType;
-use GraphQL\Type\Definition\InputObjectType;
+use QT\GraphQL\Definition\FilterType;
 use QT\GraphQL\Definition\Type as GlobalType;
 
 /**
@@ -152,7 +152,7 @@ class Registrar
      */
     protected function createJoin($table, $fields)
     {
-        return $this->manager->setType(new InputObjectType([
+        return $this->manager->setType(new FilterType([
             'fields' => $this->buildFields($fields, $table),
             'name'   => $this->formatFilterName($table),
         ]));
@@ -177,7 +177,7 @@ class Registrar
             $fields[$operator] = Factory::{$operator}($name, $type);
         }
 
-        return $this->manager->setType(new InputObjectType([
+        return $this->manager->setType(new FilterType([
             'fields' => $fields,
             'name'   => $this->formatFilterName($name, $type->name),
         ]));
@@ -186,15 +186,15 @@ class Registrar
     /**
      * 获取filter input type
      *
-     * @return InputObjectType|NilType
+     * @return FilterType|NilType
      */
-    public function getFilterInput(): InputObjectType | NilType
+    public function getFilterInput(): FilterType | NilType
     {
         if (empty($this->filters)) {
             return GlobalType::nil();
         }
 
-        return new InputObjectType([
+        return new FilterType([
             'name'   => "{$this->modelType->name}Filters",
             'fields' => fn() => $this->buildFields($this->fields),
         ]);
