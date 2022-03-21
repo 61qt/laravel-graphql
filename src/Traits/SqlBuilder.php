@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Traits;
 
@@ -76,7 +76,7 @@ trait SqlBuilder
 
     /**
      * 需要特殊构造的条件
-     * 
+     *
      * @var array
      */
     protected $conditionResolvers = [];
@@ -159,6 +159,14 @@ trait SqlBuilder
             [$first, $operator, $second, $method] = $relation;
         } else {
             [$first, $operator, $second] = $relation;
+        }
+
+        foreach ($query->toBase()->joins as $join) {
+            if ($join->table === $table) {
+                // 在代码里会已连表查询，避免重复关联报错
+                unset($this->joinTable[$table]);
+                return $query;
+            }
         }
 
         $query->{$method}($table, "{$query->getQuery()->from}.{$first}", $operator, "{$table}.{$second}");
@@ -294,7 +302,7 @@ trait SqlBuilder
                     }
 
                     [$column, $operator, $value] = array_values($condition);
-            
+
                     if (in_array($value, ['', null], true)) {
                         continue;
                     }
