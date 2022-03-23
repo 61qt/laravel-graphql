@@ -161,11 +161,13 @@ trait SqlBuilder
             [$first, $operator, $second] = $relation;
         }
 
-        foreach ($query->toBase()->joins as $join) {
-            if ($join->table === $table) {
-                // 在代码里会已连表查询，避免重复关联报错
-                unset($this->joinTable[$table]);
-                return $query;
+        if (is_array($query->toBase()->joins)) {
+            foreach ($query->toBase()->joins as $join) {
+                if ($join->table === $table) {
+                    // 在代码里会已连表查询，避免重复关联报错
+                    unset($this->joinTable[$table]);
+                    return $query;
+                }
             }
         }
 
