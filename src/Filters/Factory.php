@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Filters;
 
@@ -111,7 +111,7 @@ class Factory
     {
         return [
             'type'        => Type::listOf($type),
-            'description' => "{$name} 差集",
+            'description' => "{$name} 范围之间",
         ];
     }
 

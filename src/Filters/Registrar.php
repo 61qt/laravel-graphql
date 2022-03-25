@@ -1,10 +1,9 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Filters;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
 use GraphQL\Type\Definition\Type;
@@ -27,15 +26,15 @@ class Registrar
      */
     protected static $operatorsMaps = [
         // equal
-        '='  => 'eq',
+        '=' => 'eq',
         // not equal
         '!=' => 'ne',
         // greater than
-        '>'  => 'gt',
+        '>' => 'gt',
         // greater than or equal
         '>=' => 'ge',
         // less than
-        '<'  => 'lt',
+        '<' => 'lt',
         // less than or equal
         '<=' => 'le',
     ];
@@ -108,7 +107,7 @@ class Registrar
      * @param array $operators
      * @return self
      */
-    public function set(string $name, Type $type, array $operators)
+    public function set(string $name, Type $type, array $operators): self
     {
         $this->filters[$name] = [$type, $operators];
 
@@ -118,10 +117,13 @@ class Registrar
     }
 
     /**
-     * @param $fields
-     * @throws \App\Exceptions\Error
+     * 生成查询字段
+     *
+     * @param array $fields
+     * @param string|null $table
+     * @return array
      */
-    public function buildFields(array $fields, $table = null)
+    public function buildFields(array $fields, string $table = null): array
     {
         $results = [];
         foreach ($fields as $field => $child) {
@@ -143,14 +145,13 @@ class Registrar
     }
 
     /**
-     * 创建一组指定类型的筛选条件
+     * 创建联表查询的指定类型的筛选条件
      *
-     * @param string $name
-     * @param Type $type
-     * @param array $operators
+     * @param string $table
+     * @param array $fields
      * @return self
      */
-    protected function createJoin($table, $fields)
+    protected function createJoin(string $table, array $fields)
     {
         return $this->manager->setType(new FilterType([
             'fields' => $this->buildFields($fields, $table),
@@ -179,7 +180,7 @@ class Registrar
 
         return $this->manager->setType(new FilterType([
             'fields' => $fields,
-            'name'   => $this->formatFilterName($name, $type->name),
+            'name'   => $this->formatFilterName($name),
         ]));
     }
 
@@ -196,19 +197,18 @@ class Registrar
 
         return new FilterType([
             'name'   => "{$this->modelType->name}Filters",
-            'fields' => fn() => $this->buildFields($this->fields),
+            'fields' => fn () => $this->buildFields($this->fields),
         ]);
     }
 
     /**
-     * 创建一组string类型的筛选条件
+     * 生成filter的名称
      *
      * @param string $name
-     * @param array $operators
      * @return string
      */
-    protected function formatFilterName(string $name, ?string $type = null): string
+    protected function formatFilterName(string $name): string
     {
-        return Str::camel("{$this->modelType->name}_{$name}_{$type}_filter");
+        return "{$this->modelType->name}_{$name}";
     }
 }

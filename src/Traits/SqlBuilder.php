@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace QT\GraphQL\Traits;
 
 use RuntimeException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -120,7 +119,7 @@ trait SqlBuilder
      * @param array $input
      * @return array
      */
-    protected function prepareJoin(Builder $query, array $input)
+    protected function prepareJoin(Builder $query, array $input): array
     {
         $tables = array_intersect_key($input, $this->joinTable);
 
@@ -288,7 +287,7 @@ trait SqlBuilder
      * @param array   $filters
      * @return Builder
      */
-    public function buildFilter(Builder $baseQuery, $filters)
+    public function buildFilter(Builder $baseQuery, array $filters)
     {
         if (empty($filters)) {
             return $baseQuery;
@@ -327,9 +326,10 @@ trait SqlBuilder
      * 生成具体子sql
      *
      * @param Builder $query
+     * @param callable $handler
      * @param string $column
-     * @param string $operator
      * @param mixed $value
+     * @return void
      */
     protected function buildCondition(Builder $query, callable $handler, string $column, mixed $value)
     {
@@ -371,10 +371,9 @@ trait SqlBuilder
     /**
      * 构造排序方式
      *
-     * @param Builder    $query
-     * @param null       $orderBy
-     * @param string     $direction
-     * @param Collection $filters
+     * @param Builder $query
+     * @param string|null $column
+     * @param string $direction
      * @return Builder
      */
     public function buildSort(Builder $query, ?string $column = null, string $direction = 'desc'): Builder
