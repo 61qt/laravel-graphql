@@ -37,8 +37,9 @@ trait ResolverTriggers
      * 列表查询后触发
      * 
      * @param Collection $models
+     * @param array $selection
      */
-    protected function afterList($models)
+    protected function afterList($models, array $selection)
     {
         return $models;
     }
@@ -58,8 +59,9 @@ trait ResolverTriggers
      * 查询单条记录后触发
      * 
      * @param Model $model
+     * @param array $selection
      */
-    protected function afterShow($model)
+    protected function afterShow($model, array $selection)
     {
         return $model;
     }

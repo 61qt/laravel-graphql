@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
 
 /**
  * Graphql Result Resolver
@@ -126,7 +127,7 @@ class Resolver
 
         $model = $this->getBuilder($selection)->findOrFail($id);
 
-        $this->afterShow($model);
+        $this->afterShow($model, $selection);
 
         return $model;
     }
@@ -152,7 +153,7 @@ class Resolver
 
         $models = $query->get();
 
-        $this->afterList($models);
+        $this->afterList($models, $selection);
 
         return $models;
     }
@@ -173,7 +174,7 @@ class Resolver
         $paginator = $this->getBuilder($selection, $option->filters, $option->orderBy)
             ->paginate(min($option->take, $this->perPageMax), ['*'], 'page', $option->page);
 
-        $this->afterList($paginator);
+        $this->afterList($paginator, $selection);
 
         return $paginator;
     }
@@ -400,71 +401,59 @@ class Resolver
     }
 
     /**
-     * TODO 多态查询优化
-     * 加载动态关系,morphTo关系
+     * TODO 与 selectFieldAndWithTable 协同,减少selection循环次数
+     * 加载动态关系
      *
-     * @param $models
-     * @param $selection
+     * @param Collection $models
+     * @param array $selection
      */
     protected function loadRelations($models, $selection)
     {
-        if (empty($selection)) {
+        if (empty($selection) || $models->isEmpty()) {
             return;
         }
 
-        if (!$model = $models->first()) {
-            return;
-        }
-
+        $model = $models->first();
         foreach ($selection as $field => $val) {
-            if (!method_exists($model, $field) || !is_array($val)) {
+            if (!method_exists($model, $field)) {
                 continue;
             }
 
             if (!is_array($val)) {
-                continue;
+                $val = [];
             }
 
             $relation = $model->{$field}();
             // 检查是否为动态关联
-            if ($relation instanceof MorphTo) {
-                // 获取动态关联的对象
-                $types = $models
-                    ->unique($relation->getMorphType())
-                    ->pluck($relation->getMorphType());
+            if (!$relation instanceof MorphTo && !$relation instanceof MorphOneOrMany) {
+                continue;
+            }
 
-                $relations = [];
-                foreach ($types as $type) {
-                    $with  = [];
-                    $class = new $type;
+            // 获取多态关联的对象
+            $types = $models
+                ->unique($relation->getMorphType())
+                ->pluck($relation->getMorphType());
 
-                    foreach ($val as $k => $v) {
-                        if (method_exists($class, $k)) {
-                            $with[] = $k;
-                        }
-                    }
-
-                    $relations[$type] = $with;
+            $relations = [];
+            foreach ($types as $type) {
+                if (!class_exists($type)) {
+                    continue;
                 }
 
-                $this->loadMorph($models, $field, $relations);
-            }
-        }
-    }
+                $with  = [];
+                $class = new $type();
 
-    // TODO 多态查询优化
-    protected function loadMorph($models, $relation, $relations)
-    {
-        $models->pluck($relation)
-            ->groupBy(function ($model) {
-                return empty($model) ? null : get_class($model);
-            })
-            ->filter(function ($models, $className) use ($relations) {
-                return Arr::has($relations, $className);
-            })
-            ->each(function ($models, $className) use ($relations) {
-                $className::with($relations[$className])
-                    ->eagerLoadRelations($models->all());
-            });
+                foreach ($val as $k => $_) {
+                    if (method_exists($class, $k)) {
+                        $with[] = $k;
+                    }
+                }
+
+                $relations[$type] = $with;
+            }
+            // 加载多态关联数据
+            $models->load($field);
+            $models->loadMorph($field, $relations);
+        }
     }
 }
