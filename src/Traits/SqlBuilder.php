@@ -151,6 +151,15 @@ trait SqlBuilder
             return $query;
         }
 
+        // 检查是否手动联表,避免重复关联报错
+        if (!empty($query->toBase()->joins)) {
+            foreach ($query->toBase()->joins as $join) {
+                if ($join->table === $table) {
+                    return $query;
+                }
+            }
+        }
+
         $method   = 'join';
         $relation = array_values($this->joinTable[$table]);
 
@@ -160,19 +169,7 @@ trait SqlBuilder
             [$first, $operator, $second] = $relation;
         }
 
-        if (is_array($query->toBase()->joins)) {
-            foreach ($query->toBase()->joins as $join) {
-                if ($join->table === $table) {
-                    // 在代码里会已连表查询，避免重复关联报错
-                    unset($this->joinTable[$table]);
-                    return $query;
-                }
-            }
-        }
-
         $query->{$method}($table, "{$query->getQuery()->from}.{$first}", $operator, "{$table}.{$second}");
-        // 只关联一次
-        unset($this->joinTable[$table]);
 
         return $query;
     }
