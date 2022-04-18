@@ -1,24 +1,24 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Definition;
 
-use GraphQL\Utils\Utils;
 use GraphQL\Error\Error;
+use GraphQL\Utils\Utils;
 use GraphQL\Language\AST\Node;
 use GraphQL\Language\AST\IntValueNode;
 use GraphQL\Type\Definition\ScalarType;
 
 /**
  * BigIntType
- * 
+ *
  * @package QT\GraphQL\Definition
  */
 class BigIntType extends ScalarType
 {
-    const MAX_INT = 9223372036854775807;
-    const MIN_INT = -9223372036854775807;
+    public const MAX_INT = 9223372036854775807;
+    public const MIN_INT = -9223372036854775807;
 
     /**
      * @var string
@@ -70,11 +70,11 @@ class BigIntType extends ScalarType
      *
      * @throws Error
      */
-    public function parseValue($value) : int
+    public function parseValue($value): int
     {
         $isInt = is_int($value) || (is_float($value) && floor($value) === $value);
 
-        if (! $isInt) {
+        if (!$isInt) {
             throw new Error(
                 'Int cannot represent non-integer value: ' .
                 Utils::printSafe($value)
