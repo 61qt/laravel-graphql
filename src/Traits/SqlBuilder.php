@@ -7,11 +7,13 @@ namespace QT\GraphQL\Traits;
 use RuntimeException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as BaseBuilder;
-use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 trait SqlBuilder
@@ -79,6 +81,20 @@ trait SqlBuilder
      * @var array
      */
     protected $conditionResolvers = [];
+
+    /**
+     * 允许自动select with key的relation
+     *
+     * @var array
+     */
+    protected $autoAssociate = [
+        BelongsTo::class      => ['getForeignKeyName', 'getOwnerKeyName'],
+        BelongsToMany::class  => ['getParentKeyName', 'getRelatedKeyName'],
+        HasOne::class         => ['getLocalKeyName', 'getForeignKeyName'],
+        HasMany::class        => ['getLocalKeyName', 'getForeignKeyName'],
+        HasManyThrough::class => ['getLocalKeyName', 'getSecondLocalKeyName'],
+        HasOneThrough::class  => ['getLocalKeyName', 'getSecondLocalKeyName'],
+    ];
 
     /**
      * 生成sql
@@ -236,15 +252,17 @@ trait SqlBuilder
                 $val = ['*' => true];
             }
 
-            [$localKey, $foreignKey] = $this->getWithKeyName(
-                $model->{$field}()
-            );
+            $relationsKeys = $this->getWithKeyName($model->{$field}());
+
+            if (empty($relationsKeys)) {
+                continue;
+            }
+
+            [$localKey, $foreignKey] = $relationsKeys;
 
             $fields[$model->qualifyColumn($localKey)] = true;
-            // 多态关联时无法指定外键,所以不做字段自动选中
-            if ($foreignKey !== null) {
-                $val[$foreignKey] = true;
-            }
+            // 自动select外键关联字段
+            $val[$foreignKey] = true;
 
             // 只取出选中字段
             $query->with($field, function ($query) use ($val, $depth) {
@@ -256,25 +274,23 @@ trait SqlBuilder
     }
 
     /**
-     * 获取关联字段
+     * 获取关联字段,多态关联暂不处理
+     * 需要使用多态关联时手动调用loadRelations方法
      *
      * @param Relation $relation
      * @return array<string|null>
-     * @throws RuntimeException
      */
     protected function getWithKeyName(Relation $relation): array
     {
-        if ($relation instanceof BelongsTo) {
-            return [$relation->getForeignKeyName(), $relation->getOwnerKeyName()];
-        } elseif ($relation instanceof HasOneOrMany) {
-            return [$relation->getLocalKeyName(), $relation->getForeignKeyName()];
-        } elseif ($relation instanceof BelongsToMany) {
-            return [$relation->getParentKeyName(), $relation->getRelatedKeyName()];
-        } elseif ($relation instanceof HasManyThrough) {
-            return [$relation->getLocalKeyName(), $relation->getSecondLocalKeyName()];
+        $class = get_class($relation);
+
+        if (empty($this->autoAssociate[$class])) {
+            return [];
         }
 
-        throw new RuntimeException("无法从Relation上获取关联字段");
+        [$localKey, $foreignKey] = $this->autoAssociate[$class];
+
+        return [$relation->{$localKey}(), $relation->{$foreignKey}()];
     }
 
     /**
