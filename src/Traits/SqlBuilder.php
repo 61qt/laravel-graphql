@@ -412,7 +412,7 @@ trait SqlBuilder
             // order by limit 在部分情况下会覆盖where条件中索引
             // 为了强制使用where上的索引,使用计算公式来关闭sort索引
             // @see http://mysql.taobao.org/monthly/2015/11/10/
-            $orderBy = DB::raw("`{$table}`.`{$column}` + 0");
+            $orderBy = DB::raw("LOWER(`{$table}`.`{$column}`)");
         }
 
         return $query->orderBy($orderBy, $direction);
