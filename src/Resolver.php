@@ -220,7 +220,7 @@ class Resolver
     public function cursor(CursorOption $option, array $selection = []): Iterator
     {
         $offset = $option->offset;
-        $query  = $this->getBuilder($selection, $option->filters);
+        $query  = $this->getBuilder($selection, $option->filters, $option->orderBy);
 
         do {
             $models = (clone $query)->forPage(++$offset, $option->limit)->get();
@@ -384,6 +384,7 @@ class Resolver
     /**
      * 获取Model的主键.
      *
+     * @param array $input
      * @return mixed
      */
     public function getKey(array $input = [])
@@ -404,7 +405,7 @@ class Resolver
      * @param Collection $models
      * @param array $selection
      */
-    protected function loadRelations($models, $selection)
+    protected function loadRelations($models, array $selection)
     {
         if (empty($selection) || $models->isEmpty()) {
             return;

@@ -22,14 +22,7 @@ class CursorOption extends QueryOption
     public $limit;
 
     /**
-     * @var array
-     */
-    protected $jsonKeys = [
-        'filters',
-    ];
-
-    /**
-     * @param array $args
+     * @param mixed[] $args
      */
     public function __construct(array $args = [])
     {

@@ -86,7 +86,7 @@ trait SqlBuilder
      * 使用索引进行排序的字段,设置时必须带有表名
      * 在有where条件时,排序会强制不使用索引
      * 指定字段后就不会关闭排序索引
-     * 
+     *
      * @var array
      */
     protected $useIndexSortFields = [
@@ -427,7 +427,7 @@ trait SqlBuilder
             // order by limit 在部分情况下会覆盖where条件中索引
             // 为了强制使用where上的索引,使用计算公式来关闭sort索引
             // @see http://mysql.taobao.org/monthly/2015/11/10/
-            $orderBy = DB::raw("LOWER(`{$table}`.`{$column}`)");
+            $orderBy = DB::raw("`{$table}`.`{$column}` + 0");
         }
 
         return $query->orderBy($orderBy, $direction);
