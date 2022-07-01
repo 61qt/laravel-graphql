@@ -83,6 +83,17 @@ trait SqlBuilder
     protected $conditionResolvers = [];
 
     /**
+     * 使用索引进行排序的字段,设置时必须带有表名
+     * 在有where条件时,排序会强制不使用索引
+     * 指定字段后就不会关闭排序索引
+     * 
+     * @var array
+     */
+    protected $useIndexSortFields = [
+        // 'table.column',
+    ];
+
+    /**
      * 允许自动select with key的relation
      *
      * @var array
@@ -404,6 +415,10 @@ trait SqlBuilder
         // 排序时支持链表
         if ($table !== $this->table) {
             $query = $this->buildJoin($query, $table);
+        }
+
+        if (in_array($orderBy, $this->useIndexSortFields)) {
+            return $query->orderBy($orderBy, $direction);
         }
 
         $columns = $this->getColumns($query->toBase());
