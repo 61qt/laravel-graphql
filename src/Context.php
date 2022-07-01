@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace QT\GraphQL;
 
 use Illuminate\Support\Arr;
@@ -43,7 +45,17 @@ class Context implements ContextContract
      * @param mixed $default
      * @return mixed
      */
-    public function setValue(string $key, mixed $value)
+    public function input(string $key, mixed $default = null): mixed
+    {
+        return $this->request->input($key, $default);
+    }
+
+    /**
+     * @param string|int $key
+     * @param mixed $value
+     * @return void
+     */
+    public function setValue(string | int $key, mixed $value)
     {
         return Arr::set($this->config, $key, $value);
     }
@@ -59,20 +71,10 @@ class Context implements ContextContract
     }
 
     /**
-     * @param string|int $key
-     * @param mixed $default
-     * @return mixed
+     * @param string | int $key
+     * @return bool
      */
-    public function input(string $key, mixed $default = null): mixed
-    {
-        return $this->request->input($key, $default);
-    }
-
-    /**
-     * @param array $config
-     * @return void
-     */
-    public function has(string | int $key)
+    public function has(string | int $key): bool
     {
         return Arr::has($this->config, $key);
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Traits;
 
@@ -14,7 +14,7 @@ trait ResolverTriggers
 {
     /**
      * 在查询前触发
-     * 
+     *
      * @param Context $context
      */
     protected function beforeQuery(Context $context)
@@ -24,7 +24,7 @@ trait ResolverTriggers
 
     /**
      * 在查询列表前触发
-     * 
+     *
      * @param Context $context
      * @param QueryOption $option
      */
@@ -35,7 +35,7 @@ trait ResolverTriggers
 
     /**
      * 列表查询后触发
-     * 
+     *
      * @param Collection $models
      * @param array $selection
      */
@@ -46,7 +46,7 @@ trait ResolverTriggers
 
     /**
      * 查询单条记录前触发
-     * 
+     *
      * @param Context $context
      * @param int|string $id
      */
@@ -57,18 +57,18 @@ trait ResolverTriggers
 
     /**
      * 查询单条记录后触发
-     * 
+     *
      * @param Model $model
      * @param array $selection
      */
-    protected function afterShow($model, array $selection)
+    protected function afterShow(Model $model, array $selection)
     {
         return $model;
     }
 
     /**
      * 创建记录前触发
-     * 
+     *
      * @param Context $context
      * @param Model $model
      * @param array $input
@@ -80,17 +80,17 @@ trait ResolverTriggers
 
     /**
      * 创建记录后触发
-     * 
+     *
      * @param Model $model
      */
-    protected function afterStore($model)
+    protected function afterStore(Model $model)
     {
 
     }
 
     /**
      * 修改记录前触发
-     * 
+     *
      * @param Context $context
      * @param Model $model
      * @param array $input
@@ -102,48 +102,48 @@ trait ResolverTriggers
 
     /**
      * 修改记录后触发
-     * 
+     *
      * @param Model $model
      */
-    protected function afterUpdate($model)
+    protected function afterUpdate(Model $model)
     {
 
     }
 
     /**
      * 删除记录前触发
-     * 
+     *
      * @param Context $context
      * @param Model $model
      */
     protected function beforeDestroy(Context $context, Model $model)
     {
-        
+
     }
 
     /**
      * 删除记录前触发
-     * 
+     *
      * @param Model $model
      */
-    protected function afterDestroy($model)
+    protected function afterDestroy(Model $model)
     {
         return $model;
     }
 
     /**
      * 批量删除前触发
-     * 
+     *
      * @param Collection $models
      */
-    protected function beforeBatchDestroy($models)
+    protected function beforeBatchDestroy(Collection $models)
     {
 
     }
 
     /**
      * 导出列表前触发
-     * 
+     *
      * @param Context $context
      * @param CursorOption $option
      * @param array $selection

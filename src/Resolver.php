@@ -1,12 +1,11 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL;
 
 use Iterator;
 use RuntimeException;
-use Illuminate\Support\Arr;
 use QT\GraphQL\Contracts\Context;
 use Illuminate\Support\Facades\DB;
 use QT\GraphQL\Options\PageOption;
@@ -70,7 +69,7 @@ class Resolver
 
     /**
      * Bootstrap the resolver
-     * 
+     *
      * @return void
      */
     protected function boot()
@@ -184,7 +183,6 @@ class Resolver
      *
      * @param Context $context
      * @param CursorOption $option
-     * @param array $selection
      * @return int
      * @throws Error
      */
@@ -239,7 +237,7 @@ class Resolver
      * @param array $selection
      * @param array $filters
      * @param array $orderBy
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function getBuilder(array $selection, array $filters = [], array $orderBy = []): Builder
     {
@@ -287,7 +285,6 @@ class Resolver
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
-
         $id    = $this->getKey($input);
         $model = $this->getFreedModelQuery()->findOrFail($id);
         $this->beforeUpdate($context, $model, $input);

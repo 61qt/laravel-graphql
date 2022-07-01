@@ -149,9 +149,9 @@ class Registrar
      *
      * @param string $table
      * @param array $fields
-     * @return self
+     * @return Type
      */
-    protected function createJoin(string $table, array $fields)
+    protected function createJoin(string $table, array $fields): Type
     {
         return $this->manager->setType(new FilterType([
             'fields' => $this->buildFields($fields, $table),
@@ -165,9 +165,9 @@ class Registrar
      * @param string $name
      * @param Type $type
      * @param array $operators
-     * @return self
+     * @return Type
      */
-    protected function create(string $name, Type $type, array $operators)
+    protected function create(string $name, Type $type, array $operators): Type
     {
         $fields = [];
         foreach ($operators as $operator) {

@@ -25,7 +25,6 @@ use Illuminate\Database\Query\Processors\Processor;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Throwable;
 
 class ResolverTest extends TestCase
 {

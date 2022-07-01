@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Options;
 
@@ -29,7 +29,7 @@ class CursorOption extends QueryOption
     ];
 
     /**
-     * @param mixed[] $args
+     * @param array $args
      */
     public function __construct(array $args = [])
     {

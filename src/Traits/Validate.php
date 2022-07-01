@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Traits;
 
@@ -41,8 +41,8 @@ trait Validate
     /**
      * 核对输入的参数类型
      *
-     * @param       $input
-     * @param       $rules
+     * @param array|Collection $input
+     * @param array $rules
      * @param array $message
      * @throws Error
      */
@@ -58,7 +58,10 @@ trait Validate
         $rules     = $rules ?: $this->rules;
         $message   = $message ?: $this->messages;
         $validator = $this->getValidationFactory()->make(
-            $input, $rules, $message, $this->customAttributes
+            $input,
+            $rules,
+            $message,
+            $this->customAttributes
         );
 
         if ($validator->fails()) {

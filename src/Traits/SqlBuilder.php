@@ -209,7 +209,7 @@ trait SqlBuilder
      * @return Builder
      * @throws RuntimeException
      */
-    public function buildSelect(Builder $query, array $selection = [])
+    public function buildSelect(Builder $query, array $selection = []): Builder
     {
         if (empty($selection)) {
             // 如果没有选择查询字段,只选中主键(用于计算pageInfo)
@@ -311,7 +311,7 @@ trait SqlBuilder
      * @param array   $filters
      * @return Builder
      */
-    public function buildFilter(Builder $baseQuery, array $filters)
+    public function buildFilter(Builder $baseQuery, array $filters): Builder
     {
         if (empty($filters)) {
             return $baseQuery;
@@ -460,7 +460,7 @@ trait SqlBuilder
      * @param callable $handle
      * @return self
      */
-    public function registerOperator(string $operator, callable $handle)
+    public function registerOperator(string $operator, callable $handle): self
     {
         $this->operators[$operator] = $handle;
 
@@ -474,7 +474,7 @@ trait SqlBuilder
      * @param callable $resolver
      * @return self
      */
-    public function registerCondition(string $column, callable $resolver)
+    public function registerCondition(string $column, callable $resolver): self
     {
         $this->conditionResolvers[$column] = $resolver;
 

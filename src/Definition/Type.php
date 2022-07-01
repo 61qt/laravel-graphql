@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL\Definition;
 
@@ -12,6 +12,11 @@ use QT\GraphQL\Definition\TimestampType;
 use QT\GraphQL\Definition\DirectionType;
 use GraphQL\Type\Definition\Type as BaseType;
 
+/**
+ * Type
+ * 
+ * @package QT\GraphQL\Definition
+ */
 abstract class Type extends BaseType
 {
     public const NIL       = 'nil';
@@ -27,7 +32,7 @@ abstract class Type extends BaseType
     protected static $globalTypes = [];
 
     /**
-     * @api
+     * @return NilType
      */
     public static function nil() : NilType
     {
@@ -39,7 +44,7 @@ abstract class Type extends BaseType
     }
 
     /**
-     * @api
+     * @return JsonType
      */
     public static function json() : JsonType
     {
@@ -51,7 +56,7 @@ abstract class Type extends BaseType
     }
 
     /**
-     * @api
+     * @return MixedType
      */
     public static function mixed() : MixedType
     {
@@ -63,7 +68,7 @@ abstract class Type extends BaseType
     }
 
     /**
-     * @api
+     * @return TimestampType
      */
     public static function timestamp() : TimestampType
     {
@@ -75,7 +80,7 @@ abstract class Type extends BaseType
     }
 
     /**
-     * @api
+     * @return BigIntType
      */
     public static function bigint() : BigIntType
     {
@@ -87,7 +92,7 @@ abstract class Type extends BaseType
     }
 
     /**
-     * @api
+     * @return DirectionType
      */
     public static function direction() : DirectionType
     {

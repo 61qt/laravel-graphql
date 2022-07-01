@@ -98,7 +98,7 @@ abstract class ModelMutation
     /**
      * 获取Mutation的配置信息
      *
-     * @return Generator
+     * @return Generator<string, array>
      * @throws Error
      */
     public function getMutationConfig()

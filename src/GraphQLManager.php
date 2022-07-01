@@ -1,10 +1,9 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace QT\GraphQL;
 
-use Closure;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 use QT\GraphQL\Definition\ModelMutation;
@@ -18,8 +17,8 @@ use QT\GraphQL\Definition\Type as GlobalType;
  */
 class GraphQLManager
 {
-    const TYPE     = 'Type';
-    const MUTATION = 'Mutation';
+    public const TYPE     = 'Type';
+    public const MUTATION = 'Mutation';
 
     /**
      * @var array
@@ -32,13 +31,15 @@ class GraphQLManager
     protected $mutations = [];
 
     /**
-     * @var Closure
+     * Type查询器
+     *
+     * @var callable
      */
     protected $typeFinder;
 
     /**
      * @param string $name
-     * @return Type $type
+     * @return Type
      */
     public function getType(string $name): Type
     {
@@ -50,8 +51,8 @@ class GraphQLManager
     }
 
     /**
-     * @param string $name
      * @param string|Type $type
+     * @return Type
      * @throws GraphQLException
      */
     public function setType(string | Type $type): Type
@@ -60,7 +61,7 @@ class GraphQLManager
             (is_string($type) && class_exists($type)) &&
             is_subclass_of($type, Type::class)
         ) {
-            $type = new $type;
+            $type = new $type();
         }
 
         if (!$type instanceof Type) {
@@ -104,7 +105,7 @@ class GraphQLManager
 
         if (isset($containers[$name])) {
             if (is_string($containers[$name])) {
-                $containers[$name] = new $containers[$name];
+                $containers[$name] = new $containers[$name]();
             }
 
             return $containers[$name];
@@ -127,7 +128,6 @@ class GraphQLManager
     public function getTypeFinder(): callable
     {
         return $this->typeFinder ?: function () {
-
         };
     }
 
@@ -137,7 +137,7 @@ class GraphQLManager
      * @param callable $typeFinder
      * @return self
      */
-    public function setTypeFinder(callable $typeFinder)
+    public function setTypeFinder(callable $typeFinder): self
     {
         $this->typeFinder = $typeFinder;
 
@@ -145,13 +145,13 @@ class GraphQLManager
     }
 
     /**
-     * @param string         $name
+     * @param string $name
      * @param callable|array $fields
-     * @param array          $args
+     * @param array $args
      * @return ObjectType
      * @throws Error
      */
-    public function create(string $name, callable  | array $fields, array $args = []): ObjectType
+    public function create(string $name, callable | array $fields, array $args = []): ObjectType
     {
         return $this->setType(new ObjectType(compact('name', 'fields', 'args')));
     }
