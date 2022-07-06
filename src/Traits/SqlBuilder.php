@@ -508,6 +508,7 @@ trait SqlBuilder
             };
 
             static::registerGlobalOperator($name, $callback);
+            static::registerGlobalOperator($operator, $callback);
         }
 
         static::registerGlobalOperator('in', function ($query, $column, $value) {
