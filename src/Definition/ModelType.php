@@ -92,7 +92,7 @@ abstract class ModelType extends ObjectType implements Resolvable
     public function __construct(protected GraphQLManager $manager, array $config = [])
     {
         parent::__construct(array_merge($config, [
-            'fields'      => fn() => $this->getModelFields(),
+            'fields'      => fn ()      => $this->getModelFields(),
             'description' => $this->description,
         ]));
     }
@@ -129,10 +129,15 @@ abstract class ModelType extends ObjectType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
+        $selection = $this->formatSelection(
+            $info->getFieldSelection($context->getValue('graphql.max_depth', 5)),
+            true
+        );
+
         return $this->getResolver()->show(
             $context,
             $args,
-            $info->getFieldSelection($context->getValue('graphql.max_depth', 5))
+            $selection
         );
     }
 
@@ -221,9 +226,10 @@ abstract class ModelType extends ObjectType implements Resolvable
      * 格式化选中的字段
      *
      * @param array $selection
+     * @param boolean $isDetail
      * @return array
      */
-    public function formatSelection(array $selection): array
+    public function formatSelection(array $selection, bool $isDetail = false): array
     {
         foreach ($this->mustSelection as $field => $val) {
             if (is_int($field) && is_string($val)) {
@@ -234,8 +240,10 @@ abstract class ModelType extends ObjectType implements Resolvable
             Arr::set($selection, $field, $val);
         }
 
-        foreach ($this->detailedFields as $field) {
-            Arr::forget($selection, $field);
+        if (!$isDetail) {
+            foreach ($this->detailedFields as $field) {
+                Arr::forget($selection, $field);
+            }
         }
 
         return $selection;
