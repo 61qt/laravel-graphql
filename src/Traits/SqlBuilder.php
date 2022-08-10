@@ -132,7 +132,17 @@ trait SqlBuilder
 
         foreach ($orderBy as $columns) {
             foreach ($columns as $column => $direction) {
-                $this->buildSort($query, $column, $direction);
+                if (!is_array($direction)) {
+                    $this->buildSort($query, $column, $direction);
+                    continue;
+                }
+
+                $table = $column;
+                $item  = $direction;
+                // 联表查询结构为, table => [column => direction]
+                foreach ($item as $column => $direction) {
+                    $this->buildSort($query, $column, $direction, $table);
+                }
             }
         }
 
@@ -398,19 +408,20 @@ trait SqlBuilder
      * @param Builder $query
      * @param string|null $column
      * @param string $direction
+     * @param string|null $table
      * @return Builder
      */
-    public function buildSort(Builder $query, ?string $column = null, string $direction = 'desc'): Builder
-    {
+    public function buildSort(
+        Builder $query, 
+        ?string $column = null, 
+        string $direction = 'desc',
+        ?string $table = null
+    ): Builder {
         if ($column === null) {
             return $query;
         }
 
-        $table = $this->table;
-        if (strpos($column, '.') !== false) {
-            list($table, $column) = explode('.', $column, 2);
-        }
-
+        $table   = $table ?: $this->table;
         $orderBy = "{$table}.{$column}";
         // 排序时支持链表
         if ($table !== $this->table) {
