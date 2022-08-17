@@ -92,7 +92,7 @@ abstract class ModelType extends ObjectType implements Resolvable
     public function __construct(protected GraphQLManager $manager, array $config = [])
     {
         parent::__construct(array_merge($config, [
-            'fields'      => fn ()      => $this->getModelFields(),
+            'fields'      => fn () => $this->getModelFields(),
             'description' => $this->description,
         ]));
     }
@@ -129,15 +129,12 @@ abstract class ModelType extends ObjectType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        $selection = $this->formatSelection(
-            $info->getFieldSelection($context->getValue('graphql.max_depth', 5)),
-            true
-        );
+        $selection = $info->getFieldSelection($context->getValue('graphql.max_depth', 5));
 
         return $this->getResolver()->show(
             $context,
             $args,
-            $selection
+            $this->formatSelection($selection, true)
         );
     }
 
