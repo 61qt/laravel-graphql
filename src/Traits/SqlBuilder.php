@@ -281,14 +281,12 @@ trait SqlBuilder
 
             [$localKey, $foreignKey] = $relationsKeys;
 
-            $fields[$model->qualifyColumn($localKey)] = true;
-            // 自动select外键关联字段
+            // 选中关联表字段
             $val[$foreignKey] = true;
+            // 选中当前表字段
+            $fields[$model->qualifyColumn($localKey)] = true;
 
-            // 只取出选中字段
-            $query->with($field, function ($query) use ($val, $depth) {
-                $this->selectFieldAndWithTable($query, $val, $depth - 1);
-            });
+            $this->withRelation($query, $field, $val, $depth);
         }
 
         $query->addSelect(array_keys($fields));
@@ -312,6 +310,19 @@ trait SqlBuilder
         [$localKey, $foreignKey] = $this->autoAssociate[$class];
 
         return [$relation->{$localKey}(), $relation->{$foreignKey}()];
+    }
+
+    /**
+     * 关联子级
+     * 
+     * @param Builder|Relation $query
+     * @param string $relation
+     * @param array $fields
+     * @param int $depth
+     */
+    protected function withRelation(Builder|Relation $query, string $relation, array $fields, int $depth)
+    {
+        $query->with($relation, fn($query) => $this->selectFieldAndWithTable($query, $fields, $depth - 1));
     }
 
     /**
