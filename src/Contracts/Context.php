@@ -7,7 +7,7 @@ namespace QT\GraphQL\Contracts;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-interface Context 
+interface Context
 {
     /**
      * @return Request
@@ -20,20 +20,27 @@ interface Context
     public function getResponse(): Response;
 
     /**
-     * @param string|int $key
+     * 设置值
+     *
+     * @param string $key
      * @param mixed $value
+     * @return void
      */
     public function setValue(string $key, mixed $value);
 
     /**
-     * @param string|int $key
+     * 获取字段值
+     *
+     * @param string $key
      * @param mixed $default
      * @return mixed
      */
     public function getValue(string $key, mixed $default = null): mixed;
 
     /**
-     * @param string|int $key
+     * 传参的input
+     *
+     * @param string $key
      * @param mixed $default
      * @return mixed
      */
