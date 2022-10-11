@@ -21,7 +21,7 @@ class ObjectType extends BaseObjectType
     /**
      * @var array
      */
-    private $fieldResolvers = [];
+    protected $fieldResolvers = [];
 
     /**
      * @param array $config
@@ -61,7 +61,7 @@ class ObjectType extends BaseObjectType
     /**
      * 初始化字段回调函数
      */
-    private function initializeFieldResolver()
+    protected function initializeFieldResolver()
     {
         $defaultFn = static::getDefaultFieldResolver();
         foreach ($this->getFields() as $field) {
