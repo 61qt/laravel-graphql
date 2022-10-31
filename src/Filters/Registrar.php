@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
 use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Definition\NilType;
-use QT\GraphQL\Definition\ModelType;
 use QT\GraphQL\Definition\FilterType;
 use QT\GraphQL\Definition\Type as GlobalType;
 
@@ -44,7 +43,7 @@ class Registrar
      *
      * @var array
      */
-    protected $filters = [];
+    public $filters = [];
 
     /**
      * 允许筛选的字段
@@ -54,11 +53,11 @@ class Registrar
     protected $fields = [];
 
     /**
-     * @param ModelType $type
+     * @param string $name
      * @param GraphQLManager $manager
      */
     public function __construct(
-        protected ModelType $modelType,
+        protected string $name,
         protected GraphQLManager $manager
     ) {
     }
@@ -196,7 +195,7 @@ class Registrar
         }
 
         return new FilterType([
-            'name'   => "{$this->modelType->name}Filters",
+            'name'   => "{$this->name}Filters",
             'fields' => fn () => $this->buildFields($this->fields),
         ]);
     }
@@ -209,6 +208,6 @@ class Registrar
      */
     protected function formatFilterName(string $name): string
     {
-        return "{$this->modelType->name}_{$name}";
+        return "{$this->name}_{$name}";
     }
 }

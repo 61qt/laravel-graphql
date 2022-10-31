@@ -158,17 +158,17 @@ abstract class ModelType extends ObjectType implements Resolvable
             return $this->filterInput;
         }
 
-        $registrar = new Registrar($this, $this->manager);
+        $registrar = new Registrar($this->name, $this->manager);
 
         $this->registrationFilters($registrar);
 
-        $this->filterInput = $registrar->getFilterInput();
-
-        if ($this->filterInput instanceof NilType) {
-            return $this->filterInput;
+        if (empty($registrar->filters)) {
+            return $this->filterInput = Type::nil();
         }
 
-        return $this->manager->setType($this->filterInput);
+        return $this->manager->setType(
+            $this->filterInput = $registrar->getFilterInput()
+        );
     }
 
     /**
@@ -186,9 +186,9 @@ abstract class ModelType extends ObjectType implements Resolvable
             return $this->sortInput = Type::nil();
         }
 
-        $this->sortInput = new SortType($this, $this->sortFields);
-
-        return $this->manager->setType($this->sortInput);
+        return $this->manager->setType(
+            $this->sortInput = new SortType($this->name, $this->sortFields)
+        );
     }
 
     /**

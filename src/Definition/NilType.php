@@ -35,7 +35,7 @@ class NilType extends ScalarType
      */
     public function serialize($value)
     {
-        return null;
+        return $value;
     }
 
     /**
@@ -46,7 +46,7 @@ class NilType extends ScalarType
      */
     public function parseValue($value)
     {
-        return null;
+        return $value;
     }
 
     /**

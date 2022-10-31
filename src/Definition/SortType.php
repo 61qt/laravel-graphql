@@ -17,13 +17,13 @@ class SortType extends InputObjectType
     /**
      * 初始化数据结构
      *
-     * @param ModelType $type
+     * @param string $name
      * @param array $sortFields
      */
-    public function __construct(ModelType $type, protected array $sortFields)
+    public function __construct(string $name, protected array $sortFields)
     {
         parent::__construct([
-            'name'   => "{$type->name}SortFields",
+            'name'   => "{$name}SortFields",
             'fields' => [$this, 'getSortFields'],
         ]);
     }
