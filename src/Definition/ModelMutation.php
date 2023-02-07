@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use Generator;
+use QT\GraphQL\Resolver;
 use App\Exceptions\Error;
 use Illuminate\Support\Arr;
 use QT\GraphQL\GraphQLManager;
+use GraphQL\Type\Definition\Type;
 use QT\GraphQL\Contracts\Context;
 use GraphQL\Type\Definition\ResolveInfo;
 use QT\GraphQL\Exceptions\GraphQLException;
@@ -62,15 +64,51 @@ abstract class ModelMutation
      */
     public function __construct(protected GraphQLManager $manager)
     {
+    }
+
+    /**
+     * 获取ModelType
+     * 
+     * @return ModelType
+     */
+    public function getModelType(): ModelType
+    {
+        if ($this->ofType !== null) {
+            return $this->ofType;
+        }
+
         if (empty($this->objectType)) {
             throw new GraphQLException("Mutation绑定的Object Type不能为空");
         }
 
-        $this->ofType = $manager->getType($this->objectType);
+        $this->ofType = $this->manager->getType($this->objectType);
 
         if (!$this->ofType instanceof ModelType) {
             throw new GraphQLException("Mutation必须绑定Model Type");
         }
+
+        return $this->ofType;
+    }
+
+    /**
+     * 获取业务层逻辑
+     * 
+     * @return Resolver
+     */
+    public function getResolver(): Resolver
+    {
+        return $this->getModelType()->getResolver();
+    }
+
+    /**
+     * 获取返回的数据结构
+     * 
+     * @param string $name
+     * @return Type
+     */
+    public function getReturnType(string $name): Type
+    {
+        return $this->getModelType();
     }
 
     /**
@@ -84,7 +122,7 @@ abstract class ModelMutation
      */
     public function resolve($node, $args, Context $context, ResolveInfo $info)
     {
-        $resolver = $this->ofType->getResolver();
+        $resolver = $this->getResolver();
 
         if ($this->inputKey === null) {
             $input = $args;
@@ -133,7 +171,7 @@ abstract class ModelMutation
         $description = $this->getMutationDescription($mutation);
 
         if (!method_exists($this, 'get' . ucfirst($mutation) . 'Config')) {
-            return [$this->ofType, $inputArgs, [$this, 'resolve'], $description];
+            return [$this->getReturnType($mutation), $inputArgs, [$this, 'resolve'], $description];
         }
 
         return $this->{'get' . ucfirst($mutation) . 'Config'}($inputArgs, $description);
