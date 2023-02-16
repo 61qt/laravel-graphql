@@ -57,7 +57,7 @@ class BigIntType extends ScalarType
 
         if ($float > self::MAX_INT || $float < self::MIN_INT) {
             throw new Error(
-                'Int cannot represent non 32-bit signed integer value: ' .
+                'Int cannot represent non 64-bit signed integer value: ' .
                 Utils::printSafe($value)
             );
         }
@@ -83,7 +83,7 @@ class BigIntType extends ScalarType
 
         if ($value > self::MAX_INT || $value < self::MIN_INT) {
             throw new Error(
-                'Int cannot represent non 32-bit signed integer value: ' .
+                'Int cannot represent non 64-bit signed integer value: ' .
                 Utils::printSafe($value)
             );
         }
