@@ -111,12 +111,15 @@ class PaginationType extends ObjectType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        $fields = $info->getFieldSelection($context->getValue('graphql.max_depth', 5));
         // 获取选中的字段
+        $resolver  = $this->ofType->getResolver();
+        $fields    = $info->getFieldSelection($context->getValue('graphql.max_depth', 5));
         $selection = $this->ofType->formatSelection($fields['items'] ?? []);
 
-        return $this->ofType->getResolver()->pagination(
-            $context, new PageOption($args), $selection
-        );
+        if ($this->ofType->isDeferrable()) {
+            $resolver->disableAuthWithRelation();
+        }
+
+        return $resolver->pagination($context, new PageOption($args), $selection);
     }
 }

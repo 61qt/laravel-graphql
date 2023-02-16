@@ -94,6 +94,13 @@ trait SqlBuilder
     ];
 
     /**
+     * 自动加载关联
+     * 
+     * @var bool
+     */
+    protected $autoWithRelation = true;
+
+    /**
      * 允许自动select with key的relation
      *
      * @var array
@@ -261,6 +268,10 @@ trait SqlBuilder
         foreach ($selection as $field => $val) {
             if (!method_exists($model, $field)) {
                 $fields[$model->qualifyColumn($field)] = true;
+                continue;
+            }
+
+            if (!$this->autoWithRelation) {
                 continue;
             }
 
