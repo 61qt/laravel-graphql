@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace QT\GraphQL\Traits;
 
+use QT\GraphQL\Utils;
 use RuntimeException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as BaseBuilder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 trait SqlBuilder
 {
@@ -95,24 +90,10 @@ trait SqlBuilder
 
     /**
      * 自动加载关联
-     * 
+     *
      * @var bool
      */
     protected $autoWithRelation = true;
-
-    /**
-     * 允许自动select with key的relation
-     *
-     * @var array
-     */
-    protected $autoAssociate = [
-        BelongsTo::class      => ['getForeignKeyName', 'getOwnerKeyName'],
-        BelongsToMany::class  => ['getParentKeyName', 'getRelatedKeyName'],
-        HasOne::class         => ['getLocalKeyName', 'getForeignKeyName'],
-        HasMany::class        => ['getLocalKeyName', 'getForeignKeyName'],
-        HasManyThrough::class => ['getLocalKeyName', 'getSecondLocalKeyName'],
-        HasOneThrough::class  => ['getLocalKeyName', 'getSecondLocalKeyName'],
-    ];
 
     /**
      * 生成sql
@@ -284,7 +265,7 @@ trait SqlBuilder
                 $val = ['*' => true];
             }
 
-            $relationsKeys = $this->getWithKeyName($model->{$field}());
+            $relationsKeys = Utils::getWithKeyName($model->{$field}());
 
             if (empty($relationsKeys)) {
                 continue;
@@ -300,32 +281,12 @@ trait SqlBuilder
             $this->withRelation($query, $field, $val, $depth);
         }
 
-        $query->addSelect(array_keys($fields));
-    }
-
-    /**
-     * 获取关联字段,多态关联暂不处理
-     * 需要使用多态关联时手动调用loadRelations方法
-     *
-     * @param Relation $relation
-     * @return array<string|null>
-     */
-    protected function getWithKeyName(Relation $relation): array
-    {
-        $class = get_class($relation);
-
-        if (empty($this->autoAssociate[$class])) {
-            return [];
-        }
-
-        [$localKey, $foreignKey] = $this->autoAssociate[$class];
-
-        return [$relation->{$localKey}(), $relation->{$foreignKey}()];
+        return $query->addSelect(array_keys($fields));
     }
 
     /**
      * 关联子级
-     * 
+     *
      * @param Builder|Relation $query
      * @param string $relation
      * @param array $fields
@@ -333,7 +294,7 @@ trait SqlBuilder
      */
     protected function withRelation(Builder|Relation $query, string $relation, array $fields, int $depth)
     {
-        $query->with($relation, fn($query) => $this->selectFieldAndWithTable($query, $fields, $depth - 1));
+        $query->with($relation, fn ($query) => $this->selectFieldAndWithTable($query, $fields, $depth - 1));
     }
 
     /**
@@ -434,8 +395,8 @@ trait SqlBuilder
      * @return Builder
      */
     public function buildSort(
-        Builder $query, 
-        ?string $column = null, 
+        Builder $query,
+        ?string $column = null,
         string $direction = 'desc',
         ?string $table = null
     ): Builder {
