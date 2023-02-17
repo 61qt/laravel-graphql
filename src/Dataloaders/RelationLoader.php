@@ -31,7 +31,7 @@ class RelationLoader extends Dataloader
      *
      * @var array
      */
-    protected $resolvers = [
+    protected static $resolvers = [
         BelongsTo::class      => 'resolveBelongsTo',
         BelongsToMany::class  => 'resolveBelongsToMany',
         HasOne::class         => 'resolveHasOneOrMany',
@@ -110,7 +110,7 @@ class RelationLoader extends Dataloader
     public function __invoke(array $keys): array
     {
         $name = get_class($this->relation);
-        if (empty($this->resolvers[$name])) {
+        if (empty(static::$resolvers[$name])) {
             return [];
         }
 
@@ -126,7 +126,7 @@ class RelationLoader extends Dataloader
             }
         }
 
-        return $this->{$this->resolvers[$name]}($relation, $keys);
+        return $this->{static::$resolvers[$name]}($relation, $keys);
     }
 
     /**

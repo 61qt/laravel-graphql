@@ -7,6 +7,7 @@ namespace QT\GraphQL\Traits;
 use QT\GraphQL\Utils;
 use GraphQL\Type\Schema;
 use QT\GraphQL\Contracts\Context;
+use Illuminate\Support\Collection;
 use QT\GraphQL\Dataloaders\Dataloader;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\AbstractType;
@@ -14,21 +15,17 @@ use QT\GraphQL\Dataloaders\RelationLoader;
 use GraphQL\Executor\Promise\Adapter\SyncPromise;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
+// TODO 设计Dataloader池
+// 以ast节点作为key，作为单个语法的缓存
+// 以sql作为key，对请求内的语法查询进行整合
 trait Deferred
 {
     /**
      * Relation primary key
-     * 
+     *
      * @var array<string, string>
      */
     private $keyNames = [];
-
-    /**
-     * Resolve field dataloader
-     *
-     * @var array<string, Dataloader>
-     */
-    private $dataloaders = [];
 
     /**
      * 获取字段的Promise
@@ -55,9 +52,10 @@ trait Deferred
         }
 
         // 根据语法树节点来存储dataloader,减少重复的初始化工作
-        $path = join('.', $path);
-        if (!empty($this->dataloaders[$path])) {
-            return $this->dataloaders[$path]->get($node?->{$this->keyNames[$path]});
+        $path = join('-', $path);
+        $pool = $this->getDataloaderPool($context);
+        if (!empty($pool[$path])) {
+            return $pool[$path]->get($node?->{$this->keyNames[$path]});
         }
 
         $selection = [];
@@ -73,15 +71,34 @@ trait Deferred
         }
 
         if (!empty($selection)) {
-            $this->dataloaders[$path] = $this->getDataLoader($relation, $selection, $args);
+            $pool[$path] = $this->createDataloader($relation, $selection, $args);
         } else {
             // 没有请求具体的字段,不加载数据
-            $this->dataloaders[$path] = new Dataloader(fn() => null);
+            $pool[$path] = new Dataloader(fn () => null);
         }
 
         $this->keyNames[$path] = Utils::getWithLocalKey($relation);
 
-        return $this->dataloaders[$path]->get($node?->{$this->keyNames[$path]});
+        return $pool[$path]->get($node?->{$this->keyNames[$path]});
+    }
+
+    /**
+     * 获取graphql dataloader池
+     *
+     * @param Context $context
+     * @return Collection<string, Dataloader>
+     */
+    protected function getDataloaderPool(Context $context): Collection
+    {
+        // 将dataloader冗余在上下文中,保证不同的请求不会相互影响
+        $key  = "graphql-{$this->name}-pool";
+        $pool = $context->getValue($key);
+
+        if ($pool === null) {
+            $context->setValue($key, $pool = new Collection());
+        }
+
+        return $pool;
     }
 
     /**
@@ -92,7 +109,7 @@ trait Deferred
      * @param array $args
      * @return Dataloader
      */
-    public function getDataLoader(Relation $relation, array $selection, array $args): Dataloader
+    protected function createDataloader(Relation $relation, array $selection, array $args): Dataloader
     {
         $key = $relation->toBase()->toSql();
         if (!isset(Dataloader::$pool[$key])) {
