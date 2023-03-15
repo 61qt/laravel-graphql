@@ -62,12 +62,12 @@ class ListType extends ListOfType implements Resolvable
                 'defaultValue' => false,
             ],
             'filters' => [
-                'type'         => $this->ofType->getFiltersInput(),
-                'description'  => '查询条件',
+                'type'        => $this->ofType->getFiltersInput(),
+                'description' => '查询条件',
             ],
             'orderBy' => [
-                'type'         => Type::listOf($this->ofType->getSortFields()),
-                'description'  => '排序字段',
+                'type'        => Type::listOf($this->ofType->getSortFields()),
+                'description' => '排序字段',
             ],
         ];
     }
@@ -83,14 +83,15 @@ class ListType extends ListOfType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        $resolver  = $this->ofType->getResolver();
-        $selection = $this->ofType->formatSelection(
-            $info->getFieldSelection($context->getValue('graphql.max_depth', 5))
-        );
-
+        $depth    = $context->getValue('graphql.max_depth', 5);
+        $resolver = $this->ofType->getResolver();
         if ($this->ofType->isDeferrable()) {
+            $depth = 0;
+
             $resolver->disableAuthWithRelation();
         }
+
+        $selection = $this->ofType->formatSelection($info->getFieldSelection($depth));
 
         return $resolver->chunk($context, new ChunkOption($args), $selection);
     }

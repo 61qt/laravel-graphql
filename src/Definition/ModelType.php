@@ -129,14 +129,17 @@ abstract class ModelType extends ObjectType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        $resolver  = $this->getResolver();
-        $selection = $info->getFieldSelection($context->getValue('graphql.max_depth', 5));
-
+        $depth    = $context->getValue('graphql.max_depth', 5);
+        $resolver = $this->getResolver();
         if ($this->isDeferrable()) {
+            $depth = 0;
+
             $resolver->disableAuthWithRelation();
         }
 
-        return $resolver->show($context, $args, $this->formatSelection($selection, true));
+        $selection = $this->formatSelection($info->getFieldSelection($depth), true);
+
+        return $resolver->show($context, $args, $selection);
     }
 
     /**
