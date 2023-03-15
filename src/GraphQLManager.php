@@ -73,20 +73,23 @@ class GraphQLManager
 
     /**
      * @param string $name
+     * @param callable|array $fields
+     * @param array $args
+     * @return ObjectType
+     * @throws Error
+     */
+    public function create(string $name, callable | array $fields, array $args = []): ObjectType
+    {
+        return $this->setType(new ObjectType(compact('name', 'fields', 'args')));
+    }
+
+    /**
+     * @param string $name
      * @return ModelMutation
      */
     public function getMutation(string $name): ModelMutation
     {
         return $this->find($name, static::MUTATION);
-    }
-
-    /**
-     * @param ModelMutation $mutation
-     * @return ModelMutation
-     */
-    public function setMutation(ModelMutation $mutation): ModelMutation
-    {
-        return $this->mutations[$mutation->name] = $mutation;
     }
 
     /**
@@ -142,18 +145,6 @@ class GraphQLManager
         $this->typeFinder = $typeFinder;
 
         return $this;
-    }
-
-    /**
-     * @param string $name
-     * @param callable|array $fields
-     * @param array $args
-     * @return ObjectType
-     * @throws Error
-     */
-    public function create(string $name, callable | array $fields, array $args = []): ObjectType
-    {
-        return $this->setType(new ObjectType(compact('name', 'fields', 'args')));
     }
 
     /**
