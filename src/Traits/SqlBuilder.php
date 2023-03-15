@@ -51,7 +51,7 @@ trait SqlBuilder
      *
      * @var int
      */
-    protected $maxDepth = 10;
+    protected $maxDepth = 5;
 
     /**
      * 关联字段
