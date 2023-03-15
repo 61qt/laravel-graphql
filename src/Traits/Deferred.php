@@ -16,9 +16,11 @@ use GraphQL\Executor\Promise\Adapter\SyncPromise;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use QT\GraphQL\Contracts\Context as ContextContract;
 
-// TODO 缓存Dataloader
-// 根据AST节点进行缓存,保证高度相同的节点,可以复用sql
-// 同时不同层级的节点互不干涉,同一条记录,不同层级的selection不同,不能共用
+/**
+ * 延迟加载结果
+ * 
+ * @package QT\GraphQL\Traits
+ */
 trait Deferred
 {
     /**
@@ -34,6 +36,39 @@ trait Deferred
      * @var string
      */
     protected $nodeCacheKey = 'g-ast-%s';
+
+    /**
+     * 是否支持延迟加载
+     * 
+     * @return bool
+     */
+    public function isDeferrable()
+    {
+        return true;
+    }
+
+    /**
+     * 获取字段默认处理回调
+     *
+     * @param mixed $node
+     * @param array $args
+     * @param ContextContract $context
+     * @param ResolveInfo $info
+     * @return mixed
+     */
+    public function resolveField(mixed $node, array $args, ContextContract $context, ResolveInfo $info): mixed
+    {
+        if (method_exists($node, $info->fieldName)) {
+            // 检查model是否加载了该字段
+            if ($node->relationLoaded($info->fieldName)) {
+                return $node->getRelation($info->fieldName);
+            }
+
+            return $this->getDeferred($node, $args, $context, $info);
+        }
+
+        return $node->getAttributeValue($info->fieldName);
+    }
 
     /**
      * 获取字段的Promise

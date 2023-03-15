@@ -7,7 +7,6 @@ namespace QT\GraphQL\Definition;
 use Closure;
 use Illuminate\Support\Str;
 use QT\GraphQL\Contracts\Context;
-use QT\GraphQL\Contracts\Deferrable;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\ObjectType as BaseObjectType;
@@ -39,12 +38,12 @@ class ObjectType extends BaseObjectType
 
     /**
      * 是否支持延迟加载
-     * 
+     *
      * @return bool
      */
     public function isDeferrable()
     {
-        return $this instanceof Deferrable;
+        return false;
     }
 
     /**
@@ -74,7 +73,7 @@ class ObjectType extends BaseObjectType
      */
     protected function initializeFieldResolver()
     {
-        $defaultFn = Closure::bind(static::getDefaultFieldResolver(), $this);
+        $defaultFn = [$this, 'resolveField'];
         foreach ($this->getFields() as $field) {
             $method = 'resolve' . ucfirst(Str::camel($field->name));
 
@@ -89,43 +88,39 @@ class ObjectType extends BaseObjectType
     /**
      * 获取字段默认处理回调
      *
-     * @return Closure
+     * @param mixed $node
+     * @param array $args
+     * @param Context $context
+     * @param ResolveInfo $info
+     * @return mixed
      */
-    public static function getDefaultFieldResolver(): Closure
+    public function resolveField(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        return function ($node, $args, Context $context, ResolveInfo $info) {
-            if ($node instanceof Model) {
-                if (method_exists($node, $info->fieldName)) {
-                    // 检查model是否加载了该字段
-                    if ($node->relationLoaded($info->fieldName)) {
-                        return $node->getRelation($info->fieldName);
-                    }
-
-                    return $this instanceof Deferrable
-                        ? $this->getDeferred($node, $args, $context, $info)
-                        : null;
-                }
-
-                return $node->getAttributeValue($info->fieldName);
+        if ($node instanceof Model) {
+            // 检查model是否加载了该字段
+            if ($node->relationLoaded($info->fieldName)) {
+                return $node->getRelation($info->fieldName);
             }
 
-            if (is_array($node)) {
-                return $node[$info->fieldName] ?? null;
+            return $node->getAttributeValue($info->fieldName);
+        }
+
+        if (is_array($node)) {
+            return $node[$info->fieldName] ?? null;
+        }
+
+        if (is_object($node)) {
+            $value = $node->{$info->fieldName} ?? null;
+
+            if ($value !== null) {
+                return $value;
             }
 
-            if (is_object($node)) {
-                $value = $node->{$info->fieldName} ?? null;
-
-                if ($value !== null) {
-                    return $value;
-                }
-
-                if (method_exists($node, $info->fieldName)) {
-                    return $node->{$info->fieldName}();
-                }
+            if (method_exists($node, $info->fieldName)) {
+                return $node->{$info->fieldName}();
             }
+        }
 
-            return null;
-        };
+        return null;
     }
 }
