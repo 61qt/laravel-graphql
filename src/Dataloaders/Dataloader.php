@@ -22,13 +22,6 @@ use GraphQL\Executor\Promise\Adapter\SyncPromise;
 class Dataloader
 {
     /**
-     * dataloader pool
-     * 
-     * @var array
-     */
-    public static $pool = [];
-
-    /**
      * 数据加载回调函数
      * 
      * @var callable
@@ -86,7 +79,7 @@ class Dataloader
                 return $this->cacheMaps[$key];
             }
 
-            // 一边获取结果,一边添加新数据时
+            // 获取已查询结果时,也支持注入新的条件
             // 在没用到新数据之前,不去主动请求新数据
             if (!empty($this->keys)) {
                 $this->load();

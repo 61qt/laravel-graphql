@@ -7,10 +7,18 @@ namespace QT\GraphQL;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use QT\GraphQL\Contracts\Context as ContextContract;
 
 class Context implements ContextContract
 {
+    /**
+     * dataloaders pool
+     *
+     * @var Collection
+     */
+    public Collection $loaders;
+
     /**
      * Context constructor.
      * @param Request $request
@@ -22,6 +30,7 @@ class Context implements ContextContract
         public Response $response,
         protected array $config = [],
     ) {
+        $this->loaders = new Collection();
     }
 
     /**

@@ -6,7 +6,6 @@ namespace QT\GraphQL\Traits;
 
 use QT\GraphQL\Utils;
 use RuntimeException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as BaseBuilder;
@@ -52,7 +51,7 @@ trait SqlBuilder
      *
      * @var int
      */
-    protected $maxDepth = 5;
+    protected $maxDepth = 10;
 
     /**
      * 关联字段
@@ -220,8 +219,12 @@ trait SqlBuilder
     }
 
     /**
-     * 选中要查询的字段以及关联表
+     * TODO: 多态关联with方案
+     * 提前推断type与model的关联,然后把请求的type字段关联到model query上
+     * 目前在deferred层完成load,是因为resolve时可以获取runtime type，根据type获取model
      *
+     * 选中要查询的字段以及关联表
+     * 
      * @param Builder|Relation $query
      * @param array            $selection
      * @param int              $depth
@@ -252,10 +255,6 @@ trait SqlBuilder
                 continue;
             }
 
-            if (!$this->autoWithRelation) {
-                continue;
-            }
-
             // 已经设置过的with条件不做替换
             if (isset($loads[$field])) {
                 continue;
@@ -272,13 +271,17 @@ trait SqlBuilder
             }
 
             [$localKey, $foreignKey] = $relationsKeys;
-
-            // 选中关联表字段
-            $val[$foreignKey] = true;
             // 选中当前表字段
             $fields[$model->qualifyColumn($localKey)] = true;
 
-            $this->withRelation($query, $field, $val, $depth);
+            if ($this->autoWithRelation) {
+                if (!empty($foreignKey)) {
+                    $val[$foreignKey] = true;
+                }
+
+                // 选中关联表字段
+                $this->withRelation($query, $field, $val, $depth);
+            }
         }
 
         return $query->addSelect(array_keys($fields));
@@ -421,7 +424,7 @@ trait SqlBuilder
             // order by limit 在部分情况下会覆盖where条件中索引
             // 为了强制使用where上的索引,使用计算公式来关闭sort索引
             // @see http://mysql.taobao.org/monthly/2015/11/10/
-            $orderBy = DB::raw("`{$table}`.`{$column}` + 0");
+            // $orderBy = DB::raw("`{$table}`.`{$column}` + 0");
         }
 
         return $query->orderBy($orderBy, $direction);

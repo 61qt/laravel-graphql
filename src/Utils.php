@@ -60,9 +60,9 @@ final class Utils
             return [];
         }
 
-        [$localKey, $foreignKey] = static::$withMethods[$class];
+        [$localKeyFn, $foreignKeyFn] = static::$withMethods[$class];
 
-        return [$relation->{$localKey}(), $relation->{$foreignKey}()];
+        return [$relation->{$localKeyFn}(), $relation->{$foreignKeyFn}()];
     }
 
     /**

@@ -10,11 +10,15 @@ use Illuminate\Http\Response;
 interface Context
 {
     /**
+     * 获取请求内容
+     * 
      * @return Request
      */
     public function getRequest(): Request;
 
     /**
+     * 获取响应结果
+     * 
      * @return Response
      */
     public function getResponse(): Response;

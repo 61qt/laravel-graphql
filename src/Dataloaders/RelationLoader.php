@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace QT\GraphQL\Dataloaders;
 
 use Illuminate\Support\Arr;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,27 +44,6 @@ class RelationLoader extends Dataloader
     ];
 
     /**
-     * 关联目标model
-     * 
-     * @var Model
-     */
-    protected $model;
-
-    /**
-     * 查询字段
-     *
-     * @var array
-     */
-    protected $selection = [];
-
-    /**
-     * 入参
-     *
-     * @var array
-     */
-    protected $args = [];
-
-    /**
      * 关联加载器
      *
      * @param Relation $relation
@@ -73,34 +51,6 @@ class RelationLoader extends Dataloader
     public function __construct(protected Relation $relation)
     {
         parent::__construct([$this, '__invoke']);
-
-        $this->model = $relation->getRelated();
-    }
-
-    /**
-     * 设置可用参数
-     *
-     * @param array $args
-     * @return static
-     */
-    public function setArgs(array $args)
-    {
-        $this->args = array_merge($this->args, $args);
-
-        return $this;
-    }
-
-    /**
-     * 设置要查询的字段
-     *
-     * @param array $selection
-     * @return static
-     */
-    public function setSelection(array $selection)
-    {
-        $this->selection = array_merge($this->selection, $selection);
-
-        return $this;
     }
 
     /**
@@ -114,19 +64,7 @@ class RelationLoader extends Dataloader
             return [];
         }
 
-        $relation = clone $this->relation;
-
-        if (empty($this->selection)) {
-            $this->selection = [$this->model->getKeyName() => true];
-        }
-
-        foreach ($this->selection as $field => $_) {
-            if (!method_exists($this->model, $field)) {
-                $relation->addSelect($this->model->qualifyColumn($field));
-            }
-        }
-
-        return $this->{static::$resolvers[$name]}($relation, $keys);
+        return $this->{static::$resolvers[$name]}(clone $this->relation, $keys);
     }
 
     /**
