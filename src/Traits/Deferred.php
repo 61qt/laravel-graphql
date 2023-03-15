@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use QT\GraphQL\Contracts\Context as ContextContract;
 
 /**
- * 延迟加载结果
+ * 延迟加载relation
  * 
  * @package QT\GraphQL\Traits
  */
@@ -58,29 +58,14 @@ trait Deferred
      */
     public function resolveField(mixed $node, array $args, ContextContract $context, ResolveInfo $info): mixed
     {
-        if (method_exists($node, $info->fieldName)) {
-            // 检查model是否加载了该字段
-            if ($node->relationLoaded($info->fieldName)) {
-                return $node->getRelation($info->fieldName);
-            }
-
-            return $this->getDeferred($node, $args, $context, $info);
+        if (!method_exists($node, $info->fieldName)) {
+            return $node->getAttributeValue($info->fieldName);
+        }
+        // 检查model是否加载了该字段
+        if ($node->relationLoaded($info->fieldName)) {
+            return $node->getRelation($info->fieldName);
         }
 
-        return $node->getAttributeValue($info->fieldName);
-    }
-
-    /**
-     * 获取字段的Promise
-     *
-     * @param mixed $node
-     * @param array $args
-     * @param ContextContract $context
-     * @param ResolveInfo $info
-     * @return SyncPromise
-     */
-    public function getDeferred(mixed $node, array $args, ContextContract $context, ResolveInfo $info): SyncPromise
-    {
         $path = array_filter($info->path, 'is_string');
 
         if (count($path) > $context->getValue('graphql.max_depth', 5)) {
