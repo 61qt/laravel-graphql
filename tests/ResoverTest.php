@@ -1,6 +1,6 @@
 <?php
 
-namespace QT\Test\GraphQL;
+namespace QT\Test;
 
 use Mockery;
 use Carbon\Carbon;
