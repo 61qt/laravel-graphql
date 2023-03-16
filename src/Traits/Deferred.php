@@ -69,7 +69,7 @@ trait Deferred
         $path = array_filter($info->path, 'is_string');
 
         if (count($path) > $context->getValue('graphql.max_depth', 5)) {
-            return new SyncPromise(fn () => null);
+            return null;
         }
 
         if ($info->returnType instanceof AbstractType) {
