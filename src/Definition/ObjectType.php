@@ -128,7 +128,7 @@ class ObjectType extends BaseObjectType implements HasFieldsType
      */
     public function getFields(): array
     {
-        return $this->getfields();
+        return $this->getOriginalFields();
     }
 
     /**
