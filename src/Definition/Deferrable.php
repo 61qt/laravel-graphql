@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace QT\GraphQL\Traits;
+namespace QT\GraphQL\Definition;
 
 use QT\GraphQL\Utils;
 use QT\GraphQL\Context;
@@ -12,16 +12,15 @@ use QT\GraphQL\Dataloaders\Dataloader;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\AbstractType;
 use QT\GraphQL\Dataloaders\RelationLoader;
-use GraphQL\Executor\Promise\Adapter\SyncPromise;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use QT\GraphQL\Contracts\Context as ContextContract;
 
 /**
  * 延迟加载relation
  * 
- * @package QT\GraphQL\Traits
+ * @package QT\GraphQL\Definition
  */
-trait Deferred
+trait Deferrable
 {
     /**
      * Relation primary key
