@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace QT\GraphQL\Definition;
 
 use Closure;
+use GraphQL\Utils\Utils;
 use Illuminate\Support\Str;
 use QT\GraphQL\Contracts\Context;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\HasFieldsType;
+use GraphQL\Type\Definition\FieldDefinition;
+use GraphQL\Type\Definition\UnresolvedFieldDefinition;
 use GraphQL\Type\Definition\ObjectType as BaseObjectType;
 
 /**
@@ -16,10 +20,17 @@ use GraphQL\Type\Definition\ObjectType as BaseObjectType;
  *
  * @package QT\GraphQL\Definition
  */
-class ObjectType extends BaseObjectType
+class ObjectType extends BaseObjectType implements HasFieldsType
 {
     /**
-     * @var array
+     * Lazily initialized.
+     *
+     * @var array<string, FieldDefinition|UnresolvedFieldDefinition>
+     */
+    protected $fields;
+
+    /**
+     * @var array<string, callable>
      */
     protected $fieldResolvers = [];
 
@@ -44,6 +55,110 @@ class ObjectType extends BaseObjectType
     public function isDeferrable()
     {
         return false;
+    }
+
+    /**
+     * 初始化可用字段
+     *
+     * @return void
+     */
+    protected function initializeFields(): void
+    {
+        if (isset($this->fields)) {
+            return;
+        }
+
+        $this->fields = FieldDefinition::defineFieldMap(
+            $this,
+            $this->config['fields'] ?? []
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $name
+     * @return FieldDefinition
+     */
+    public function getField(string $name): FieldDefinition
+    {
+        Utils::invariant($this->hasField($name), 'Field "%s" is not defined for type "%s"', $name, $this->name);
+
+        return $this->findField($name);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $name
+     * @return ?FieldDefinition
+     */
+    public function findField(string $name): ?FieldDefinition
+    {
+        $this->initializeFields();
+
+        if (!isset($this->fields[$name])) {
+            return null;
+        }
+
+        if ($this->fields[$name] instanceof UnresolvedFieldDefinition) {
+            $this->fields[$name] = $this->fields[$name]->resolve();
+        }
+
+        return $this->fields[$name];
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasField(string $name): bool
+    {
+        $this->initializeFields();
+
+        return isset($this->fields[$name]);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return array
+     */
+    public function getFields(): array
+    {
+        return $this->getfields();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return array
+     */
+    public function getFieldNames(): array
+    {
+        $this->initializeFields();
+
+        return array_keys($this->fields);
+    }
+
+    /**
+     * 获取原始字段
+     *
+     * @return array
+     */
+    public function getOriginalFields(): array
+    {
+        $this->initializeFields();
+
+        foreach ($this->fields as $name => $field) {
+            if ($field instanceof UnresolvedFieldDefinition) {
+                $this->fields[$name] = $field->resolve();
+            }
+        }
+
+        return $this->fields;
     }
 
     /**
