@@ -35,6 +35,13 @@ class ObjectType extends BaseObjectType implements HasFieldsType
     protected $fieldResolvers = [];
 
     /**
+     * 字段是否加载
+     *
+     * @var bool
+     */
+    private $loadUnresolved = false;
+
+    /**
      * @param array $config
      */
     public function __construct(array $config = [])
@@ -152,10 +159,14 @@ class ObjectType extends BaseObjectType implements HasFieldsType
     {
         $this->initializeFields();
 
-        foreach ($this->fields as $name => $field) {
-            if ($field instanceof UnresolvedFieldDefinition) {
-                $this->fields[$name] = $field->resolve();
+        if (!$this->loadUnresolved) {
+            foreach ($this->fields as $name => $field) {
+                if ($field instanceof UnresolvedFieldDefinition) {
+                    $this->fields[$name] = $field->resolve();
+                }
             }
+
+            $this->loadUnresolved = true;
         }
 
         return $this->fields;
