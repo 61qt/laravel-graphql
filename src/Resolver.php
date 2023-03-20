@@ -390,24 +390,4 @@ class Resolver
 
         return $input[$keyName];
     }
-
-    /**
-     * 启用自动关联,预加载出要使用的关联数据
-     * 
-     * @return void
-     */
-    public function enableAuthWithRelation()
-    {
-        $this->autoWithRelation = true;
-    }
-
-    /**
-     * 关闭自动关联,使用dataloader进行查询
-     * 
-     * @return void
-     */
-    public function disableAuthWithRelation()
-    {
-        $this->autoWithRelation = false;
-    }
 }

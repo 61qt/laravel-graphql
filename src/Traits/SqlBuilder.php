@@ -7,6 +7,7 @@ namespace QT\GraphQL\Traits;
 use QT\GraphQL\Utils;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as BaseBuilder;
 
@@ -86,13 +87,6 @@ trait SqlBuilder
     protected $useIndexSortFields = [
         // 'table.column',
     ];
-
-    /**
-     * 自动加载关联
-     *
-     * @var bool
-     */
-    protected $autoWithRelation = true;
 
     /**
      * 生成sql
@@ -224,7 +218,7 @@ trait SqlBuilder
      * 目前在deferred层完成load,是因为resolve时可以获取runtime type，根据type获取model
      *
      * 选中要查询的字段以及关联表
-     * 
+     *
      * @param Builder|Relation $query
      * @param array            $selection
      * @param int              $depth
@@ -264,24 +258,25 @@ trait SqlBuilder
                 $val = ['*' => true];
             }
 
-            $relationsKeys = Utils::getWithKeyName($model->{$field}());
+            $relation = $model->{$field}();
+            $keys     = Utils::getWithKeyName($relation);
 
-            if (empty($relationsKeys)) {
+            if (empty($keys)) {
                 continue;
             }
 
-            [$localKey, $foreignKey] = $relationsKeys;
+            [$localKey, $foreignKey] = $keys;
             // 选中当前表字段
             $fields[$model->qualifyColumn($localKey)] = true;
 
-            if ($this->autoWithRelation) {
-                if (!empty($foreignKey)) {
-                    $val[$foreignKey] = true;
-                }
-
-                // 选中关联表字段
-                $this->withRelation($query, $field, $val, $depth);
+            // 一对一多态关联不做自动关联
+            if (empty($foreignKey) || $relation instanceof MorphTo) {
+                continue;
             }
+
+            $val[$foreignKey] = true;
+            // 选中关联表字段
+            $this->withRelation($query, $field, $val, $depth);
         }
 
         return $query->addSelect(array_keys($fields));

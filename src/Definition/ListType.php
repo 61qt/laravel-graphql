@@ -83,16 +83,10 @@ class ListType extends ListOfType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
-        $depth    = $context->getValue('graphql.max_depth', 5);
-        $resolver = $this->ofType->getResolver();
-        if ($this->ofType->isDeferrable()) {
-            $depth = 0;
-
-            $resolver->disableAuthWithRelation();
-        }
-
+        $depth     = $context->getValue('graphql.max_depth', 5);
         $selection = $this->ofType->formatSelection($info->getFieldSelection($depth));
 
-        return $resolver->chunk($context, new ChunkOption($args), $selection);
+        return $this->ofType->getResolver()
+            ->chunk($context, new ChunkOption($args), $selection);
     }
 }
