@@ -207,7 +207,8 @@ trait SqlBuilder
             $selection = [$query->getModel()->getKeyName() => true];
         }
 
-        $this->selectFieldAndWithTable($query, $selection, $this->maxDepth);
+        // 关联深度 = 最大深度 - 第一层查询
+        $this->selectFieldAndWithTable($query, $selection, $this->maxDepth - 1);
 
         return $query;
     }
