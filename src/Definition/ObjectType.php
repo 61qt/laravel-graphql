@@ -23,11 +23,9 @@ use GraphQL\Type\Definition\ObjectType as BaseObjectType;
 class ObjectType extends BaseObjectType implements HasFieldsType
 {
     /**
-     * Lazily initialized.
-     *
      * @var array<string, FieldDefinition|UnresolvedFieldDefinition>
      */
-    protected $fields;
+    private $originalFields;
 
     /**
      * @var array<string, callable>
@@ -55,27 +53,17 @@ class ObjectType extends BaseObjectType implements HasFieldsType
     }
 
     /**
-     * 是否支持延迟加载
-     *
-     * @return bool
-     */
-    public function isDeferrable()
-    {
-        return false;
-    }
-
-    /**
      * 初始化可用字段
      *
      * @return void
      */
     protected function initializeFields(): void
     {
-        if (isset($this->fields)) {
+        if (isset($this->originalFields)) {
             return;
         }
 
-        $this->fields = FieldDefinition::defineFieldMap(
+        $this->originalFields = FieldDefinition::defineFieldMap(
             $this,
             $this->config['fields'] ?? []
         );
@@ -102,17 +90,17 @@ class ObjectType extends BaseObjectType implements HasFieldsType
      */
     public function findField(string $name): ?FieldDefinition
     {
-        $this->initializeFields();
+        $fields = $this->getFields();
 
-        if (!isset($this->fields[$name])) {
+        if (!isset($fields[$name])) {
             return null;
         }
 
-        if ($this->fields[$name] instanceof UnresolvedFieldDefinition) {
-            $this->fields[$name] = $this->fields[$name]->resolve();
+        if ($fields[$name] instanceof UnresolvedFieldDefinition) {
+            $fields[$name] = $fields[$name]->resolve();
         }
 
-        return $this->fields[$name];
+        return $fields[$name];
     }
 
     /**
@@ -123,9 +111,9 @@ class ObjectType extends BaseObjectType implements HasFieldsType
      */
     public function hasField(string $name): bool
     {
-        $this->initializeFields();
+        $fields = $this->getFields();
 
-        return isset($this->fields[$name]);
+        return isset($fields[$name]);
     }
 
     /**
@@ -145,9 +133,7 @@ class ObjectType extends BaseObjectType implements HasFieldsType
      */
     public function getFieldNames(): array
     {
-        $this->initializeFields();
-
-        return array_keys($this->fields);
+        return array_keys($this->getFields());
     }
 
     /**
@@ -160,16 +146,16 @@ class ObjectType extends BaseObjectType implements HasFieldsType
         $this->initializeFields();
 
         if (!$this->loadUnresolved) {
-            foreach ($this->fields as $name => $field) {
+            foreach ($this->originalFields as $name => $field) {
                 if ($field instanceof UnresolvedFieldDefinition) {
-                    $this->fields[$name] = $field->resolve();
+                    $this->originalFields[$name] = $field->resolve();
                 }
             }
 
             $this->loadUnresolved = true;
         }
 
-        return $this->fields;
+        return $this->originalFields;
     }
 
     /**

@@ -17,7 +17,7 @@ use QT\GraphQL\Contracts\Context as ContextContract;
 
 /**
  * 延迟加载relation
- * 
+ *
  * @package QT\GraphQL\Definition
  */
 trait Deferrable
@@ -35,16 +35,6 @@ trait Deferrable
      * @var string
      */
     protected $nodeCacheKey = 'g-ast-%s';
-
-    /**
-     * 是否支持延迟加载
-     * 
-     * @return bool
-     */
-    public function isDeferrable()
-    {
-        return true;
-    }
 
     /**
      * 获取字段默认处理回调
