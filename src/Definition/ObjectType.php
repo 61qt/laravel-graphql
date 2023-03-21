@@ -186,7 +186,7 @@ class ObjectType extends BaseObjectType implements HasFieldsType
     protected function initializeFieldResolver()
     {
         $defaultFn = [$this, 'resolveField'];
-        foreach ($this->getFields() as $field) {
+        foreach ($this->getOriginalFields() as $field) {
             $method = 'resolve' . ucfirst(Str::camel($field->name));
 
             if (method_exists($this, $method)) {
