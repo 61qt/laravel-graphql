@@ -7,6 +7,7 @@ namespace QT\GraphQL\Traits;
 use QT\GraphQL\Utils;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as BaseBuilder;
@@ -419,8 +420,8 @@ trait SqlBuilder
         if (count($columns) > 1 || (count($columns) == 1 && empty($columns[$orderBy]))) {
             // order by limit 在部分情况下会覆盖where条件中索引
             // 为了强制使用where上的索引,使用计算公式来关闭sort索引
-            // @see http://mysql.taobao.org/monthly/2015/11/10/
-            // $orderBy = DB::raw("`{$table}`.`{$column}` + 0");
+            // @see http://mysql.taobao.org/monthly/2015/11/10/            
+            $orderBy = new Expression("`{$table}`.`{$column}` + 0");
         }
 
         return $query->orderBy($orderBy, $direction);
