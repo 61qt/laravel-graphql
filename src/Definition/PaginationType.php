@@ -111,6 +111,9 @@ class PaginationType extends ObjectType implements Resolvable
      */
     public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info): mixed
     {
+        // 列表查询时,添加不允许使用详情页字段
+        $context->setValue('is_detail', false);
+
         $depth     = $context->getValue('graphql.max_depth', 5);
         $fields    = $info->getFieldSelection($depth);
         $selection = $this->ofType->formatSelection($fields['items'] ?? []);

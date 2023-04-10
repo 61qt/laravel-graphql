@@ -55,6 +55,15 @@ trait Deferrable
             return $node->getRelation($info->fieldName);
         }
 
+        // 非详情页请求详情页字段,返回空
+        if (
+            $this instanceof ModelType && 
+            !$context->getValue('is_detail', true) &&
+            in_array($info->fieldName, $this->detailedFields)
+        ) {
+            return null;
+        }
+
         $path = array_filter($info->path, 'is_string');
 
         if (count($path) > $context->getValue('graphql.max_depth', 5)) {
