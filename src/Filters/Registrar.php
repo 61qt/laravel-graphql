@@ -25,15 +25,15 @@ class Registrar
      */
     protected static $operatorsMaps = [
         // equal
-        '=' => 'eq',
+        '='  => 'eq',
         // not equal
         '!=' => 'ne',
         // greater than
-        '>' => 'gt',
+        '>'  => 'gt',
         // greater than or equal
         '>=' => 'ge',
         // less than
-        '<' => 'lt',
+        '<'  => 'lt',
         // less than or equal
         '<=' => 'le',
     ];

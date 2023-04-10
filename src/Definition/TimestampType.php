@@ -13,7 +13,7 @@ use GraphQL\Language\AST\StringValueNode;
 
 /**
  * TimestampType
- * 
+ *
  * @package QT\GraphQL\Definition
  */
 class TimestampType extends ScalarType
@@ -64,7 +64,7 @@ class TimestampType extends ScalarType
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param Node $valueNode
      * @param array|null $variables
      */

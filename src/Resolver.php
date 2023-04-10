@@ -312,7 +312,7 @@ class Resolver
 
     /**
      * 删除数据
-     * 
+     *
      * @param Context $context
      * @param array $input
      * @return Model
@@ -335,7 +335,7 @@ class Resolver
 
     /**
      * 批量删除数据
-     * 
+     *
      * @param Context $context
      * @param array $filter
      * @return int

@@ -68,7 +68,7 @@ abstract class ModelMutation
 
     /**
      * 获取ModelType
-     * 
+     *
      * @return ModelType
      */
     public function getModelType(): ModelType
@@ -92,7 +92,7 @@ abstract class ModelMutation
 
     /**
      * 获取业务层逻辑
-     * 
+     *
      * @return Resolver
      */
     public function getResolver(): Resolver
@@ -159,7 +159,7 @@ abstract class ModelMutation
 
     /**
      * 获取返回的数据结构
-     * 
+     *
      * @param string $name
      * @return Type
      */
@@ -170,7 +170,7 @@ abstract class ModelMutation
 
     /**
      * 获取mutation的形参
-     * 
+     *
      * @param string $mutation
      * @param array $globalArgs
      * @param array $args
@@ -184,8 +184,8 @@ abstract class ModelMutation
         // object type 延迟加载形参
         $inputName = "{$mutation}Input";
         $inputType = new InputObjectType([
-            'name'   => $inputName, 
-            'fields' => fn() => !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs
+            'name'   => $inputName,
+            'fields' => fn () => !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs,
         ]);
 
         return [$this->inputKey => $this->manager->setType($inputType)];

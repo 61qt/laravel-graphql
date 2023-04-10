@@ -10,6 +10,11 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use QT\GraphQL\Contracts\Context as ContextContract;
 
+/**
+ * Graphql runtime context
+ *
+ * @package QT\GraphQL
+ */
 class Context implements ContextContract
 {
     /**

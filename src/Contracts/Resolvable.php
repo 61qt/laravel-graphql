@@ -11,7 +11,7 @@ interface Resolvable
 {
     /**
      * 获取需要的形参
-     * 
+     *
      * @param GraphQLManager $manager
      * @return array
      */

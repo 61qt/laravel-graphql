@@ -11,10 +11,10 @@ use GraphQL\Executor\Promise\Adapter\SyncPromise;
  * 无法实现promise或者yield来异步调度
  * 只能使用SyncPromise来收集查询信息,然后加入待执行队列
  * 在graphql语法解析完成后执行队列,将任务全部完成
- * 
+ *
  * 完整的dataloader实现参考
  * @see https://github.com/graphql/dataloader
- * 
+ *
  * Dataloader
  *
  * @package QT\GraphQL\Dataloaders
@@ -23,35 +23,35 @@ class Dataloader
 {
     /**
      * 数据加载回调函数
-     * 
+     *
      * @var callable
      */
     protected $loadFunc;
 
     /**
      * 待加载的keys
-     * 
+     *
      * @var array<mixed>
      */
     protected $keys = [];
 
     /**
      * 数据缓存
-     * 
+     *
      * @var array
      */
     protected $cacheMaps = [];
 
     /**
      * 根据key冗余的promises
-     * 
+     *
      * @var array
      */
     protected $promises = [];
 
     /**
      * Dataloader constructor
-     * 
+     *
      * @param callable $loadFunc
      */
     public function __construct(callable $loadFunc)
@@ -61,7 +61,7 @@ class Dataloader
 
     /**
      * 获取结果
-     * 
+     *
      * @param mixed $key
      * @return SyncPromise
      */
@@ -91,7 +91,7 @@ class Dataloader
 
     /**
      * 加载数据
-     * 
+     *
      * @return void
      */
     protected function load()
@@ -107,7 +107,7 @@ class Dataloader
 
     /**
      * 清理数据
-     * 
+     *
      * @return void
      */
     public function clear()

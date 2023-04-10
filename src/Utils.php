@@ -113,7 +113,7 @@ final class Utils
 
     /**
      * 递归获取查询的字段
-     * 
+     *
      * @param ResolveInfo $info
      * @param SelectionSetNode $selectionSet
      * @param int $depth
