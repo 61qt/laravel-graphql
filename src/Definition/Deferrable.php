@@ -9,6 +9,7 @@ use QT\GraphQL\Context;
 use GraphQL\Type\Schema;
 use Illuminate\Support\Collection;
 use QT\GraphQL\Dataloaders\Dataloader;
+use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\AbstractType;
 use QT\GraphQL\Dataloaders\RelationLoader;
@@ -47,6 +48,10 @@ trait Deferrable
      */
     public function resolveField(mixed $node, array $args, ContextContract $context, ResolveInfo $info): mixed
     {
+        if (!$node instanceof Model) {
+            return parent::resolveField($node, $args, $context, $info);
+        }
+
         if (!method_exists($node, $info->fieldName)) {
             return $node->getAttributeValue($info->fieldName);
         }
@@ -57,7 +62,7 @@ trait Deferrable
 
         // 非详情页请求详情页字段,返回空
         if (
-            $this instanceof ModelType && 
+            $this instanceof ModelType &&
             !$context->getValue('is_detail', true) &&
             in_array($info->fieldName, $this->detailedFields)
         ) {
