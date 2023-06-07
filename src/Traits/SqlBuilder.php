@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace QT\GraphQL\Traits;
 
+use QT\GraphQL\Utils;
 use RuntimeException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as BaseBuilder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 trait SqlBuilder
 {
@@ -91,20 +87,6 @@ trait SqlBuilder
      */
     protected $useIndexSortFields = [
         // 'table.column',
-    ];
-
-    /**
-     * 允许自动select with key的relation
-     *
-     * @var array
-     */
-    protected $autoAssociate = [
-        BelongsTo::class      => ['getForeignKeyName', 'getOwnerKeyName'],
-        BelongsToMany::class  => ['getParentKeyName', 'getRelatedKeyName'],
-        HasOne::class         => ['getLocalKeyName', 'getForeignKeyName'],
-        HasMany::class        => ['getLocalKeyName', 'getForeignKeyName'],
-        HasManyThrough::class => ['getLocalKeyName', 'getSecondLocalKeyName'],
-        HasOneThrough::class  => ['getLocalKeyName', 'getSecondLocalKeyName'],
     ];
 
     /**
@@ -226,12 +208,17 @@ trait SqlBuilder
             $selection = [$query->getModel()->getKeyName() => true];
         }
 
-        $this->selectFieldAndWithTable($query, $selection, $this->maxDepth);
+        // 关联深度 = 最大深度 - 第一层查询
+        $this->selectFieldAndWithTable($query, $selection, $this->maxDepth - 1);
 
         return $query;
     }
 
     /**
+     * TODO: 多态关联with方案
+     * 提前推断type与model的关联,然后把请求的type字段关联到model query上
+     * 目前在deferred层完成load,是因为resolve时可以获取runtime type，根据type获取model
+     *
      * 选中要查询的字段以及关联表
      *
      * @param Builder|Relation $query
@@ -273,48 +260,33 @@ trait SqlBuilder
                 $val = ['*' => true];
             }
 
-            $relationsKeys = $this->getWithKeyName($model->{$field}());
+            $relation = $model->{$field}();
+            $keys     = Utils::getWithKeyName($relation);
 
-            if (empty($relationsKeys)) {
+            if (empty($keys)) {
                 continue;
             }
 
-            [$localKey, $foreignKey] = $relationsKeys;
-
-            // 选中关联表字段
-            $val[$foreignKey] = true;
+            [$localKey, $foreignKey] = $keys;
             // 选中当前表字段
             $fields[$model->qualifyColumn($localKey)] = true;
 
+            // 一对一多态关联不做自动关联
+            if (empty($foreignKey) || $relation instanceof MorphTo) {
+                continue;
+            }
+
+            $val[$foreignKey] = true;
+            // 选中关联表字段
             $this->withRelation($query, $field, $val, $depth);
         }
 
-        $query->addSelect(array_keys($fields));
-    }
-
-    /**
-     * 获取关联字段,多态关联暂不处理
-     * 需要使用多态关联时手动调用loadRelations方法
-     *
-     * @param Relation $relation
-     * @return array<string|null>
-     */
-    protected function getWithKeyName(Relation $relation): array
-    {
-        $class = get_class($relation);
-
-        if (empty($this->autoAssociate[$class])) {
-            return [];
-        }
-
-        [$localKey, $foreignKey] = $this->autoAssociate[$class];
-
-        return [$relation->{$localKey}(), $relation->{$foreignKey}()];
+        return $query->addSelect(array_keys($fields));
     }
 
     /**
      * 关联子级
-     * 
+     *
      * @param Builder|Relation $query
      * @param string $relation
      * @param array $fields
@@ -322,7 +294,7 @@ trait SqlBuilder
      */
     protected function withRelation(Builder|Relation $query, string $relation, array $fields, int $depth)
     {
-        $query->with($relation, fn($query) => $this->selectFieldAndWithTable($query, $fields, $depth - 1));
+        $query->with($relation, fn ($query) => $this->selectFieldAndWithTable($query, $fields, $depth - 1));
     }
 
     /**
@@ -423,8 +395,8 @@ trait SqlBuilder
      * @return Builder
      */
     public function buildSort(
-        Builder $query, 
-        ?string $column = null, 
+        Builder $query,
+        ?string $column = null,
         string $direction = 'desc',
         ?string $table = null
     ): Builder {
@@ -449,7 +421,7 @@ trait SqlBuilder
             // order by limit 在部分情况下会覆盖where条件中索引
             // 为了强制使用where上的索引,使用计算公式来关闭sort索引
             // @see http://mysql.taobao.org/monthly/2015/11/10/
-            $orderBy = DB::raw("`{$table}`.`{$column}` + 0");
+            $orderBy = new Expression("`{$table}`.`{$column}` + 0");
         }
 
         return $query->orderBy($orderBy, $direction);

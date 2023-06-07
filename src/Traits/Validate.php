@@ -72,7 +72,7 @@ trait Validate
     /**
      * @return Factory
      */
-    protected function getValidationFactory(): Factory
+    public function getValidationFactory(): Factory
     {
         return $this->factory;
     }

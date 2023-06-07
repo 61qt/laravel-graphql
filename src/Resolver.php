@@ -16,9 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Eloquent\Relations\MorphOneOrMany;
 
 /**
  * Graphql Result Resolver
@@ -116,7 +114,6 @@ class Resolver
      * @param array $input
      * @param array $selection
      * @return \Illuminate\Database\Eloquent\Model
-     * @throws Error
      */
     public function show(Context $context, array $input, array $selection = []): Model
     {
@@ -138,7 +135,6 @@ class Resolver
      * @param ChunkOption $option
      * @param array $selection
      * @return \Illuminate\Database\Eloquent\Collection
-     * @throws Error
      */
     public function chunk(Context $context, ChunkOption $option, array $selection = []): Collection
     {
@@ -164,7 +160,6 @@ class Resolver
      * @param PageOption $option
      * @param array $selection
      * @return \Illuminate\Contracts\Pagination\Paginator
-     * @throws Error
      */
     public function pagination(Context $context, PageOption $option, array $selection = []): Paginator
     {
@@ -184,7 +179,6 @@ class Resolver
      * @param Context $context
      * @param CursorOption $option
      * @return int
-     * @throws Error
      */
     public function getExportCount(Context $context, CursorOption $option): int
     {
@@ -200,7 +194,6 @@ class Resolver
      * @param CursorOption $option
      * @param array $selection
      * @return Iterator
-     * @throws Error
      */
     public function export(Context $context, CursorOption $option, array $selection): Iterator
     {
@@ -215,7 +208,6 @@ class Resolver
      * @param CursorOption $option
      * @param array $selection
      * @return Iterator
-     * @throws Error
      */
     public function cursor(CursorOption $option, array $selection = []): Iterator
     {
@@ -251,7 +243,6 @@ class Resolver
      * @param Context $context
      * @param array $input
      * @return Model
-     * @throws Error
      */
     public function store(Context $context, array $input = []): Model
     {
@@ -278,7 +269,6 @@ class Resolver
      * @param Context $context
      * @param array $input
      * @return Model
-     * @throws RuntimeException
      */
     public function update(Context $context, array $input = []): Model
     {
@@ -321,10 +311,11 @@ class Resolver
     }
 
     /**
+     * 删除数据
+     *
      * @param Context $context
      * @param array $input
      * @return Model
-     * @throws \Exception
      */
     public function destroy(Context $context, array $input = []): Model
     {
@@ -343,9 +334,11 @@ class Resolver
     }
 
     /**
+     * 批量删除数据
+     *
+     * @param Context $context
      * @param array $filter
      * @return int
-     * @throws \Exception
      */
     public function batchDestroy(Context $context, array $input = []): int
     {
@@ -396,62 +389,5 @@ class Resolver
         }
 
         return $input[$keyName];
-    }
-
-    /**
-     * TODO 与 selectFieldAndWithTable 协同,减少selection循环次数
-     * 加载动态关系
-     *
-     * @param Collection $models
-     * @param array $selection
-     */
-    protected function loadRelations($models, array $selection)
-    {
-        if (empty($selection) || $models->isEmpty()) {
-            return;
-        }
-
-        $model = $models->first();
-        foreach ($selection as $field => $val) {
-            if (!method_exists($model, $field)) {
-                continue;
-            }
-
-            if (!is_array($val)) {
-                $val = [];
-            }
-
-            $relation = $model->{$field}();
-            // 检查是否为动态关联
-            if (!$relation instanceof MorphTo && !$relation instanceof MorphOneOrMany) {
-                continue;
-            }
-
-            // 获取多态关联的对象
-            $types = $models
-                ->unique($relation->getMorphType())
-                ->pluck($relation->getMorphType());
-
-            $relations = [];
-            foreach ($types as $type) {
-                if (!class_exists($type)) {
-                    continue;
-                }
-
-                $with  = [];
-                $class = new $type();
-
-                foreach ($val as $k => $_) {
-                    if (method_exists($class, $k)) {
-                        $with[] = $k;
-                    }
-                }
-
-                $relations[$type] = $with;
-            }
-            // 加载多态关联数据
-            $models->load($field);
-            $models->loadMorph($field, $relations);
-        }
     }
 }

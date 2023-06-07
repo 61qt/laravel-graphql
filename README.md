@@ -1,2 +1,2 @@
 # laravel-graphql
-基于Laravel的GraphQL应用
+基于Laravel ORM的GraphQL查询库

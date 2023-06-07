@@ -68,7 +68,7 @@ abstract class ModelMutation
 
     /**
      * 获取ModelType
-     * 
+     *
      * @return ModelType
      */
     public function getModelType(): ModelType
@@ -92,23 +92,12 @@ abstract class ModelMutation
 
     /**
      * 获取业务层逻辑
-     * 
+     *
      * @return Resolver
      */
     public function getResolver(): Resolver
     {
         return $this->getModelType()->getResolver();
-    }
-
-    /**
-     * 获取返回的数据结构
-     * 
-     * @param string $name
-     * @return Type
-     */
-    public function getReturnType(string $name): Type
-    {
-        return $this->getModelType();
     }
 
     /**
@@ -141,20 +130,10 @@ abstract class ModelMutation
      */
     public function getMutationConfig()
     {
-        $globalArgs  = $this->args();
-        $defaultArgs = $this->getDefaultMutationArgs();
+        $globalArgs = $this->args();
 
         foreach ($this->getMutationArgs() as $mutation => $args) {
-            $inputArgs = !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
-            $inputArgs = array_merge($defaultArgs, $inputArgs);
-
-            if ($this->inputKey !== null) {
-                $inputName = "{$mutation}Input";
-                $inputType = new InputObjectType(['name' => $inputName, 'fields' => $inputArgs]);
-                $inputArgs = [$this->inputKey => $this->manager->setType($inputType)];
-            }
-
-            yield $mutation => $this->getMutationResolveInfo($mutation, $inputArgs);
+            yield $mutation => $this->getMutationResolveInfo($mutation, $globalArgs, $args);
         }
     }
 
@@ -165,16 +144,51 @@ abstract class ModelMutation
      * @param array $inputArgs
      * @return array
      */
-    protected function getMutationResolveInfo(string $mutation, array $inputArgs): array
+    protected function getMutationResolveInfo(string $mutation, array $globalArgs, array $args): array
     {
         // 获取方法备注信息
         $description = $this->getMutationDescription($mutation);
+        $inputArgs   = $this->getInputArgs($mutation, $globalArgs, $args);
 
         if (!method_exists($this, 'get' . ucfirst($mutation) . 'Config')) {
             return [$this->getReturnType($mutation), $inputArgs, [$this, 'resolve'], $description];
         }
 
         return $this->{'get' . ucfirst($mutation) . 'Config'}($inputArgs, $description);
+    }
+
+    /**
+     * 获取返回的数据结构
+     *
+     * @param string $name
+     * @return Type
+     */
+    public function getReturnType(string $name): Type
+    {
+        return $this->getModelType();
+    }
+
+    /**
+     * 获取mutation的形参
+     *
+     * @param string $mutation
+     * @param array $globalArgs
+     * @param array $args
+     */
+    protected function getInputArgs(string $mutation, array $globalArgs, array $args)
+    {
+        if ($this->inputKey === null) {
+            return !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
+        }
+
+        // object type 延迟加载形参
+        $inputName = "{$mutation}Input";
+        $inputType = new InputObjectType([
+            'name'   => $inputName,
+            'fields' => fn () => !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs,
+        ]);
+
+        return [$this->inputKey => $this->manager->setType($inputType)];
     }
 
     /**
@@ -186,15 +200,5 @@ abstract class ModelMutation
     protected function getMutationDescription(string $mutation): string
     {
         return $mutation;
-    }
-
-    /**
-     * 所有Mutation共用的默认参数
-     *
-     * @return array
-     */
-    protected function getDefaultMutationArgs()
-    {
-        return [];
     }
 }

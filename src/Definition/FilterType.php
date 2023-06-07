@@ -13,5 +13,4 @@ use GraphQL\Type\Definition\InputObjectType;
  */
 class FilterType extends InputObjectType
 {
-
 }

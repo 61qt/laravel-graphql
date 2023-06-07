@@ -11,13 +11,13 @@ use GraphQL\Language\AST\IntValueNode;
 use GraphQL\Language\AST\ListValueNode;
 use GraphQL\Type\Definition\ScalarType;
 use GraphQL\Language\AST\FloatValueNode;
-use GraphQL\Type\Definition\BooleanType;
-use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Language\AST\ObjectValueNode;
+use GraphQL\Language\AST\StringValueNode;
+use GraphQL\Language\AST\BooleanValueNode;
 
 /**
  * MixedType
- * 
+ *
  * @package QT\GraphQL\Definition
  */
 class MixedType extends ScalarType
@@ -60,7 +60,7 @@ class MixedType extends ScalarType
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param Node $valueNode
      * @param array|null $variables
      */
@@ -72,14 +72,18 @@ class MixedType extends ScalarType
         if ($valueNode instanceof IntValueNode) {
             return (int) $valueNode->value;
         }
-        if ($valueNode instanceof BooleanType) {
+        if ($valueNode instanceof BooleanValueNode) {
             return (bool) $valueNode->value;
         }
         if ($valueNode instanceof FloatValueNode) {
             return (float) $valueNode->value;
         }
         if ($valueNode instanceof ListValueNode) {
-            return array_map([$this, 'parseLiteral'], $valueNode->values);
+            $value = [];
+            foreach ($valueNode->values as $val) {
+                $value[] = $this->parseLiteral($val);
+            }
+            return $value;
         }
         if ($valueNode instanceof ObjectValueNode) {
             $value = [];

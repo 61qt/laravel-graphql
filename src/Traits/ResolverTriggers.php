@@ -19,7 +19,6 @@ trait ResolverTriggers
      */
     protected function beforeQuery(Context $context)
     {
-
     }
 
     /**
@@ -75,7 +74,6 @@ trait ResolverTriggers
      */
     protected function beforeStore(Context $context, Model $model, array $input)
     {
-
     }
 
     /**
@@ -85,7 +83,6 @@ trait ResolverTriggers
      */
     protected function afterStore(Model $model)
     {
-
     }
 
     /**
@@ -97,7 +94,6 @@ trait ResolverTriggers
      */
     protected function beforeUpdate(Context $context, Model $model, array $input)
     {
-
     }
 
     /**
@@ -107,7 +103,6 @@ trait ResolverTriggers
      */
     protected function afterUpdate(Model $model)
     {
-
     }
 
     /**
@@ -118,7 +113,6 @@ trait ResolverTriggers
      */
     protected function beforeDestroy(Context $context, Model $model)
     {
-
     }
 
     /**
@@ -138,7 +132,6 @@ trait ResolverTriggers
      */
     protected function beforeBatchDestroy(Collection $models)
     {
-
     }
 
     /**

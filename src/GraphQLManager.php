@@ -65,10 +65,22 @@ class GraphQLManager
         }
 
         if (!$type instanceof Type) {
-            throw new GraphQLException("类型错误");
+            throw new GraphQLException('Invalid graphql type');
         }
 
         return $this->types[$type->name] = $type;
+    }
+
+    /**
+     * @param string $name
+     * @param callable|array $fields
+     * @param array $args
+     * @return ObjectType
+     * @throws Error
+     */
+    public function create(string $name, callable | array $fields): ObjectType
+    {
+        return $this->setType(new ObjectType(['name' => $name, 'fields' => $fields]));
     }
 
     /**
@@ -78,15 +90,6 @@ class GraphQLManager
     public function getMutation(string $name): ModelMutation
     {
         return $this->find($name, static::MUTATION);
-    }
-
-    /**
-     * @param ModelMutation $mutation
-     * @return ModelMutation
-     */
-    public function setMutation(ModelMutation $mutation): ModelMutation
-    {
-        return $this->mutations[$mutation->name] = $mutation;
     }
 
     /**
@@ -114,7 +117,7 @@ class GraphQLManager
         $type = call_user_func($this->getTypeFinder(), $name, $space, $this);
 
         if (empty($type) || (!$type instanceof Type && !$type instanceof ModelMutation)) {
-            throw new GraphQLException("{$name} 类型不存在");
+            throw new GraphQLException("\"{$name}\" Not found");
         }
 
         return $containers[$name] = $type;
@@ -142,18 +145,6 @@ class GraphQLManager
         $this->typeFinder = $typeFinder;
 
         return $this;
-    }
-
-    /**
-     * @param string $name
-     * @param callable|array $fields
-     * @param array $args
-     * @return ObjectType
-     * @throws Error
-     */
-    public function create(string $name, callable | array $fields, array $args = []): ObjectType
-    {
-        return $this->setType(new ObjectType(compact('name', 'fields', 'args')));
     }
 
     /**
