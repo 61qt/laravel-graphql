@@ -150,6 +150,15 @@ trait Deferrable
     {
         $model = $relation->getRelated();
 
+        // 去除隐藏字段
+        foreach ($model->getHidden() as $hidden) {
+            unset($selection[$hidden]);
+        }
+        // 允许在model层设置关联字段
+        if (method_exists($model, 'getWithFields')) {
+            $selection = array_merge($selection, $model->getWithFields());
+        }
+
         foreach ($selection as $field => $_) {
             // 根据relation推断关联必要的字段
             if (method_exists($model, $field)) {
