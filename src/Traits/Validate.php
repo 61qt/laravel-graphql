@@ -45,12 +45,13 @@ trait Validate
      * @param array $rules
      * @param array $message
      * @throws Error
+     * @return array
      */
     public function validate(
         array | Collection $input,
         array $rules = [],
         array $message = []
-    ) {
+    ): array {
         if ($input instanceof Collection) {
             $input = $input->toArray();
         }
@@ -67,6 +68,8 @@ trait Validate
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
+
+        return $validator->validated();
     }
 
     /**
