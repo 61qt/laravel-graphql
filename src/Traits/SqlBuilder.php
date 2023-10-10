@@ -138,7 +138,7 @@ trait SqlBuilder
      * @param array $input
      * @return array
      */
-    protected function prepareJoin(Builder $query, array $input): array
+    public function prepareJoin(Builder $query, array $input): array
     {
         $tables = array_intersect_key($input, $this->joinTable);
 
