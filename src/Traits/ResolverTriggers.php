@@ -80,8 +80,9 @@ trait ResolverTriggers
      * 创建记录后触发
      *
      * @param Model $model
+     * @param array $input
      */
-    protected function afterStore(Model $model)
+    protected function afterStore(Model $model, array $input)
     {
     }
 
@@ -100,8 +101,9 @@ trait ResolverTriggers
      * 修改记录后触发
      *
      * @param Model $model
+     * @param array $input
      */
-    protected function afterUpdate(Model $model)
+    protected function afterUpdate(Model $model, array $input)
     {
     }
 

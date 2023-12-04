@@ -35,18 +35,22 @@ class SortType extends InputObjectType
      */
     protected function getSortFields()
     {
-        $sortFields = [];
+        $sortFields = $tableFields = [];
         foreach ($this->sortFields as $field) {
             if (!Str::contains($field, '.')) {
                 $sortFields[$field] = ['type' => Type::direction()];
             } else {
                 [$table, $field] = explode('.', $field, 2);
 
-                $sortFields[$table] = ['type' => new InputObjectType([
-                    'name'   => "{$this->name}SortFields_{$table}",
-                    'fields' => [$field => ['type' => Type::direction()]],
-                ])];
+                $tableFields[$table][$field] = ['type' => Type::direction()];
             }
+        }
+
+        foreach ($tableFields as $table => $fields) {
+            $sortFields[$table] = ['type' => new InputObjectType([
+                'name'   => "{$this->name}SortFields_{$table}",
+                'fields' => $fields,
+            ])];
         }
 
         return $sortFields;

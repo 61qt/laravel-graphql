@@ -52,12 +52,13 @@ trait Deferrable
             return parent::resolveField($node, $args, $context, $info);
         }
 
-        if (!method_exists($node, $info->fieldName)) {
-            return $node->getAttributeValue($info->fieldName);
-        }
         // 检查model是否加载了该字段
         if ($node->relationLoaded($info->fieldName)) {
             return $node->getRelation($info->fieldName);
+        }
+
+        if (!method_exists($node, $info->fieldName)) {
+            return $node->getAttributeValue($info->fieldName);
         }
 
         // 非详情页请求详情页字段,返回空

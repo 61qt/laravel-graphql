@@ -257,7 +257,7 @@ class Resolver
 
             $this->buildRelation($model, $input);
 
-            $this->afterStore($model);
+            $this->afterStore($model, $input);
 
             return $model;
         });
@@ -275,8 +275,7 @@ class Resolver
         $this->validate($input, $this->rules, $this->messages);
 
         $input = $this->checkAndFormatInput($input);
-        $id    = $this->getKey($input);
-        $model = $this->getFreedModelQuery()->findOrFail($id);
+        $model = $this->find($input);
         $this->beforeUpdate($context, $model, $input);
 
         return DB::transaction(function () use ($model, $input) {
@@ -284,7 +283,7 @@ class Resolver
 
             $this->buildRelation($model, $input);
 
-            $this->afterUpdate($model);
+            $this->afterUpdate($model, $input);
 
             return $model;
         });
@@ -303,6 +302,7 @@ class Resolver
      * 构造model关系,在afterUpdate跟afterStore触发
      *
      * @param $model
+     * @param array $input
      * @return mixed
      */
     protected function buildRelation(Model $model, array $input = []): Model
@@ -319,9 +319,7 @@ class Resolver
      */
     public function destroy(Context $context, array $input = []): Model
     {
-        $id    = $this->getKey($input);
-        $model = $this->getFreedModelQuery()->findOrFail($id);
-
+        $model = $this->find($input);
         $this->beforeDestroy($context, $model);
 
         return DB::transaction(function () use ($model) {
@@ -337,7 +335,7 @@ class Resolver
      * 批量删除数据
      *
      * @param Context $context
-     * @param array $filter
+     * @param array $input
      * @return int
      */
     public function batchDestroy(Context $context, array $input = []): int
@@ -358,12 +356,13 @@ class Resolver
 
     /**
      * @param array $input
+     * @param array $columns
      * @return Model
      */
-    public function find(array $input): Model
+    public function find(array $input, array $columns = ['*']): Model
     {
         $id    = $this->getKey($input);
-        $model = $this->getModelQuery(true)->find($id);
+        $model = $this->getModelQuery(true)->find($id, $columns);
 
         if ($model === null) {
             $exception = new ModelNotFoundException('数据不存在');

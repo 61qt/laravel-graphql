@@ -14,12 +14,13 @@ use GraphQL\Type\Definition\Type as BaseType;
  */
 abstract class Type extends BaseType
 {
-    public const NIL       = 'nil';
-    public const JSON      = 'json';
-    public const MIXED     = 'mixed';
-    public const BIGINT    = 'bigint';
-    public const TIMESTAMP = 'timestamp';
-    public const DIRECTION = 'direction';
+    public const NIL          = 'nil';
+    public const JSON         = 'json';
+    public const MIXED        = 'mixed';
+    public const BIGINT       = 'bigint';
+    public const TIMESTAMP    = 'timestamp';
+    public const DIRECTION    = 'direction';
+    public const UNSIGNED_INT = 'unsignedInt';
 
     /**
      * @var array<ScalarType|DirectionType>
@@ -87,6 +88,8 @@ abstract class Type extends BaseType
     }
 
     /**
+     * 排序用的方向类型
+     *
      * @return DirectionType
      */
     public static function direction(): DirectionType
@@ -96,5 +99,19 @@ abstract class Type extends BaseType
         }
 
         return static::$globalTypes[self::DIRECTION];
+    }
+
+    /**
+     * 无符号的32位整数
+     *
+     * @return UnsignedIntType
+     */
+    public static function uint(): UnsignedIntType
+    {
+        if (!isset(static::$globalTypes[self::UNSIGNED_INT])) {
+            static::$globalTypes[self::UNSIGNED_INT] = new UnsignedIntType();
+        }
+
+        return static::$globalTypes[self::UNSIGNED_INT];
     }
 }
