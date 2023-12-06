@@ -65,6 +65,13 @@ trait SqlBuilder
     ];
 
     /**
+     * 已经关联的表
+     *
+     * @var array
+     */
+    protected $hasJoins;
+
+    /**
      * 筛选时需要进行时间戳转换的字段
      *
      * @var array
@@ -171,13 +178,11 @@ trait SqlBuilder
         }
 
         // 检查是否手动联表,避免重复关联报错
-        if (!empty($query->toBase()->joins)) {
-            foreach ($query->toBase()->joins as $join) {
-                if ($join->table === $table) {
-                    return $query;
-                }
-            }
+        $this->getJoinTables($query);
+        if (isset($this->hasJoins[$table])) {
+            return $query;
         }
+        $this->hasJoins[$table] = true;
 
         $method   = 'join';
         $relation = array_values($this->joinTable[$table]);
@@ -191,6 +196,26 @@ trait SqlBuilder
         $query->{$method}($table, "{$query->getQuery()->from}.{$first}", $operator, "{$table}.{$second}");
 
         return $query;
+    }
+
+    /**
+     * 获取已经关联的表
+     *
+     * @param Builder $query
+     * @return void
+     */
+    protected function getJoinTables(Builder $query)
+    {
+        if (!isset($this->hasJoins)) {
+            $this->hasJoins = [];
+
+            $joins = $query->toBase()->joins;
+            if (!empty($joins)) {
+                foreach ($joins as $join) {
+                    $this->hasJoins[$join->table] = true;
+                }
+            }
+        }
     }
 
     /**
