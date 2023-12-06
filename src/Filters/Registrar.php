@@ -99,6 +99,18 @@ class Registrar
     }
 
     /**
+     * 设置一组无符号int类型的筛选条件
+     *
+     * @param string $name
+     * @param array $operators
+     * @return self
+     */
+    public function uint(string $name, array $operators): self
+    {
+        return $this->set($name, GlobalType::uint(), $operators);
+    }
+
+    /**
      * 设置筛选条件
      *
      * @param string $name

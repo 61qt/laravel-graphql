@@ -96,8 +96,8 @@ trait SqlBuilder
      * @param array $selection
      * @param array $filters
      * @param array $orderBy
-     * @return Builder
      * @throws RuntimeException
+     * @return Builder
      */
     public function buildSql(
         Builder $query,
@@ -112,10 +112,11 @@ trait SqlBuilder
             $orderBy[] = [$this->model->getKeyName() => 'desc'];
         }
 
+        $whereColumns = $this->getWhereColumns($query->toBase());
         foreach ($orderBy as $columns) {
             foreach ($columns as $column => $direction) {
                 if (!is_array($direction)) {
-                    $this->buildSort($query, $column, $direction);
+                    $this->buildSort($query, $column, $direction, columns: $whereColumns);
                     continue;
                 }
 
@@ -123,7 +124,7 @@ trait SqlBuilder
                 $item  = $direction;
                 // 联表查询结构为, table => [column => direction]
                 foreach ($item as $column => $direction) {
-                    $this->buildSort($query, $column, $direction, $table);
+                    $this->buildSort($query, $column, $direction, $table, $whereColumns);
                 }
             }
         }
@@ -135,26 +136,25 @@ trait SqlBuilder
      * 预处理联表查询的条件
      *
      * @param Builder $query
-     * @param array $input
+     * @param array $filters
      * @return array
      */
-    public function prepareJoin(Builder $query, array $input): array
+    public function prepareJoin(Builder $query, array $filters): array
     {
-        $tables = array_intersect_key($input, $this->joinTable);
+        $tables = array_intersect_key($filters, $this->joinTable);
 
         foreach ($tables as $table => $columns) {
-            // users: {id: desc}  => users.id: desc
             // users: {id: {eq: 1}}  => users.id: {eq: q}
-            unset($input[$table]);
+            unset($filters[$table]);
 
             foreach ($columns as $column => $val) {
-                $input["{$table}.{$column}"] = $val;
+                $filters["{$table}.{$column}"] = $val;
             }
 
             $this->buildJoin($query, $table);
         }
 
-        return $input;
+        return $filters;
     }
 
     /**
@@ -197,9 +197,9 @@ trait SqlBuilder
      * 构造字段选择
      *
      * @param Builder $query
-     * @param array   $selection
-     * @return Builder
+     * @param array $selection
      * @throws RuntimeException
+     * @return Builder
      */
     public function buildSelect(Builder $query, array $selection = []): Builder
     {
@@ -222,8 +222,8 @@ trait SqlBuilder
      * 选中要查询的字段以及关联表
      *
      * @param Builder|Relation $query
-     * @param array            $selection
-     * @param int              $depth
+     * @param array $selection
+     * @param int $depth
      * @throws RuntimeException
      */
     protected function selectFieldAndWithTable(Builder | Relation $query, array $selection, int $depth)
@@ -301,7 +301,7 @@ trait SqlBuilder
      * 生成过滤条件
      *
      * @param Builder $baseQuery
-     * @param array   $filters
+     * @param array $filters
      * @return Builder
      */
     public function buildFilter(Builder $baseQuery, array $filters): Builder
@@ -368,6 +368,8 @@ trait SqlBuilder
     }
 
     /**
+     * 构造特殊的查询条件
+     *
      * @param string $column
      * @param string $operator
      * @param mixed $value
@@ -392,13 +394,15 @@ trait SqlBuilder
      * @param string|null $column
      * @param string $direction
      * @param string|null $table
+     * @param array $columns
      * @return Builder
      */
     public function buildSort(
         Builder $query,
         ?string $column = null,
         string $direction = 'desc',
-        ?string $table = null
+        ?string $table = null,
+        array $columns = []
     ): Builder {
         if ($column === null) {
             return $query;
@@ -406,7 +410,7 @@ trait SqlBuilder
 
         $table   = $table ?: $this->table;
         $orderBy = "{$table}.{$column}";
-        // 排序时支持链表
+        // 排序时支持联表
         if ($table !== $this->table) {
             $query = $this->buildJoin($query, $table);
         }
@@ -415,7 +419,6 @@ trait SqlBuilder
             return $query->orderBy($orderBy, $direction);
         }
 
-        $columns = $this->getColumns($query->toBase());
         // 筛选条件与排序字段不同时,默认放弃排序索引
         if (count($columns) > 1 || (count($columns) == 1 && empty($columns[$orderBy]))) {
             // order by limit 在部分情况下会覆盖where条件中索引
@@ -433,12 +436,12 @@ trait SqlBuilder
      * @param $query
      * @return array
      */
-    protected function getColumns(BaseBuilder $query): array
+    protected function getWhereColumns(BaseBuilder $query): array
     {
         $columns = [];
         foreach ($query->wheres as $where) {
             if ($where['type'] === 'Nested') {
-                $columns = array_merge($columns, $this->getColumns($where['query']));
+                $columns = array_merge($columns, $this->getWhereColumns($where['query']));
             } elseif (!empty($where['column'])) {
                 $columns[$where['column']] = true;
             }

@@ -264,7 +264,7 @@ class Resolver
     }
 
     /**
-     * 更新一条记录
+     * 更新记录
      *
      * @param Context $context
      * @param array $input
@@ -299,11 +299,11 @@ class Resolver
     }
 
     /**
-     * 构造model关系,在afterUpdate跟afterStore触发
+     * 构造model关系,在afterUpdate跟afterStore前触发
      *
      * @param $model
      * @param array $input
-     * @return mixed
+     * @return Model
      */
     protected function buildRelation(Model $model, array $input = []): Model
     {
