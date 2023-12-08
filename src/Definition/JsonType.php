@@ -24,7 +24,7 @@ class JsonType extends MixedType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed
      */
     public function serialize($value)
@@ -35,7 +35,7 @@ class JsonType extends MixedType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed|null
      */
     public function parseValue($value)

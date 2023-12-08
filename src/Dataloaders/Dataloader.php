@@ -13,6 +13,7 @@ use GraphQL\Executor\Promise\Adapter\SyncPromise;
  * 在graphql语法解析完成后执行队列,将任务全部完成
  *
  * 完整的dataloader实现参考
+ *
  * @see https://github.com/graphql/dataloader
  *
  * Dataloader

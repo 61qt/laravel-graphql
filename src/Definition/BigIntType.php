@@ -32,10 +32,8 @@ class BigIntType extends ScalarType
 
     /**
      * @param mixed $value
-     *
-     * @return int|null
-     *
      * @throws Error
+     * @return int|null
      */
     public function serialize($value)
     {
@@ -67,7 +65,6 @@ class BigIntType extends ScalarType
 
     /**
      * @param mixed $value
-     *
      * @throws Error
      */
     public function parseValue($value): int
@@ -92,11 +89,9 @@ class BigIntType extends ScalarType
     }
 
     /**
-     * @param mixed[]|null $variables
-     *
+     * @param Node $valueNode
+     * @param array|null $variables
      * @return int
-     *
-     * @throws Exception
      */
     public function parseLiteral(Node $valueNode, ?array $variables = null)
     {

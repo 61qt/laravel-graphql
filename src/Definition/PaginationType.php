@@ -32,7 +32,7 @@ class PaginationType extends ObjectType implements Resolvable
         $this->ofType = $type;
 
         parent::__construct([
-            'name'   => isset($this->name) ? $this->name : "{$type->name}Pagination",
+            'name'   => $this->name ?? "{$type->name}Pagination",
             'fields' => [$this, 'getDataStructure'],
         ]);
     }

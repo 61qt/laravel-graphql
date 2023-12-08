@@ -52,8 +52,8 @@ class GraphQLManager
 
     /**
      * @param string|Type $type
-     * @return Type
      * @throws GraphQLException
+     * @return Type
      */
     public function setType(string | Type $type): Type
     {
@@ -74,9 +74,8 @@ class GraphQLManager
     /**
      * @param string $name
      * @param callable|array $fields
-     * @param array $args
-     * @return ObjectType
      * @throws Error
+     * @return ObjectType
      */
     public function create(string $name, callable | array $fields): ObjectType
     {
@@ -95,8 +94,8 @@ class GraphQLManager
     /**
      * @param string $name
      * @param string $space
-     * @return Type|ModelMutation
      * @throws GraphQLException
+     * @return Type|ModelMutation
      */
     protected function find(string $name, string $space): Type | ModelMutation
     {
@@ -130,8 +129,7 @@ class GraphQLManager
      */
     public function getTypeFinder(): callable
     {
-        return $this->typeFinder ?: function () {
-        };
+        return $this->typeFinder ?: function () {};
     }
 
     /**
@@ -150,7 +148,7 @@ class GraphQLManager
     /**
      * @param $name
      * @param $arguments
-     * @return BaseMutation|ObjectType|Type
+     * @return ModelMutation|ObjectType|Type
      */
     public function __call($name, $arguments)
     {

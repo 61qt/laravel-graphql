@@ -90,6 +90,7 @@ final class Utils
     /**
      * 获取GraphQL请求的字段
      *
+     * @param ResolveInfo $info
      * @param int $depth
      * @return array<string, mixed>
      */

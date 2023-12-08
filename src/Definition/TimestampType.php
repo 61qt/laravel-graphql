@@ -31,7 +31,7 @@ class TimestampType extends ScalarType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed
      */
     public function serialize($value)
@@ -41,7 +41,7 @@ class TimestampType extends ScalarType
         }
 
         if (is_int($value)) {
-            $value = date("Y-m-d H:i:s", $value);
+            $value = date('Y-m-d H:i:s', $value);
         }
 
         return $value;
@@ -50,13 +50,13 @@ class TimestampType extends ScalarType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed|null
      */
     public function parseValue($value)
     {
         if (is_int($value)) {
-            $value = date("Y-m-d H:i:s", $value);
+            $value = date('Y-m-d H:i:s', $value);
         }
 
         return $value;

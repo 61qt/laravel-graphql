@@ -17,6 +17,8 @@ class Factory
     use Macroable;
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function eq(string $name, Type $type)
@@ -28,6 +30,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function ne(string $name, Type $type)
@@ -39,6 +43,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function gt(string $name, Type $type)
@@ -50,6 +56,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function ge(string $name, Type $type)
@@ -61,6 +69,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function lt(string $name, Type $type)
@@ -72,6 +82,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function le(string $name, Type $type)
@@ -83,6 +95,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function in(string $name, Type $type)
@@ -94,6 +108,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function notIn(string $name, Type $type)
@@ -105,6 +121,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function between(string $name, Type $type)
@@ -116,6 +134,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function like(string $name, Type $type)
@@ -127,6 +147,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function leftLike(string $name, Type $type)
@@ -138,6 +160,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function rightLike(string $name, Type $type)
@@ -149,6 +173,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function isNull(string $name, Type $type)
@@ -160,6 +186,8 @@ class Factory
     }
 
     /**
+     * @param string $name
+     * @param Type $type
      * @return array
      */
     public static function notNull(string $name, Type $type)

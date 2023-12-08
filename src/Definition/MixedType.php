@@ -35,7 +35,7 @@ class MixedType extends ScalarType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed
      */
     public function serialize($value)
@@ -46,13 +46,13 @@ class MixedType extends ScalarType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed|null
      */
     public function parseValue($value)
     {
         if (!is_scalar($value) && !is_array($value)) {
-            throw new Error("CannInvalid value: " . Utils::printSafe($value));
+            throw new Error("Can't Invalid value: " . Utils::printSafe($value));
         }
 
         return $value;
@@ -83,6 +83,7 @@ class MixedType extends ScalarType
             foreach ($valueNode->values as $val) {
                 $value[] = $this->parseLiteral($val);
             }
+
             return $value;
         }
         if ($valueNode instanceof ObjectValueNode) {

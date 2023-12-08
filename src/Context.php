@@ -26,6 +26,7 @@ class Context implements ContextContract
 
     /**
      * Context constructor.
+     *
      * @param Request $request
      * @param Response $response
      * @param array $config

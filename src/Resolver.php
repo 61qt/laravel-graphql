@@ -51,6 +51,13 @@ class Resolver
     protected $perPageMax = 500;
 
     /**
+     * 导出的最大行数
+     *
+     * @var int
+     */
+    public $exportLimit;
+
+    /**
      * Resolver constructor.
      *
      * @param Model $model

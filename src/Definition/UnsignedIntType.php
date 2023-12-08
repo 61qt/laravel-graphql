@@ -89,8 +89,8 @@ class UnsignedIntType extends ScalarType
     }
 
     /**
-     * @param mixed[]|null $variables
      * @param Node $valueNode
+     * @param ?array $variables
      * @throws Exception
      * @return int
      */

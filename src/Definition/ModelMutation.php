@@ -78,13 +78,13 @@ abstract class ModelMutation
         }
 
         if (empty($this->objectType)) {
-            throw new GraphQLException("Mutation绑定的Object Type不能为空");
+            throw new GraphQLException('Mutation绑定的Object Type不能为空');
         }
 
         $this->ofType = $this->manager->getType($this->objectType);
 
         if (!$this->ofType instanceof ModelType) {
-            throw new GraphQLException("Mutation必须绑定Model Type");
+            throw new GraphQLException('Mutation必须绑定Model Type');
         }
 
         return $this->ofType;
@@ -105,7 +105,7 @@ abstract class ModelMutation
      *
      * @param $node
      * @param $args
-     * @param AppContext $context
+     * @param Context $context
      * @param ResolveInfo $info
      * @return mixed
      */
@@ -125,8 +125,8 @@ abstract class ModelMutation
     /**
      * 获取Mutation的配置信息
      *
-     * @return Generator<string, array>
      * @throws Error
+     * @return Generator<string, array>
      */
     public function getMutationConfig()
     {
@@ -141,7 +141,8 @@ abstract class ModelMutation
      * 获取mutation需要的形参,返回类型
      *
      * @param string $mutation
-     * @param array $inputArgs
+     * @param array $globalArgs
+     * @param array $args
      * @return array
      */
     protected function getMutationResolveInfo(string $mutation, array $globalArgs, array $args): array
@@ -174,19 +175,24 @@ abstract class ModelMutation
      * @param string $mutation
      * @param array $globalArgs
      * @param array $args
+     * @return array
      */
-    protected function getInputArgs(string $mutation, array $globalArgs, array $args)
+    protected function getInputArgs(string $mutation, array $globalArgs, array $args): array
     {
         if ($this->inputKey === null) {
-            return !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs;
+            return !empty($args) ? Arr::only($globalArgs, $args) : [];
         }
 
         // object type 延迟加载形参
         $inputName = "{$mutation}Input";
-        $inputType = new InputObjectType([
-            'name'   => $inputName,
-            'fields' => fn () => !empty($args) ? Arr::only($globalArgs, $args) : $globalArgs,
-        ]);
+        if (empty($args)) {
+            $inputType = new NilType(['name' => $inputName]);
+        } else {
+            $inputType = new InputObjectType([
+                'name'   => $inputName,
+                'fields' => fn () => Arr::only($globalArgs, $args),
+            ]);
+        }
 
         return [$this->inputKey => $this->manager->setType($inputType)];
     }
@@ -194,7 +200,7 @@ abstract class ModelMutation
     /**
      * 获取mutation的介绍
      *
-     * @param string $description
+     * @param string $mutation
      * @return string
      */
     protected function getMutationDescription(string $mutation): string

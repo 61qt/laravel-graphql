@@ -33,7 +33,7 @@ class SortType extends InputObjectType
      *
      * @return array
      */
-    protected function getSortFields()
+    protected function getSortFields(): array
     {
         $sortFields = $tableFields = [];
         foreach ($this->sortFields as $field) {

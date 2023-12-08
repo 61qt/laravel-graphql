@@ -458,7 +458,7 @@ trait SqlBuilder
     /**
      * 获取sql使用的where字段
      *
-     * @param $query
+     * @param BaseBuilder $query
      * @return array
      */
     protected function getWhereColumns(BaseBuilder $query): array

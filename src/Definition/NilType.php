@@ -30,7 +30,7 @@ class NilType extends ScalarType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed
      */
     public function serialize($value)
@@ -41,7 +41,7 @@ class NilType extends ScalarType
     /**
      * {@inheritDoc}
      *
-     * @param  mixed $value
+     * @param mixed $value
      * @return mixed|null
      */
     public function parseValue($value)
