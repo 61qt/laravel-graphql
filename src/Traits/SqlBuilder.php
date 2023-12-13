@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder as BaseBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 trait SqlBuilder
 {
@@ -65,13 +65,6 @@ trait SqlBuilder
     ];
 
     /**
-     * 已经关联的表
-     *
-     * @var array
-     */
-    protected $hasJoins;
-
-    /**
      * 筛选时需要进行时间戳转换的字段
      *
      * @var array
@@ -119,11 +112,11 @@ trait SqlBuilder
             $orderBy[] = [$this->model->getKeyName() => 'desc'];
         }
 
-        $whereColumns = $this->getWhereColumns($query->toBase());
+        $columns = $this->getWhereColumns($query->getQuery());
         foreach ($orderBy as $columns) {
             foreach ($columns as $column => $direction) {
                 if (!is_array($direction)) {
-                    $this->buildSort($query, $column, $direction, columns: $whereColumns);
+                    $this->buildSort($query, $column, $direction, columns: $columns);
                     continue;
                 }
 
@@ -131,7 +124,7 @@ trait SqlBuilder
                 $item  = $direction;
                 // 联表查询结构为, table => [column => direction]
                 foreach ($item as $column => $direction) {
-                    $this->buildSort($query, $column, $direction, $table, $whereColumns);
+                    $this->buildSort($query, $column, $direction, $table, $columns);
                 }
             }
         }
@@ -158,7 +151,7 @@ trait SqlBuilder
                 $filters["{$table}.{$column}"] = $val;
             }
 
-            $this->buildJoin($query, $table);
+            $this->buildJoin($query->getQuery(), $table);
         }
 
         return $filters;
@@ -167,22 +160,21 @@ trait SqlBuilder
     /**
      * 生成联表查询
      *
-     * @param Builder $query
+     * @param QueryBuilder $query
      * @param string $table
-     * @return Builder
+     * @return QueryBuilder
      */
-    public function buildJoin(Builder $query, string $table): Builder
+    public function buildJoin(QueryBuilder $query, string $table): QueryBuilder
     {
         if (empty($this->joinTable[$table])) {
             return $query;
         }
 
-        // 检查是否手动联表,避免重复关联报错
-        $this->getJoinTables($query);
-        if (isset($this->hasJoins[$table])) {
-            return $query;
+        foreach ($query->joins ?: [] as $join) {
+            if ($join->table === $table) {
+                return $query;
+            }
         }
-        $this->hasJoins[$table] = true;
 
         $method   = 'join';
         $relation = array_values($this->joinTable[$table]);
@@ -193,29 +185,9 @@ trait SqlBuilder
             [$first, $operator, $second] = $relation;
         }
 
-        $query->{$method}($table, "{$query->getQuery()->from}.{$first}", $operator, "{$table}.{$second}");
+        $query->{$method}($table, "{$query->from}.{$first}", $operator, "{$table}.{$second}");
 
         return $query;
-    }
-
-    /**
-     * 获取已经关联的表
-     *
-     * @param Builder $query
-     * @return void
-     */
-    protected function getJoinTables(Builder $query)
-    {
-        if (!isset($this->hasJoins)) {
-            $this->hasJoins = [];
-
-            $joins = $query->toBase()->joins;
-            if (!empty($joins)) {
-                foreach ($joins as $join) {
-                    $this->hasJoins[$join->table] = true;
-                }
-            }
-        }
     }
 
     /**
@@ -437,7 +409,7 @@ trait SqlBuilder
         $orderBy = "{$table}.{$column}";
         // 排序时支持联表
         if ($table !== $this->table) {
-            $query = $this->buildJoin($query, $table);
+            $this->buildJoin($query->getQuery(), $table);
         }
 
         if (in_array($orderBy, $this->useIndexSortFields)) {
@@ -458,10 +430,10 @@ trait SqlBuilder
     /**
      * 获取sql使用的where字段
      *
-     * @param BaseBuilder $query
+     * @param QueryBuilder $query
      * @return array
      */
-    protected function getWhereColumns(BaseBuilder $query): array
+    protected function getWhereColumns(QueryBuilder $query): array
     {
         $columns = [];
         foreach ($query->wheres as $where) {
