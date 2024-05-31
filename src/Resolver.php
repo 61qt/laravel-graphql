@@ -58,6 +58,13 @@ class Resolver
     public $exportLimit;
 
     /**
+     * 最大内存(搭配exportLimit使用)
+     *
+     * @var string
+     */
+    public $memoryLimit;
+
+    /**
      * Resolver constructor.
      *
      * @param Model $model
@@ -84,7 +91,7 @@ class Resolver
 
     /**
      * @param bool $fresh
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function getModelQuery(bool $fresh = false): Builder
     {
@@ -103,7 +110,7 @@ class Resolver
      * 释放当前使用的builder并返回
      *
      * @param bool $fresh
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     protected function getFreedModelQuery(): Builder
     {
@@ -120,7 +127,7 @@ class Resolver
      * @param Context $context
      * @param array $input
      * @param array $selection
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      */
     public function show(Context $context, array $input, array $selection = []): Model
     {
@@ -141,7 +148,7 @@ class Resolver
      * @param Context $context
      * @param ChunkOption $option
      * @param array $selection
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function chunk(Context $context, ChunkOption $option, array $selection = []): Collection
     {
@@ -166,7 +173,7 @@ class Resolver
      * @param Context $context
      * @param PageOption $option
      * @param array $selection
-     * @return \Illuminate\Contracts\Pagination\Paginator
+     * @return Paginator
      */
     public function pagination(Context $context, PageOption $option, array $selection = []): Paginator
     {
@@ -204,9 +211,39 @@ class Resolver
      */
     public function export(Context $context, CursorOption $option, array $selection): Iterator
     {
+        if (isset($this->memoryLimit)) {
+            ini_set('memory_limit', $this->memoryLimit);
+        }
         $this->beforeExport($context, $option, $selection);
 
-        return $this->cursor($option, $selection);
+        return $this->getExportData($option, $selection);
+    }
+
+    /**
+     * 获取导出数据集
+     *
+     * @param CursorOption $option
+     * @param array $selection
+     * @return Iterator
+     */
+    public function getExportData(CursorOption $option, array $selection = []): Iterator
+    {
+        $query  = $this->getBuilder($selection, $option->filters, $option->orderBy);
+        $column = $query->getModel()->getKeyName();
+        $offset = $option->offset;
+        $lastId = null;
+
+        do {
+            if (empty($option->orderBy) || (count($option->orderBy) === 1 && isset($option->orderBy[0][$column]))) {
+                $models = $this->cursor($query, $option, $lastId);
+            } else {
+                $models = (clone $query)->forPage(++$offset, $option->limit)->get();
+            }
+
+            foreach ($models as $model) {
+                yield $model;
+            }
+        } while ($models->count() === $option->limit);
     }
 
     /**
@@ -214,20 +251,26 @@ class Resolver
      *
      * @param CursorOption $option
      * @param array $selection
-     * @return Iterator
+     * @param Builder $query
+     * @param ?int $lastId
+     * @return Collection
      */
-    public function cursor(CursorOption $option, array $selection = []): Iterator
+    public function cursor(Builder $query, CursorOption $option, ?int &$lastId = null)
     {
-        $offset = $option->offset;
-        $query  = $this->getBuilder($selection, $option->filters, $option->orderBy);
+        $column        = $query->getModel()->getKeyName();
+        $descending    = 'desc' === ($option->orderBy[0][$column] ?? 'desc') ? true : false;
+        $qualifyColumn = $query->getModel()->qualifyColumn($column);
 
-        do {
-            $models = (clone $query)->forPage(++$offset, $option->limit)->get();
+        $clone = clone $query->addSelect($qualifyColumn);
+        if ($descending) {
+            $models = $clone->forPageBeforeId($option->limit, $lastId, $qualifyColumn)->get();
+        } else {
+            $models = $clone->forPageAfterId($option->limit, $lastId, $qualifyColumn)->get();
+        }
 
-            foreach ($models as $model) {
-                yield $model;
-            }
-        } while ($models->count() === $option->limit);
+        $lastId = $models->last()->{$column};
+
+        return $models;
     }
 
     /**

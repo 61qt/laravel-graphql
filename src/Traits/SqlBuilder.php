@@ -90,6 +90,13 @@ trait SqlBuilder
     ];
 
     /**
+     * 是否已经联表toBase
+     *
+     * @var bool
+     */
+    protected $hasJoinBase = false;
+
+    /**
      * 生成sql
      *
      * @param Builder $query
@@ -112,11 +119,11 @@ trait SqlBuilder
             $orderBy[] = [$this->model->getKeyName() => 'desc'];
         }
 
-        $columns = $this->getWhereColumns($query->getQuery());
+        $whereColumns = $this->getWhereColumns($query->getQuery());
         foreach ($orderBy as $columns) {
             foreach ($columns as $column => $direction) {
                 if (!is_array($direction)) {
-                    $this->buildSort($query, $column, $direction, columns: $columns);
+                    $this->buildSort($query, $column, $direction, whereColumns: $whereColumns);
                     continue;
                 }
 
@@ -124,7 +131,7 @@ trait SqlBuilder
                 $item  = $direction;
                 // 联表查询结构为, table => [column => direction]
                 foreach ($item as $column => $direction) {
-                    $this->buildSort($query, $column, $direction, $table, $columns);
+                    $this->buildSort($query, $column, $direction, $table, $whereColumns);
                 }
             }
         }
@@ -151,7 +158,7 @@ trait SqlBuilder
                 $filters["{$table}.{$column}"] = $val;
             }
 
-            $this->buildJoin($query->getQuery(), $table);
+            $this->buildJoin($query, $table);
         }
 
         return $filters;
@@ -160,14 +167,21 @@ trait SqlBuilder
     /**
      * 生成联表查询
      *
-     * @param QueryBuilder $query
+     * @param Builder $query
      * @param string $table
      * @return QueryBuilder
      */
-    public function buildJoin(QueryBuilder $query, string $table): QueryBuilder
+    public function buildJoin(Builder $query, string $table): QueryBuilder
     {
         if (empty($this->joinTable[$table])) {
             return $query;
+        }
+
+        if ($this->hasJoinBase) {
+            $query = $query->getQuery();
+        } else {
+            $query             = $query->toBase();
+            $this->hasJoinBase = true;
         }
 
         foreach ($query->joins ?: [] as $join) {
@@ -337,7 +351,7 @@ trait SqlBuilder
     }
 
     /**
-     * 生成具体子sql
+     * 构建查询条件
      *
      * @param Builder $query
      * @param callable $handler
@@ -391,7 +405,7 @@ trait SqlBuilder
      * @param string|null $column
      * @param string $direction
      * @param string|null $table
-     * @param array $columns
+     * @param array $whereColumns
      * @return Builder
      */
     public function buildSort(
@@ -399,7 +413,7 @@ trait SqlBuilder
         ?string $column = null,
         string $direction = 'desc',
         ?string $table = null,
-        array $columns = []
+        array $whereColumns = []
     ): Builder {
         if ($column === null) {
             return $query;
@@ -409,7 +423,7 @@ trait SqlBuilder
         $orderBy = "{$table}.{$column}";
         // 排序时支持联表
         if ($table !== $this->table) {
-            $this->buildJoin($query->getQuery(), $table);
+            $this->buildJoin($query, $table);
         }
 
         if (in_array($orderBy, $this->useIndexSortFields)) {
@@ -417,7 +431,7 @@ trait SqlBuilder
         }
 
         // 筛选条件与排序字段不同时,默认放弃排序索引
-        if (count($columns) > 1 || (count($columns) == 1 && empty($columns[$orderBy]))) {
+        if (count($whereColumns) > 1 || (count($whereColumns) === 1 && empty($whereColumns[$orderBy]))) {
             // order by limit 在部分情况下会覆盖where条件中索引
             // 为了强制使用where上的索引,使用计算公式来关闭sort索引
             // @see http://mysql.taobao.org/monthly/2015/11/10/

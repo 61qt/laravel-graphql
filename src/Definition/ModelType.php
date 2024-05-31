@@ -35,13 +35,6 @@ abstract class ModelType extends ObjectType implements Resolvable
     public $useList = false;
 
     /**
-     * 必须选中的字段(填充关联字段)
-     *
-     * @var array
-     */
-    protected $mustSelection = [];
-
-    /**
      * 详细页面进行展示的字段(填充超长字段)
      *
      * @var array
@@ -216,15 +209,6 @@ abstract class ModelType extends ObjectType implements Resolvable
      */
     public function formatSelection(array $selection, bool $isDetail = false): array
     {
-        foreach ($this->mustSelection as $field => $val) {
-            if (is_int($field) && is_string($val)) {
-                $field = $val;
-                $val   = true;
-            }
-
-            Arr::set($selection, $field, $val);
-        }
-
         if (!$isDetail) {
             foreach ($this->detailedFields as $field) {
                 Arr::forget($selection, $field);
