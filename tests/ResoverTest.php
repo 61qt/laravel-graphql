@@ -168,6 +168,31 @@ class ResolverTest extends TestCase
         $this->assertSame([['id' => 999, 'name' => 'foo']], $items);
     }
 
+    public function testJoinTable()
+    {
+        $times = 1;
+        $model = new EloquentModelStub;
+        $this->addMockConnection($model);
+        $model->getConnection()->shouldReceive('select')->times(2)->andReturnUsing(function ($sql) use (&$times) {
+            if ($times++ === 1) {
+                $this->assertSame('select count(*) as aggregate from "table" inner join "foobar" on "table"."foobar_id" = "foobar"."id" where ("foobar"."id" in (?, ?))', $sql);
+
+                return [['aggregate' => 1]];
+            } else {
+                $this->assertSame('select "table"."id", "table"."name" from "table" inner join "foobar" on "table"."foobar_id" = "foobar"."id" where ("foobar"."id" in (?, ?)) order by "foobar"."id" desc limit 100 offset 100', $sql);
+
+                return [['id' => 999, 'name' => 'foo']];
+            }
+        });
+
+        $option    = new PageOption(['filters' => ['foobar' => ['id' => ['in' => [1, 2]]]], 'orderBy' => [['foobar' => ['id' => 'desc']]], 'take' => 100, 'page' => 2]);
+        $resolver  = new JoinTableResolver($model, new Factory(new Translator(new ArrayLoader, 'cn')));
+        $paginator = $resolver->pagination(new GraphQLContext, $option, ['id' => true, 'name' => true]);
+        $items     = array_map(function ($item) {return $item instanceof Arrayable ? $item->toArray() : $item;}, $paginator->items());
+
+        $this->assertSame([['id' => 999, 'name' => 'foo']], $items);
+    }
+
     public function testStore()
     {
         $model = $this->getMockBuilder(EloquentModelStub::class)->onlyMethods(['newInstance'])->getMock();
@@ -266,6 +291,13 @@ class EloquentModelStub extends Model
     protected $primaryKey = 'id';
     protected $guarded    = [];
     public $timestamps    = false;
+}
+
+class JoinTableResolver extends Resolver
+{
+    protected $joinTable = [
+        'foobar' => ['foobar_id', '=', 'id'],
+    ];
 }
 
 class GraphQLContext implements Context

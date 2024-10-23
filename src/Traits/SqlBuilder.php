@@ -90,11 +90,13 @@ trait SqlBuilder
     ];
 
     /**
-     * 是否已经联表toBase
+     * 关联时自动注入的筛选条件
      *
-     * @var bool
+     * @var array
      */
-    protected $hasJoinBase = false;
+    protected $withFilters = [
+        // relation => callback | array
+    ];
 
     /**
      * 生成sql
@@ -112,8 +114,10 @@ trait SqlBuilder
         array $filters = [],
         array $orderBy = []
     ): Builder {
+        $joined = [];
+
         $this->buildSelect($query, $selection);
-        $this->buildFilter($query, $this->prepareJoin($query, $filters));
+        $this->buildFilter($query, $this->prepareJoin($query, $filters, $joined));
 
         if (empty($orderBy) && $this->model->incrementing) {
             $orderBy[] = [$this->model->getKeyName() => 'desc'];
@@ -123,7 +127,7 @@ trait SqlBuilder
         foreach ($orderBy as $columns) {
             foreach ($columns as $column => $direction) {
                 if (!is_array($direction)) {
-                    $this->buildSort($query, $column, $direction, whereColumns: $whereColumns);
+                    $this->buildSort($query, $column, $direction, joined: $joined, whereColumns: $whereColumns);
                     continue;
                 }
 
@@ -131,7 +135,7 @@ trait SqlBuilder
                 $item  = $direction;
                 // 联表查询结构为, table => [column => direction]
                 foreach ($item as $column => $direction) {
-                    $this->buildSort($query, $column, $direction, $table, $whereColumns);
+                    $this->buildSort($query, $column, $direction, $table, $joined, $whereColumns);
                 }
             }
         }
@@ -144,9 +148,10 @@ trait SqlBuilder
      *
      * @param Builder $query
      * @param array $filters
+     * @param array $joined
      * @return array
      */
-    public function prepareJoin(Builder $query, array $filters): array
+    public function prepareJoin(Builder $query, array $filters, array &$joined = []): array
     {
         $tables = array_intersect_key($filters, $this->joinTable);
 
@@ -158,7 +163,7 @@ trait SqlBuilder
                 $filters["{$table}.{$column}"] = $val;
             }
 
-            $this->buildJoin($query, $table);
+            $this->buildJoin($query, $table, $joined);
         }
 
         return $filters;
@@ -169,25 +174,13 @@ trait SqlBuilder
      *
      * @param Builder $query
      * @param string $table
-     * @return QueryBuilder
+     * @param array $joined
+     * @return Builder
      */
-    public function buildJoin(Builder $query, string $table): QueryBuilder
+    public function buildJoin(Builder $query, string $table, array &$joined = []): Builder
     {
-        if (empty($this->joinTable[$table])) {
+        if (empty($this->joinTable[$table]) || isset($joined[$table])) {
             return $query;
-        }
-
-        if ($this->hasJoinBase) {
-            $query = $query->getQuery();
-        } else {
-            $query             = $query->toBase();
-            $this->hasJoinBase = true;
-        }
-
-        foreach ($query->joins ?: [] as $join) {
-            if ($join->table === $table) {
-                return $query;
-            }
         }
 
         $method   = 'join';
@@ -200,6 +193,9 @@ trait SqlBuilder
         }
 
         $query->{$method}($table, "{$query->from}.{$first}", $operator, "{$table}.{$second}");
+
+        // 将已联表的数据标记
+        $joined[$table] = true;
 
         return $query;
     }
@@ -305,7 +301,13 @@ trait SqlBuilder
      */
     protected function withRelation(Builder|Relation $query, string $relation, array $fields, int $depth)
     {
-        $query->with($relation, fn ($query) => $this->selectFieldAndWithTable($query, $fields, $depth - 1));
+        $query->with($relation, function ($query) use ($relation, $fields, $depth) {
+            $this->selectFieldAndWithTable($query, $fields, $depth - 1);
+
+            foreach ($this->withFilters[$relation] ?? [] as $filter) {
+                $query->where($filter);
+            }
+        });
     }
 
     /**
@@ -413,7 +415,8 @@ trait SqlBuilder
         ?string $column = null,
         string $direction = 'desc',
         ?string $table = null,
-        array $whereColumns = []
+        array &$joined = [],
+        array $whereColumns = [],
     ): Builder {
         if ($column === null) {
             return $query;
@@ -423,7 +426,7 @@ trait SqlBuilder
         $orderBy = "{$table}.{$column}";
         // 排序时支持联表
         if ($table !== $this->table) {
-            $this->buildJoin($query, $table);
+            $this->buildJoin($query, $table, $joined);
         }
 
         if (in_array($orderBy, $this->useIndexSortFields)) {
@@ -490,6 +493,21 @@ trait SqlBuilder
     }
 
     /**
+     * 注册关联筛选条件
+     *
+     * @param string $relation
+     * @param array|callable $filter
+     */
+    public function registerWithFilter(string $relation, array | callable $filter)
+    {
+        if (empty($this->withFilters[$relation])) {
+            $this->withFilters[$relation] = [];
+        }
+
+        $this->withFilters[$relation][] = $filter;
+    }
+
+    /**
      * 注册全局filter operator
      *
      * @param string $operator
@@ -529,6 +547,10 @@ trait SqlBuilder
 
         static::registerGlobalOperator('between', function ($query, $column, $value) {
             $query->whereBetween($column, $value);
+        });
+
+        static::registerGlobalOperator('raw_sql', function ($query, $column, $value) {
+            $query->whereRaw($value);
         });
 
         static::registerGlobalOperator('like', function ($query, $column, $value) {
