@@ -549,7 +549,7 @@ trait SqlBuilder
             $query->whereBetween($column, $value);
         });
 
-        static::registerGlobalOperator('raw_sql', function ($query, $column, $value) {
+        static::registerGlobalOperator('rawSql', function ($query, $column, $value) {
             $query->whereRaw($value);
         });
 
