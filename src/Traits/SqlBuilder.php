@@ -115,6 +115,9 @@ trait SqlBuilder
         array $orderBy = []
     ): Builder {
         $joined = [];
+        foreach ($query->toBase()->joins as $join) {
+            $joined[$join->table] = true;
+        }
 
         $this->buildSelect($query, $selection);
         $this->buildFilter($query, $this->prepareJoin($query, $filters, $joined));
