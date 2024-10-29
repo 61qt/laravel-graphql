@@ -99,6 +99,15 @@ trait SqlBuilder
     ];
 
     /**
+     * 关联的属性修改(参考模型的casts)
+     *
+     * @var array
+     */
+    protected $withCasts = [
+        // relation => ['column' => 'type']
+    ];
+
+    /**
      * 生成sql
      *
      * @param Builder $query
@@ -234,9 +243,11 @@ trait SqlBuilder
      * @param Builder|Relation $query
      * @param array $selection
      * @param int $depth
+     * @param string $prefix
      * @throws RuntimeException
+     * @return Builder|Relation
      */
-    protected function selectFieldAndWithTable(Builder|Relation $query, array $selection, int $depth)
+    protected function selectFieldAndWithTable(Builder|Relation $query, array $selection, int $depth, string $prefix = '')
     {
         // 深度达到极限,不在进行关联
         if ($depth === 0) {
@@ -288,7 +299,7 @@ trait SqlBuilder
 
             $val[$foreignKey] = true;
             // 选中关联表字段
-            $this->withRelation($query, $field, $val, $depth);
+            $this->withRelation($query, $field, $val, $depth, $prefix);
         }
 
         return $query->addSelect(array_keys($fields));
@@ -301,14 +312,20 @@ trait SqlBuilder
      * @param string $relation
      * @param array $fields
      * @param int $depth
+     * @param string $prefix
      */
-    protected function withRelation(Builder|Relation $query, string $relation, array $fields, int $depth)
+    protected function withRelation(Builder|Relation $query, string $relation, array $fields, int $depth, string $prefix = '')
     {
-        $query->with($relation, function ($query) use ($relation, $fields, $depth) {
-            $this->selectFieldAndWithTable($query, $fields, $depth - 1);
+        $query->with($relation, function ($query) use ($relation, $fields, $depth, $prefix) {
+            $relationKey = !empty($prefix) ? $prefix . '.' . $relation : $relation;
+            $this->selectFieldAndWithTable($query, $fields, $depth - 1, $relationKey);
 
-            foreach ($this->withFilters[$relation] ?? [] as $filter) {
+            foreach ($this->withFilters[$relationKey] ?? [] as $filter) {
                 $query->where($filter);
+            }
+
+            if (!empty($this->withCasts[$relationKey])) {
+                $query->withCasts($this->withCasts[$relationKey]);
             }
         });
     }
@@ -509,6 +526,21 @@ trait SqlBuilder
         }
 
         $this->withFilters[$relation][] = $filter;
+    }
+
+    /**
+     * 注册关联的属性修改
+     *
+     * @param string $relation
+     * @param array $casts
+     */
+    protected function registerWithCasts(string $relation, array $casts)
+    {
+        if (empty($this->withCasts[$relation])) {
+            $this->withCasts[$relation] = $casts;
+        } else {
+            $this->withCasts[$relation] = array_merge($this->withCasts[$relation], $casts);
+        }
     }
 
     /**
