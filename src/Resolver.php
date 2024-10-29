@@ -6,6 +6,7 @@ namespace QT\GraphQL;
 
 use Iterator;
 use RuntimeException;
+use UnexpectedValueException;
 use QT\GraphQL\Contracts\Context;
 use Illuminate\Support\Facades\DB;
 use QT\GraphQL\Options\PageOption;
@@ -231,15 +232,18 @@ class Resolver
         $query  = $this->getBuilder($selection, $option->filters, $option->orderBy);
         $column = $query->getModel()->getKeyName();
         $offset = $option->offset;
-        $lastId = null;
 
-        do {
-            if (empty($option->orderBy) || (count($option->orderBy) === 1 && isset($option->orderBy[0][$column]))) {
-                $models = $this->cursor($query, $option, $lastId);
-            } else {
-                $models = (clone $query)->forPage(++$offset, $option->limit)->get();
+        if (empty($option->orderBy) || (count($option->orderBy) === 1 && isset($option->orderBy[0][$column]))) {
+            $descending = 'desc' === ($option->orderBy[0][$column] ?? 'desc') ? true : false;
+            foreach ($this->cursor($query, $column, $option->limit, $descending) as $model) {
+                yield $model;
             }
 
+            return;
+        }
+
+        do {
+            $models = (clone $query)->forPage(++$offset, $option->limit)->get();
             foreach ($models as $model) {
                 yield $model;
             }
@@ -249,28 +253,34 @@ class Resolver
     /**
      * 游标式查询数据集
      *
-     * @param CursorOption $option
-     * @param array $selection
      * @param Builder $query
-     * @param ?int $lastId
-     * @return Collection
+     * @param string $column
+     * @param int $limit
+     * @param bool $descending
+     * @return Iterator
      */
-    public function cursor(Builder $query, CursorOption $option, ?int &$lastId = null)
+    public function cursor(Builder $query, string $column, int $limit, bool $descending): Iterator
     {
-        $column        = $query->getModel()->getKeyName();
-        $descending    = 'desc' === ($option->orderBy[0][$column] ?? 'desc') ? true : false;
+        $lastId        = null;
         $qualifyColumn = $query->getModel()->qualifyColumn($column);
+        $query->addSelect($qualifyColumn);
+        $query->reorder();
 
-        $clone = clone $query->addSelect($qualifyColumn);
-        if ($descending) {
-            $models = $clone->forPageBeforeId($option->limit, $lastId, $qualifyColumn)->get();
-        } else {
-            $models = $clone->forPageAfterId($option->limit, $lastId, $qualifyColumn)->get();
+        while (true) {
+            $clone = clone $query;
+            if ($descending) {
+                $models = $clone->forPageBeforeId($limit, $lastId, $qualifyColumn)->get();
+            } else {
+                $models = $clone->forPageAfterId($limit, $lastId, $qualifyColumn)->get();
+            }
+            foreach ($models as $model) {
+                $lastId = $model->{$column};
+                yield $model;
+            }
+            if ($models->count() !== $limit) {
+                break;
+            }
         }
-
-        $lastId = $models->last()->{$column};
-
-        return $models;
     }
 
     /**
@@ -434,7 +444,7 @@ class Resolver
         $keyName = $this->model->getKeyName();
 
         if (empty($input[$keyName])) {
-            throw new RuntimeException("{$keyName}不能为空");
+            throw new UnexpectedValueException("{$keyName}不能为空");
         }
 
         return $input[$keyName];

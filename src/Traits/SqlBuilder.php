@@ -115,7 +115,7 @@ trait SqlBuilder
         array $orderBy = []
     ): Builder {
         $joined = [];
-        foreach ($query->toBase()->joins as $join) {
+        foreach ($query->toBase()->joins ?? [] as $join) {
             $joined[$join->table] = true;
         }
 
@@ -236,7 +236,7 @@ trait SqlBuilder
      * @param int $depth
      * @throws RuntimeException
      */
-    protected function selectFieldAndWithTable(Builder | Relation $query, array $selection, int $depth)
+    protected function selectFieldAndWithTable(Builder|Relation $query, array $selection, int $depth)
     {
         // 深度达到极限,不在进行关联
         if ($depth === 0) {
@@ -410,6 +410,7 @@ trait SqlBuilder
      * @param string|null $column
      * @param string $direction
      * @param string|null $table
+     * @param array $joined
      * @param array $whereColumns
      * @return Builder
      */
@@ -501,7 +502,7 @@ trait SqlBuilder
      * @param string $relation
      * @param array|callable $filter
      */
-    public function registerWithFilter(string $relation, array | callable $filter)
+    public function registerWithFilter(string $relation, array|callable $filter)
     {
         if (empty($this->withFilters[$relation])) {
             $this->withFilters[$relation] = [];

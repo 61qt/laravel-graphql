@@ -30,7 +30,7 @@ class MixedType extends ScalarType
     /**
      * @var string
      */
-    public $description = '混合类型,以支持[strings,bool,int,float,array]';
+    public $description = '混合类型,以支持[string,bool,int,float,array]';
 
     /**
      * {@inheritDoc}

@@ -103,13 +103,13 @@ abstract class ModelMutation
     /**
      * 处理mutation
      *
-     * @param $node
-     * @param $args
+     * @param mixed $node
+     * @param array $args
      * @param Context $context
      * @param ResolveInfo $info
      * @return mixed
      */
-    public function resolve($node, $args, Context $context, ResolveInfo $info)
+    public function resolve(mixed $node, array $args, Context $context, ResolveInfo $info)
     {
         $resolver = $this->getResolver();
 
