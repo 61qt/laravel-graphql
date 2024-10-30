@@ -9,6 +9,8 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Language\AST\SelectionSetNode;
 use GraphQL\Language\AST\FragmentSpreadNode;
 use GraphQL\Language\AST\InlineFragmentNode;
+use QT\GraphQL\Relations\HasOne as ExtraHasOne;
+use QT\GraphQL\Relations\HasMany as ExtraHasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -44,6 +46,8 @@ final class Utils
         MorphToMany::class    => ['getParentKeyName', 'getRelatedKeyName'],
         MorphOne::class       => ['getLocalKeyName', 'getForeignKeyName'],
         MorphMany::class      => ['getLocalKeyName', 'getForeignKeyName'],
+        ExtraHasOne::class    => ['getLocalKeyName', 'getForeignKeyName'],
+        ExtraHasMany::class   => ['getLocalKeyName', 'getForeignKeyName'],
     ];
 
     /**

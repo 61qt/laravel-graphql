@@ -8,6 +8,7 @@ use QT\GraphQL\Utils;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
+use QT\GraphQL\Contracts\RelationExtraKeys;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -295,6 +296,12 @@ trait SqlBuilder
             // 一对一多态关联不做自动关联
             if (empty($foreignKey) || $relation instanceof MorphTo) {
                 continue;
+            }
+            // 设置额外的关联表字段
+            if ($relation instanceof RelationExtraKeys) {
+                foreach ($relation->getExtraKeyNames() as $localExtraKey => $foreignExtraKey) {
+                    $val[$foreignExtraKey] = $fields[$model->qualifyColumn($localExtraKey)] = true;
+                }
             }
 
             $val[$foreignKey] = true;

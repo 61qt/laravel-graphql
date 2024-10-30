@@ -215,7 +215,7 @@ class Resolver
         if (isset($this->memoryLimit)) {
             ini_set('memory_limit', $this->memoryLimit);
         }
-        $this->beforeExport($context, $option, $selection);
+        $selection = $this->beforeExport($context, $option, $selection);
 
         return $this->getExportData($option, $selection);
     }
@@ -284,7 +284,7 @@ class Resolver
     }
 
     /**
-     * 生成sql
+     * 获取Builder
      *
      * @param array $selection
      * @param array $filters
