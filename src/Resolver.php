@@ -88,6 +88,7 @@ class Resolver
     protected function boot()
     {
         static::registerDefaultOperatorHandle();
+        $this->registerJoinTables();
     }
 
     /**

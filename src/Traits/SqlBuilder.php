@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace QT\GraphQL\Traits;
 
+use Closure;
 use QT\GraphQL\Utils;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Builder;
@@ -169,7 +170,7 @@ trait SqlBuilder
         $tables = array_intersect_key($filters, $this->joinTable);
 
         foreach ($tables as $table => $columns) {
-            // users: {id: {eq: 1}}  => users.id: {eq: q}
+            // users: {id: {eq: 1}}  => users.id: {eq: 1}
             unset($filters[$table]);
 
             foreach ($columns as $column => $val) {
@@ -197,20 +198,52 @@ trait SqlBuilder
         }
 
         $method   = 'join';
-        $relation = array_values($this->joinTable[$table]);
+        $relation = $this->joinTable[$table];
 
-        if (count($relation) > 3) {
-            [$first, $operator, $second, $method] = $relation;
-        } else {
-            [$first, $operator, $second] = $relation;
+        if ($relation instanceof Closure) {
+            $first = $relation;
+        } elseif (is_array($relation)) {
+            [$first, $operator, $second, $method] = $this->dealJoinClause(...$relation);
         }
-
-        $query->{$method}($table, "{$query->from}.{$first}", $operator, "{$table}.{$second}");
-
+        // 处理数组定义的联表条件，可以定义$method
+        if ($first instanceof Closure) {
+            $query->{$method}($table, $first);
+        } else {
+            $query->{$method}($table, "{$query->from}.{$first}", $operator, "{$table}.{$second}");
+        }
         // 将已联表的数据标记
         $joined[$table] = true;
 
         return $query;
+    }
+
+    /**
+     * 处理联表条件
+     *
+     * @param string|Closure $first
+     * @param string|null $operator
+     * @param string|null $second
+     * @param string $method
+     * @return array
+     */
+    protected function dealJoinClause(
+        string|Closure $first,
+        ?string $operator = null,
+        ?string $second = null,
+        string $method = 'join'
+    ): array {
+        if ($first instanceof Closure) {
+            $method = $operator === null ? $method : $operator;
+        }
+
+        return [$first, $operator, $second, $method];
+    }
+
+    /**
+     * 注册联表
+     */
+    public function registerJoinTables()
+    {
     }
 
     /**
