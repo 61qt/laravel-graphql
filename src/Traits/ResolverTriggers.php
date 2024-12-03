@@ -112,17 +112,19 @@ trait ResolverTriggers
      *
      * @param Context $context
      * @param Model $model
+     * @param array $input
      */
-    protected function beforeDestroy(Context $context, Model $model)
+    protected function beforeDestroy(Context $context, Model $model, array $input)
     {
     }
 
     /**
-     * 删除记录前触发
+     * 删除记录后触发
      *
      * @param Model $model
+     * @param array $input
      */
-    protected function afterDestroy(Model $model)
+    protected function afterDestroy(Model $model, array $input)
     {
         return $model;
     }

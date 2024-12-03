@@ -381,14 +381,14 @@ class Resolver
     public function destroy(Context $context, array $input = []): Model
     {
         $model = $this->find($input);
-        $this->beforeDestroy($context, $model);
+        $this->beforeDestroy($context, $model, $input);
 
-        return DB::transaction(function () use ($model) {
+        return DB::transaction(function () use ($model, $input) {
             if (!$model->delete()) {
                 throw new RuntimeException('删除失败');
             }
 
-            return $this->afterDestroy($model) ?: $model;
+            return $this->afterDestroy($model, $input) ?: $model;
         });
     }
 
