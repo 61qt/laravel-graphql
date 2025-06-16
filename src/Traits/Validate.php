@@ -44,21 +44,24 @@ trait Validate
      * @param array|Collection $input
      * @param array $rules
      * @param array $message
+     * @param array $customAttributes
      * @throws Error
      * @return array
      */
     public function validate(
-        array | Collection $input,
+        array|Collection $input,
         array $rules = [],
-        array $message = []
+        array $message = [],
+        array $customAttributes = []
     ): array {
         if ($input instanceof Collection) {
             $input = $input->toArray();
         }
 
-        $rules     = $rules ?: $this->rules;
-        $message   = $message ?: $this->messages;
-        $validator = $this->getValidationFactory()->make(
+        $rules            = $rules ?: $this->rules;
+        $message          = $message ?: $this->messages;
+        $customAttributes = $customAttributes ?: $this->customAttributes;
+        $validator        = $this->getValidationFactory()->make(
             $input,
             $rules,
             $message,

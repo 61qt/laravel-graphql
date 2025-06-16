@@ -17,9 +17,7 @@ use GraphQL\Type\Definition\ResolveInfo;
  */
 class PaginationType extends ObjectType implements Resolvable
 {
-    /**
-     * @var ModelType
-     */
+    /** @var ModelType */
     public $ofType;
 
     /**
@@ -32,8 +30,9 @@ class PaginationType extends ObjectType implements Resolvable
         $this->ofType = $type;
 
         parent::__construct([
-            'name'   => $this->name ?? "{$type->name}Pagination",
-            'fields' => [$this, 'getDataStructure'],
+            'name'        => $this->name ?? "{$type->name}Pagination",
+            'description' => $this->description ?? "{$type->description}分页",
+            'fields'      => [$this, 'getDataStructure'],
         ]);
     }
 

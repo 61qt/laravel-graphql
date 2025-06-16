@@ -18,9 +18,7 @@ use GraphQL\Type\Definition\ResolveInfo;
  */
 class ListType extends ListOfType implements Resolvable
 {
-    /**
-     * @var ModelType
-     */
+    /** @var ModelType */
     public $ofType;
 
     /**
@@ -32,6 +30,9 @@ class ListType extends ListOfType implements Resolvable
     {
         if (empty($this->name)) {
             $this->name = "{$type->name}List";
+        }
+        if (empty($this->description)) {
+            $this->description = "{$type->description}全量列表";
         }
 
         parent::__construct($type);
