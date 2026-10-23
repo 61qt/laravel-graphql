@@ -16,12 +16,12 @@ class DirectionType extends EnumType
     /**
      * @var string
      */
-    public $name = Type::DIRECTION;
+    public string $name = Type::DIRECTION;
 
     /**
      * @var string
      */
-    public $description = 'Sql排序关键字';
+    public ?string $description = 'Sql排序关键字';
 
     /**
      * 初始化排序可以枚举值

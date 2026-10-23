@@ -23,12 +23,12 @@ class BigIntType extends ScalarType
     /**
      * @var string
      */
-    public $name = Type::BIGINT;
+    public string $name = Type::BIGINT;
 
     /**
      * @var string
      */
-    public $description = 'bigint类型,兼容64位int';
+    public ?string $description = 'bigint类型,兼容64位int';
 
     /**
      * @param mixed $value

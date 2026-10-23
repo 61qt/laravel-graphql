@@ -25,12 +25,12 @@ class MixedType extends ScalarType
     /**
      * @var string
      */
-    public $name = Type::MIXED;
+    public string $name = Type::MIXED;
 
     /**
      * @var string
      */
-    public $description = '混合类型,以支持[string,bool,int,float,array]';
+    public ?string $description = '混合类型,以支持[string,bool,int,float,array]';
 
     /**
      * {@inheritDoc}

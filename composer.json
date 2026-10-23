@@ -3,17 +3,17 @@
     "description": "Laravel Graphql",
     "type": "library",
     "require": {
-        "php": "^8.0.0",
-        "webonyx/graphql-php": "^14.7.0",
-        "illuminate/http": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
-        "illuminate/support": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
-        "illuminate/database": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
-        "illuminate/validation": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
-        "illuminate/pagination": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0"
+        "php": "^8.2.0",
+        "webonyx/graphql-php": "^15.32.3",
+        "illuminate/http": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/database": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/validation": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/pagination": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0"
     },
     "require-dev": {
-        "mockery/mockery": "^1.4.2",
-        "phpunit/phpunit": "^8.5.8|^9.3.3"
+        "mockery/mockery": "^1.6",
+        "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0 || ^13.0"
     },
     "authors": [
         {

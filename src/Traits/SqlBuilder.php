@@ -430,8 +430,8 @@ trait SqlBuilder
             }
 
             if (is_array($value) && count($value) >= 2) {
-                $value[0] = date('Y-m-d H:i:s', $value[0]);
-                $value[1] = date('Y-m-d H:i:s', $value[1]);
+                $value[0] = is_numeric($value[0]) ? date('Y-m-d H:i:s', $value[0]) : $value[0];
+                $value[1] = is_numeric($value[1]) ? date('Y-m-d H:i:s', $value[1]) : $value[1];
             }
         }
 

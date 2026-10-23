@@ -14,12 +14,12 @@ class JsonType extends MixedType
     /**
      * @var string
      */
-    public $name = Type::JSON;
+    public string $name = Type::JSON;
 
     /**
      * @var string
      */
-    public $description = 'json类型';
+    public ?string $description = 'json类型';
 
     /**
      * {@inheritDoc}

@@ -60,11 +60,13 @@ class ResolverTest extends TestCase
         $model->setConnectionResolver($resolver = Mockery::mock(ConnectionResolverInterface::class));
         $resolver->shouldReceive('connection')->andReturn($connection = Mockery::mock(Connection::class));
 
-        $grammar   = new Grammar;
         $processor = Mockery::mock(Processor::class);
         $processor->shouldReceive('processSelect')->andReturnUsing(function ($query, $result) {
             return $result;
         });
+
+        $connection->shouldReceive('getTablePrefix')->andReturn('');
+        $grammar   = new Grammar($connection);
 
         $connection->shouldReceive('getName')->andReturn('name');
         $connection->shouldReceive('getQueryGrammar')->andReturn($grammar);
@@ -151,7 +153,7 @@ class ResolverTest extends TestCase
         $this->addMockConnection($model);
         $model->getConnection()->shouldReceive('select')->times(2)->andReturnUsing(function ($sql) use (&$times) {
             if ($times++ === 1) {
-                $this->assertSame('select count(*) as aggregate from "table" where ("table"."id" in (?, ?))', $sql);
+                $this->assertSame('select count(*) as "aggregate" from "table" where ("table"."id" in (?, ?))', $sql);
 
                 return [['aggregate' => 1]];
             } else {
@@ -175,7 +177,7 @@ class ResolverTest extends TestCase
         $this->addMockConnection($model);
         $model->getConnection()->shouldReceive('select')->times(2)->andReturnUsing(function ($sql) use (&$times) {
             if ($times++ === 1) {
-                $this->assertSame('select count(*) as aggregate from "table" inner join "foobar" on "table"."foobar_id" = "foobar"."id" where ("foobar"."id" in (?, ?))', $sql);
+                $this->assertSame('select count(*) as "aggregate" from "table" inner join "foobar" on "table"."foobar_id" = "foobar"."id" where ("foobar"."id" in (?, ?))', $sql);
 
                 return [['aggregate' => 1]];
             } else {

@@ -20,12 +20,12 @@ class NilType extends ScalarType
     /**
      * @var string
      */
-    public $name = Type::NIL;
+    public string $name = Type::NIL;
 
     /**
      * @var string
      */
-    public $description = '占位符,留空时使用';
+    public ?string $description = '占位符,留空时使用';
 
     /**
      * {@inheritDoc}

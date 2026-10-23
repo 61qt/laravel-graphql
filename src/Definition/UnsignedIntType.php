@@ -23,12 +23,12 @@ class UnsignedIntType extends ScalarType
     /**
      * @var string
      */
-    public $name = Type::UNSIGNED_INT;
+    public string $name = Type::UNSIGNED_INT;
 
     /**
      * @var string
      */
-    public $description = '无符号的32位int类型,大小在0d到4294967295之间';
+    public ?string $description = '无符号的32位int类型,大小在0d到4294967295之间';
 
     /**
      * @param mixed $value

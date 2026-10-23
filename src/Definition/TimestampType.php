@@ -21,12 +21,12 @@ class TimestampType extends ScalarType
     /**
      * @var string
      */
-    public $name = Type::TIMESTAMP;
+    public string $name = Type::TIMESTAMP;
 
     /**
      * @var string
      */
-    public $description = '时间戳格式';
+    public ?string $description = '时间戳格式';
 
     /**
      * {@inheritDoc}
