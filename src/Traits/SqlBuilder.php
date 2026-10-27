@@ -204,7 +204,13 @@ trait SqlBuilder
             $first = $relation;
         } elseif (is_array($relation)) {
             [$first, $operator, $second, $method] = $this->dealJoinClause(...$relation);
+        } else {
+            throw new RuntimeException(
+                "Invalid joinTable configuration for table '{$table}'. " .
+                "Expected array or Closure, got " . gettype($relation)
+            );
         }
+
         // 处理数组定义的联表条件，可以定义$method
         if ($first instanceof Closure) {
             $query->{$method}($table, $first);
@@ -623,10 +629,6 @@ trait SqlBuilder
 
         static::registerGlobalOperator('between', function ($query, $column, $value) {
             $query->whereBetween($column, $value);
-        });
-
-        static::registerGlobalOperator('rawSql', function ($query, $column, $value) {
-            $query->whereRaw($value);
         });
 
         static::registerGlobalOperator('like', function ($query, $column, $value) {

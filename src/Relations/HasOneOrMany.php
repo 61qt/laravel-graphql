@@ -29,9 +29,10 @@ abstract class HasOneOrMany extends Base implements RelationExtraKeys
      */
     public function __construct(Builder $query, Model $parent, $foreignKey, $localKey, array $extraKeys = [])
     {
-        $this->extraKeys = $extraKeys;
-
         parent::__construct($query, $parent, $foreignKey, $localKey);
+
+        // 在父类构造函数之后设置 extraKeys，确保父类初始化完成
+        $this->extraKeys = $extraKeys;
     }
 
     /**

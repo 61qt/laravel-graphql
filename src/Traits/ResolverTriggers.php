@@ -10,6 +10,13 @@ use QT\GraphQL\Options\CursorOption;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Resolver 触发器 Trait
+ *
+ * 提供 resolver 生命周期钩子方法
+ *
+ * @see CHANGELOG.md 了解破坏性变更详情
+ */
 trait ResolverTriggers
 {
     /**

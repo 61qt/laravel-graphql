@@ -30,7 +30,9 @@ class HasOne extends HasOneOrMany
         }
 
         foreach ($this->extraKeys as $localKey => $foreignKey) {
-            $this->query->where($this->qualifyRelatedColumn($foreignKey), $this->parent->{$localKey});
+            // 使用 qualifyColumn 限定列名，避免 JOIN 时的列名歧义
+            $qualifiedColumn = $this->related->qualifyColumn($foreignKey);
+            $this->query->where($qualifiedColumn, $this->parent->{$localKey});
         }
 
         return $this->query->first() ?: $this->getDefaultFor($this->parent);
